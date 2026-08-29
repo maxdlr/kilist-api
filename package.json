@@ -1,0 +1,56 @@
+{
+  "name": "kilist-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "",
+  "main": "index.ts",
+  "author": "maxdlr",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only --require tsconfig-paths/register index.ts",
+    "build": "tsc && tsc-alias && npm run copy:assets",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit --incremental",
+    "tsc": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "eslint . --fix",
+    "copy:assets": "copyfiles -u 2 \"src/assets/**/*.{pdf,ttf}\" dist/src/assets"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "@types/express": "^4.17.21",
+    "bcrypt": "^6.0.0",
+    "chalk": "^5.5.0",
+    "class-validator": "^0.15.1",
+    "cookie-parser": "~1.4.4",
+    "dotenv": "^8.6.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^6.7.0",
+    "fuse.js": "^7.4.2",
+    "jsonwebtoken": "^9.0.3",
+    "module-alias": "^2.2.3",
+    "mysql2": "^3.14.0",
+    "reflect-metadata": "^0.2.2",
+    "tsconfig-paths": "^4.2.0",
+    "typeorm": "^0.3.26"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.18.1",
+    "copyfiles": "^2.4.1",
+    "eslint": "^9.39.5",
+    "globals": "^16.5.0",
+    "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^3.2.6"
+  },
+  "_moduleAliases": {
+    "@": "dist/src/"
+  }
+}
