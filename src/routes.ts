@@ -6,8 +6,11 @@ import authenticate from "./middlewares/authenticate";
 import getRefreshToken from "./api/auth/controllers/getRefreshToken";
 import logOut from "./api/auth/controllers/logOut";
 import signUp from "./api/auth/controllers/signup";
+import getHealth from "./api/health/getHeath";
 
 const router = Router();
+
+router.get("/health", getHealth);
 
 router.post("/login", logIn);
 router.post("/signup", signUp);
