@@ -1,4 +1,4 @@
-import { IsNotEmpty, MinLength } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import GroceryItemEntity from "./GroceryItemEntity";
@@ -6,7 +6,7 @@ import UserEntity from "./UserEntity";
 
 @Entity({ name: "grocery_lists" })
 export default class GroceryListEntity extends AbstractEntity {
-  @MinLength(3, { message: "Too short! Minimum is 3 characters" })
+  @Column({ default: "New list", length: 2000 })
   @IsNotEmpty({ message: "Required" })
   title!: string;
 
@@ -21,6 +21,6 @@ export default class GroceryListEntity extends AbstractEntity {
   })
   user!: UserEntity;
 
-  @Column({ default: "", length: 2000 })
+  @Column({ nullable: true, length: 2000 })
   description?: string;
 }

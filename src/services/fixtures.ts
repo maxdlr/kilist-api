@@ -54,9 +54,15 @@ const seedGroceryLists = async (
     GroceryListEntity,
     Array.from({ length: count }).map((_) => {
       const groceryList = new GroceryListEntity();
-      groceryList.title = faker.lorem.sentence();
-      groceryList.items = [randomElement(groceryItems)];
-      groceryList.description = faker.lorem.paragraph(3);
+      groceryList.title = randomElement([
+        faker.lorem.sentence(),
+        faker.lorem.word(),
+      ]);
+      groceryList.items = groceryItems;
+      groceryList.description = randomElement([
+        faker.lorem.paragraph(2),
+        undefined,
+      ]);
       groceryList.user = randomElement(users);
       return groceryList;
     }),
@@ -68,11 +74,11 @@ const makeGroceryItems = async (
 ): Promise<GroceryItemEntity[]> => {
   return await manager.save(
     GroceryItemEntity,
-    Array.from({ length: 50 }).map(() => {
+    Array.from({ length: 20 }).map(() => {
       const groceryItem = new GroceryItemEntity();
       groceryItem.name = faker.lorem.word();
       groceryItem.description = faker.lorem.sentence();
-      groceryItem.image = faker.image.url();
+      groceryItem.imageUrl = faker.image.url();
       return groceryItem;
     }),
   );
@@ -98,7 +104,7 @@ export const loadFixtures = async (): Promise<void> => {
     const groceryItems = await makeGroceryItems(manager);
 
     if (isDev) {
-      const count = 50;
+      const count = 5;
       const users = [...(await makeUsers(manager, 25)), admin];
       await seedGroceryLists(manager, users, groceryItems, count);
     }

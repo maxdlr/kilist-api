@@ -1,5 +1,6 @@
 import { Router } from "express";
 import userRoutes from "./api/users/routes/index";
+import listsRoutes from "./api/lists/routes/index";
 import getMe from "./api/auth/controllers/getMe";
 import logIn from "./api/auth/controllers/logIn";
 import authenticate from "./middlewares/authenticate";
@@ -20,5 +21,7 @@ router.post("/refresh", getRefreshToken);
 router.get("/me", authenticate, getMe);
 
 router.use("/users", userRoutes);
+
+router.use("/lists", listsRoutes);
 
 export default router;
