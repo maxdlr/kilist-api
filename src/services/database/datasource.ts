@@ -1,5 +1,12 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import FoodEntity from "@/entities/FoodEntity";
+import UserEntity from "@/entities/UserEntity";
+import RefreshTokenEntity from "@/entities/RefreshTokenEntity";
+import InStockScoreEntity from "@/entities/InStockScoreEntity";
+import FoodCategoryEntity from "@/entities/FoodCategory";
+import ListEntity from "@/entities/ListEntity";
+import FrequencyEntity from "@/entities/FrequencyEntity";
 
 export const AppDataSource = new DataSource({
   type: "mariadb",
@@ -10,8 +17,16 @@ export const AppDataSource = new DataSource({
   database: process.env.APP_NAME,
   synchronize: process.env.NODE_ENV !== "production",
   logging: false,
-  entities: [__dirname + "/../../entities/**/*.{ts,js}"],
+  entities: [
+    FoodEntity,
+    UserEntity,
+    RefreshTokenEntity,
+    InStockScoreEntity,
+    FoodCategoryEntity,
+    ListEntity,
+    FrequencyEntity,
+  ],
   migrations: [__dirname + "/../../migrations/**/*.{ts,js}"],
   subscribers: [],
-  timezone: "Europe/Paris",
+  timezone: "local",
 });

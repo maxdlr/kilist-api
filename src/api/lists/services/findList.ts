@@ -2,8 +2,8 @@ import ListEntity from "@/entities/ListEntity";
 import ListRepository from "@/repositories/ListRepository";
 import { FindOptionsWhere } from "typeorm";
 
-const findAllLists = async (where?: FindOptionsWhere<ListEntity>) => {
-  const lists = await ListRepository.find({
+const findList = async (where: FindOptionsWhere<ListEntity>) => {
+  const list = await ListRepository.findOne({
     where,
     relations: ["items"],
     order: {
@@ -12,7 +12,12 @@ const findAllLists = async (where?: FindOptionsWhere<ListEntity>) => {
       },
     },
   });
-  return lists;
+
+  if (!list) {
+    throw Missing("List not found");
+  }
+
+  return list;
 };
 
-export default findAllLists;
+export default findList;

@@ -1,13 +1,12 @@
-import GroceryItemEntity from "@/entities/GroceryItemEntity";
-import GroceryListEntity from "@/entities/GroceryListEntity";
+import FoodCategoryEntity from "@/entities/FoodCategory";
+import FoodEntity from "@/entities/FoodEntity";
+import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
-import GroceryListRepository from "@/repositories/GroceryListRepository";
+import ListRepository from "@/repositories/ListRepository";
+import { randomElement } from "@/utils/helpers";
 import { faker } from "@faker-js/faker";
+import { randomInt } from "crypto";
 import { EntityManager } from "typeorm";
-
-const randomElement = <T>(array: T[]): T => {
-  return array[Math.floor(Math.random() * array.length)] as T;
-};
 
 // --- Helpers ---
 
@@ -28,60 +27,89 @@ const ensureAdminUser = async (manager: EntityManager): Promise<UserEntity> => {
   return await manager.save(UserEntity, user);
 };
 
-const makeUsers = async (
-  manager: EntityManager,
-  count: number,
-): Promise<UserEntity[]> => {
-  return await Promise.all(
-    Array.from({ length: count }).map(async () => {
-      const user = new UserEntity();
-      user.username = faker.internet.username();
-      user.email = faker.internet.email();
-      user.password = "password";
-      user.description = faker.lorem.paragraph(2);
-      return await manager.save(UserEntity, user);
-    }),
-  );
-};
+// const makeUsers = async (
+//   manager: EntityManager,
+//   count: number,
+// ): Promise<UserEntity[]> => {
+//   return await Promise.all(
+//     Array.from({ length: count }).map(async () => {
+//       const user = new UserEntity();
+//       user.username = faker.internet.username();
+//       user.email = faker.internet.email();
+//       user.password = "password";
+//       user.description = faker.lorem.paragraph(2);
+//       return await manager.save(UserEntity, user);
+//     }),
+//   );
+// };
 
-const seedGroceryLists = async (
+const makeGroceryLists = async (
   manager: EntityManager,
   users: UserEntity[],
-  groceryItems: GroceryItemEntity[],
+  foods: () => Promise<FoodEntity[]>,
   count: number,
-): Promise<void> => {
-  await manager.save(
-    GroceryListEntity,
-    Array.from({ length: count }).map((_) => {
-      const groceryList = new GroceryListEntity();
-      groceryList.title = randomElement([
-        faker.lorem.sentence(),
-        faker.lorem.word(),
-      ]);
-      groceryList.items = groceryItems;
-      groceryList.description = randomElement([
-        faker.lorem.paragraph(2),
-        undefined,
-      ]);
-      groceryList.user = randomElement(users);
-      return groceryList;
+): Promise<ListEntity[]> => {
+  const lists = await Promise.all(
+    Array.from({ length: count }).map(async () => {
+      const foodItems = await foods();
+      const list = new ListEntity();
+      list.title = randomElement([faker.lorem.sentence(), faker.lorem.word()]);
+      list.items = foodItems;
+      list.description = randomElement([faker.lorem.paragraph(2), undefined]);
+      list.user = randomElement(users);
+      return list;
     }),
   );
+
+  return manager.save(ListEntity, lists);
 };
 
-const makeGroceryItems = async (
+const makeFoodCategories = async (
   manager: EntityManager,
-): Promise<GroceryItemEntity[]> => {
-  return await manager.save(
-    GroceryItemEntity,
-    Array.from({ length: 20 }).map(() => {
-      const groceryItem = new GroceryItemEntity();
-      groceryItem.name = faker.lorem.word();
-      groceryItem.description = faker.lorem.sentence();
-      groceryItem.imageUrl = faker.image.url();
-      return groceryItem;
+  count: number = 10,
+): Promise<FoodCategoryEntity[]> => {
+  const categories = manager.create(
+    FoodCategoryEntity,
+    Array.from({ length: count }).map(() => {
+      const category = new FoodCategoryEntity();
+      category.name = faker.word.noun();
+      category.description = faker.lorem.sentence();
+      return category;
     }),
   );
+  return await manager.save(categories);
+};
+
+const makeFoods = async (
+  manager: EntityManager,
+  foodCategories: () => Promise<FoodCategoryEntity[]>,
+  count: number = 20,
+): Promise<FoodEntity[]> => {
+  const categories = await foodCategories();
+
+  const foods = manager.create(
+    FoodEntity,
+    Array.from({ length: count }).map(() => {
+      const food = new FoodEntity();
+      food.name = randomElement([
+        faker.food.vegetable(),
+        faker.food.fruit(),
+        faker.food.ingredient(),
+        faker.food.meat(),
+        faker.food.spice(),
+      ]);
+      food.inStockScore = faker.number.float({
+        min: 0,
+        max: 1,
+        fractionDigits: 2,
+      });
+      food.categories = categories;
+      food.description = faker.food.description();
+      food.imageUrl = faker.image.urlPicsumPhotos();
+      return food;
+    }),
+  );
+  return await manager.save(foods);
 };
 
 // --- Public API ---
@@ -89,24 +117,28 @@ const makeGroceryItems = async (
 export const loadFixtures = async (): Promise<void> => {
   const isDev = process.env.NODE_ENV === "development";
 
-  await GroceryListRepository.manager.transaction(async (manager) => {
+  await ListRepository.manager.transaction(async (manager) => {
     if (isDev) {
+      await manager.createQueryBuilder().delete().from(ListEntity).execute();
       await manager
         .createQueryBuilder()
         .delete()
-        .from(GroceryListEntity)
+        .from(FoodCategoryEntity)
         .execute();
+      await manager.createQueryBuilder().delete().from(FoodEntity).execute();
       await manager.createQueryBuilder().delete().from(UserEntity).execute();
     }
 
-    const admin = await ensureAdminUser(manager);
-
-    const groceryItems = await makeGroceryItems(manager);
+    const foodCategories = () => makeFoodCategories(manager, randomInt(1, 3));
+    const foods = () => makeFoods(manager, foodCategories, randomInt(1, 20));
 
     if (isDev) {
-      const count = 5;
-      const users = [...(await makeUsers(manager, 25)), admin];
-      await seedGroceryLists(manager, users, groceryItems, count);
+      await makeGroceryLists(
+        manager,
+        [await ensureAdminUser(manager)],
+        foods,
+        randomInt(1, 10),
+      );
     }
 
     console.log(`Fixtures loaded (${isDev ? "development" : "production"})`);

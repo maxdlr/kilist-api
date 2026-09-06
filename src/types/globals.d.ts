@@ -12,7 +12,7 @@ declare global {
     validation: { property: string; messages: string[] }[];
   }
 
-  interface TCrudError extends Error {
+  interface TServiceError extends Error {
     status: number;
   }
 
@@ -36,9 +36,9 @@ declare global {
     (message: string): TApiError;
   };
 
-  var CrudError: {
-    (status: number, message?: string): TCrudError;
-    (message: string): TCrudError;
+  var ServiceError: {
+    (status: number, message?: string): TServiceError;
+    (message: string): TServiceError;
   };
 
   var Missing: (message: string) => TApiError;
@@ -49,7 +49,7 @@ declare global {
   var Unauthorized: (type?: "user" | "origin") => TApiError;
   var Forbidden: () => TApiError;
   var isApiError: (error: unknown) => error is TApiError;
-  var isCrudError: (error: unknown) => error is TCrudError;
+  var isServiceError: (error: unknown) => error is TServiceError;
 
   namespace NodeJS {
     interface ProcessEnv {

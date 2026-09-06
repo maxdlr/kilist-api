@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
 import { Column, Entity, OneToMany } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
-import GroceryListEntity from "./GroceryListEntity";
+import ListEntity from "./ListEntity";
 
 @Entity({ name: "users" })
 export default class UserEntity extends AbstractEntity {
@@ -21,8 +21,8 @@ export default class UserEntity extends AbstractEntity {
   @Column({ default: "", length: 2000 })
   description?: string;
 
-  @OneToMany(() => GroceryListEntity, (groceryList) => groceryList.user)
-  lists!: GroceryListEntity[];
+  @OneToMany(() => ListEntity, (groceryList) => groceryList.user)
+  lists!: ListEntity[];
 
   @Column({ nullable: false, default: "user" })
   type!: "user" | "admin";

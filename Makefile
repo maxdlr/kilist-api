@@ -17,10 +17,11 @@ export $(shell sed 's/=.*//' .env)
 ARG=$(filter-out $@, $(MAKECMDGOALS))
 
 define EXEC
-    $(DOCKER) exec -w / $(DB_CONTAINER_NAME) $(1)
+    $(DOCKER) exec -w / $(1) $(2)
 endef
 
-MARIADB = $(call EXEC, mariadb -u root -p"root" --show-warnings -vvv -t)
+MARIADB = $(call EXEC, $(DB_CONTAINER_NAME), mariadb -u root -p"root" --show-warnings -vvv -t)
+MARIADB_TEST = $(call EXEC, $(DB_TEST_CONTAINER_NAME), mariadb -u root -p"root" --show-warnings -vvv -t)
 
 
 prod: ## Launch production environment via Docker
@@ -40,8 +41,13 @@ dev: ## npm run dev for back
 	make start-db
 	make db-wait
 	make db-drop
+	make db-drop-test
 	make db-create
+	make db-create-test
 	make dev-api
+
+dev-api: ## npm run dev for back
+	npm run dev
 
 build: ## npm run build for back
 	NODE_ENV=production npm run && npm run build
@@ -50,13 +56,11 @@ start: ## npm run start for back
 	make start-db
 	make db-wait
 	make db-create
+	make db-create-test
 	make start-api
 
 start-api: ## npm run start for back
 	npm run start
-
-dev-api: is-db-created ## npm run dev for back
-	npm run dev
 
 start-db: ## start the database docker service
 	docker compose up --remove-orphans --force-recreate --build -d
@@ -66,16 +70,32 @@ is-db-created: is-db-up ## check if the database is created
 		&& echo "✔ kilist-api database exists" \
 		|| { echo "✘ kilist-api database does not exist"; exit 1; }
 
+is-db-test-created: is-db-test-up ## check if the database is created
+	$(MARIADB_TEST) --database=$(APP_NAME)-test -e "SHOW TABLES;" \
+		&& echo "✔ kilist-api-test database exists" \
+		|| { echo "✘ kilist-api-test database does not exist"; exit 1; }
+
 is-db-up: ## Check if db service is up
 	@docker ps --filter "name=$(DB_CONTAINER_NAME)" --filter "status=running" --format "{{.Names}}" | grep -q "$(DB_CONTAINER_NAME)" \
 		&& echo "✔ $(DB_CONTAINER_NAME) is up" \
 		|| { echo "✘ $(DB_CONTAINER_NAME) is not running"; exit 1; }
 
+is-db-test-up: ## Check if db service is up
+	@docker ps --filter "name=$(DB_TEST_CONTAINER_NAME)" --filter "status=running" --format "{{.Names}}" | grep -q "$(DB_TEST_CONTAINER_NAME)" \
+		&& echo "✔ $(DB_TEST_CONTAINER_NAME) is up" \
+		|| { echo "✘ $(DB_TEST_CONTAINER_NAME) is not running"; exit 1; }
+
 db-create: db-wait ## Creates database db
 	$(MARIADB) -e "CREATE DATABASE IF NOT EXISTS \`$(APP_NAME)\`;"
 
+db-create-test: db-test-wait ## Creates database db
+	$(MARIADB_TEST) -e "CREATE DATABASE IF NOT EXISTS \`$(APP_NAME)-test\`;"
+
 db-drop: db-wait ## Drop database db
 	$(MARIADB) -e "DROP DATABASE IF EXISTS \`$(APP_NAME)\`;"
+
+db-drop-test: db-test-wait ## Drop database db
+	$(MARIADB_TEST) -e "DROP DATABASE IF EXISTS \`$(APP_NAME)-test\`;"
 
 db-wait: ## Wait for MariaDB to be ready
 	@echo "Waiting for MariaDB to be ready..."
@@ -86,6 +106,21 @@ db-wait: ## Wait for MariaDB to be ready
 		sleep 2; \
 	done; \
 	echo "✘ MariaDB did not become ready in time"; exit 1
+
+db-test-wait: ## Wait for MariaDB to be ready
+	@echo "Waiting for MariaDB to be ready..."
+	@for i in $$(seq 1 20); do \
+		docker exec $(DB_TEST_CONTAINER_NAME) mariadb -u root -p"root" -e "SELECT 1;" > /dev/null 2>&1 \
+			&& echo "✔ MariaDB is ready" && exit 0; \
+		echo "  ...waiting ($$i/20)"; \
+		sleep 2; \
+	done; \
+	echo "✘ MariaDB did not become ready in time"; exit 1
+
+test: ## Run test
+	make db-drop-test
+	make db-create-test
+	npm run test
 
 %:
 	@:

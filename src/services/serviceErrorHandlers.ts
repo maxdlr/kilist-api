@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-type HandledError = Error | TApiError | TCrudError | TValidationError;
+type HandledError = Error | TApiError | TServiceError | TValidationError;
 
 const serviceErrorHandler = (
   err: HandledError,

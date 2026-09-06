@@ -1,18 +1,18 @@
 import { IsNotEmpty } from "class-validator";
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
-import GroceryItemEntity from "./GroceryItemEntity";
 import UserEntity from "./UserEntity";
+import FoodEntity from "./FoodEntity";
 
-@Entity({ name: "grocery_lists" })
-export default class GroceryListEntity extends AbstractEntity {
+@Entity({ name: "lists" })
+export default class ListEntity extends AbstractEntity {
   @Column({ default: "New list", length: 2000 })
   @IsNotEmpty({ message: "Required" })
   title!: string;
 
-  @ManyToMany(() => GroceryItemEntity)
+  @ManyToMany(() => FoodEntity)
   @JoinTable()
-  items!: GroceryItemEntity[];
+  items!: FoodEntity[];
 
   @ManyToOne(() => UserEntity, (user) => user.lists, {
     nullable: false,
