@@ -1,14 +1,14 @@
 import findAllFoods from "@/api/foods/services/findAllFoods";
 import FoodEntity from "@/entities/FoodEntity";
-import InStockScoreEntity from "@/entities/InStockScoreEntity";
 import FoodRepository from "@/repositories/FoodRepository";
-import InStockScoreRepository from "@/repositories/InStockScoreRepository";
 import { faker } from "@faker-js/faker";
 import { beforeEach, describe, expect, it } from "vitest";
-import { StockUpdate } from "../../interfaces";
-import processStockUpdate from "../../services/processStockUpdate";
+import { FoodHistoryCreateType } from "../../interfaces";
+import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
+import createFoodHistory from "../../services/createFoodHistory";
 
-describe("processUpdate controller", () => {
+describe("createFoodHistory", () => {
   let foods: FoodEntity[];
   beforeEach(async () => {
     foods = Array.from({ length: 10 }, (_, i) => {
@@ -21,23 +21,26 @@ describe("processUpdate controller", () => {
     const savedFoods = await FoodRepository.save(foods);
 
     const inStockScores = Array.from({ length: 10 }, (_, i) => {
-      return InStockScoreRepository.create({
+      return FoodHistoryRepository.create({
         food: { id: savedFoods[i]?.id } as Partial<FoodEntity>,
         isInStock: true,
-      } as Partial<InStockScoreEntity>);
+      } as Partial<FoodHistoryEntity>);
     });
 
-    await InStockScoreRepository.save(inStockScores);
+    await FoodHistoryRepository.save(inStockScores);
   });
 
-  it("handle food updates", async () => {
-    const update: StockUpdate[] = Array.from({ length: 10 }, (_, i) => {
-      return {
-        foodId: foods[i]?.id,
-        isInStock: i % 2 === 0,
-      } as StockUpdate;
-    });
-    await processStockUpdate(update);
+  it("create food history", async () => {
+    const update: FoodHistoryCreateType[] = Array.from(
+      { length: 10 },
+      (_, i) => {
+        return {
+          foodId: foods[i]?.id,
+          isInStock: i % 2 === 0,
+        } as FoodHistoryCreateType;
+      },
+    );
+    await createFoodHistory(update);
     const updatedFoods = await FoodRepository.find({ order: { id: "ASC" } });
 
     for (let i = 0; i < updatedFoods.length; i++) {
@@ -53,7 +56,7 @@ describe("processUpdate controller", () => {
   });
 });
 
-describe("processUpdate sorts the food by inStockScores for lists", async () => {
+describe("createFoodHistory sorts the food by inStockScores for lists", async () => {
   let orderedFoods: FoodEntity[];
   let foods: FoodEntity[];
 
@@ -66,11 +69,10 @@ describe("processUpdate sorts the food by inStockScores for lists", async () => 
     });
 
     await FoodRepository.save(foods);
+    orderedFoods = await findAllFoods();
   });
 
   it("should return the list order by inStockScores", async () => {
-    orderedFoods = await findAllFoods();
-
     for (let i = 0; i < orderedFoods.length - 1; i++) {
       const current = orderedFoods[i];
       const next = orderedFoods[i + 1];
@@ -81,14 +83,17 @@ describe("processUpdate sorts the food by inStockScores for lists", async () => 
   });
 
   it("should sort the food by inStockScores", async () => {
-    const updates: StockUpdate[] = Array.from({ length: 10 }, (_, i) => {
-      return {
-        foodId: foods[i]?.id,
-        isInStock: faker.datatype.boolean(),
-      } as StockUpdate;
-    });
+    const updates: FoodHistoryCreateType[] = Array.from(
+      { length: 10 },
+      (_, i) => {
+        return {
+          foodId: foods[i]?.id,
+          isInStock: faker.datatype.boolean(),
+        } as FoodHistoryCreateType;
+      },
+    );
 
-    await processStockUpdate(updates);
+    await createFoodHistory(updates);
 
     for (let i = 0; i < orderedFoods.length - 1; i++) {
       const current = orderedFoods[i];

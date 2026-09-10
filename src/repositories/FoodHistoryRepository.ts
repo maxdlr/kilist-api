@@ -1,7 +1,7 @@
-import InStockScoreEntity from "@/entities/InStockScoreEntity";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import { AppDataSource } from "@/services/database/datasource";
 
-const InStockScoreRepository = AppDataSource.getRepository(InStockScoreEntity);
+const FoodHistoryRepository = AppDataSource.getRepository(FoodHistoryEntity);
 
 // export const InStockScoreRepository = AppDataSource.getRepository(InStockScore).extend({
 //     findByTitle(title: string) {
@@ -11,4 +11,4 @@ const InStockScoreRepository = AppDataSource.getRepository(InStockScoreEntity);
 //     },
 // })
 
-export default InStockScoreRepository;
+export default FoodHistoryRepository;

@@ -1,11 +1,11 @@
 import FoodEntity from "@/entities/FoodEntity";
 import FoodRepository from "@/repositories/FoodRepository";
-import { FindOptionsWhere } from "typeorm";
+import { FindManyOptions } from "typeorm";
 
-const findAllFoods = async (where?: FindOptionsWhere<FoodEntity>) => {
+const findAllFoods = async (options?: FindManyOptions<FoodEntity>) => {
   const foods = await FoodRepository.find({
-    where,
     order: { inStockScore: "DESC" },
+    ...options,
   });
   return foods;
 };

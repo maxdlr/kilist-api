@@ -1,6 +1,6 @@
-import InStockScoreEntity from "@/entities/InStockScoreEntity";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 
-const calculateInStockScore = (inStockScores: InStockScoreEntity[]) => {
+const calculateInStockScore = (inStockScores: FoodHistoryEntity[]) => {
   const totalScores = inStockScores.length;
   const inStockCount = inStockScores.filter((score) => score.isInStock).length;
 

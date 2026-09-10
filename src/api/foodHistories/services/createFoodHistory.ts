@@ -1,16 +1,18 @@
-import InStockScoreRepository from "@/repositories/InStockScoreRepository";
-import { StockUpdate } from "../interfaces";
+import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import calculateInStockScore from "./calculateInStockScore";
 import FoodRepository from "@/repositories/FoodRepository";
+import { FoodHistoryCreateType } from "../interfaces";
 
-const processStockUpdate = async (update: StockUpdate[]): Promise<void> => {
-  const inStockScoreInsertPromises = update.map(async (item) => {
-    await InStockScoreRepository.save({
+const createFoodHistory = async (
+  foodHistoryCreate: FoodHistoryCreateType[],
+): Promise<void> => {
+  const inStockScoreInsertPromises = foodHistoryCreate.map(async (item) => {
+    await FoodHistoryRepository.save({
       food: { id: item.foodId },
       isInStock: item.isInStock,
     });
 
-    const itemInStockScores = await InStockScoreRepository.find({
+    const itemInStockScores = await FoodHistoryRepository.find({
       where: { food: { id: item.foodId } },
     });
 
@@ -33,4 +35,4 @@ const processStockUpdate = async (update: StockUpdate[]): Promise<void> => {
   }
 };
 
-export default processStockUpdate;
+export default createFoodHistory;

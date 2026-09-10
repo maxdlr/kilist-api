@@ -3,7 +3,7 @@ import { AbstractEntity } from "./AbstractEntity";
 import FoodEntity from "./FoodEntity";
 
 @Entity({ name: "in_stock_scores" })
-export default class InStockScoreEntity extends AbstractEntity {
+export default class FoodHistoryEntity extends AbstractEntity {
   @ManyToOne(() => FoodEntity, (food) => food.inStockScores, {
     onDelete: "CASCADE",
   })

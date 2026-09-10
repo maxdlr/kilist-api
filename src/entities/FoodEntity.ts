@@ -3,7 +3,7 @@ import { AbstractEntity } from "./AbstractEntity";
 import ListEntity from "./ListEntity";
 import { IsUrl } from "class-validator";
 import FoodCategoryEntity from "./FoodCategory";
-import InStockScoreEntity from "./InStockScoreEntity";
+import FoodHistoryEntity from "./FoodHistoryEntity";
 
 @Entity({ name: "foods" })
 export default class FoodEntity extends AbstractEntity {
@@ -23,8 +23,8 @@ export default class FoodEntity extends AbstractEntity {
   @Column({ type: "float", default: 1 })
   inStockScore!: number;
 
-  @OneToMany(() => InStockScoreEntity, (inStockScore) => inStockScore.food)
-  inStockScores?: InStockScoreEntity[];
+  @OneToMany(() => FoodHistoryEntity, (inStockScore) => inStockScore.food)
+  inStockScores?: FoodHistoryEntity[];
 
   @ManyToMany(() => FoodCategoryEntity, {
     nullable: true,

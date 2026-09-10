@@ -3,10 +3,10 @@ import { DataSource } from "typeorm";
 import FoodEntity from "@/entities/FoodEntity";
 import UserEntity from "@/entities/UserEntity";
 import RefreshTokenEntity from "@/entities/RefreshTokenEntity";
-import InStockScoreEntity from "@/entities/InStockScoreEntity";
 import FoodCategoryEntity from "@/entities/FoodCategory";
 import ListEntity from "@/entities/ListEntity";
 import FrequencyEntity from "@/entities/FrequencyEntity";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 
 export const AppDataSource = new DataSource({
   type: "mariadb",
@@ -21,7 +21,7 @@ export const AppDataSource = new DataSource({
     FoodEntity,
     UserEntity,
     RefreshTokenEntity,
-    InStockScoreEntity,
+    FoodHistoryEntity,
     FoodCategoryEntity,
     ListEntity,
     FrequencyEntity,
