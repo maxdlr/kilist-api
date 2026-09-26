@@ -1,9 +1,9 @@
+import { IsUrl } from "class-validator";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
-import ListEntity from "./ListEntity";
-import { IsUrl } from "class-validator";
 import FoodCategoryEntity from "./FoodCategory";
 import FoodHistoryEntity from "./FoodHistoryEntity";
+import ListEntity from "./ListEntity";
 
 @Entity({ name: "foods" })
 export default class FoodEntity extends AbstractEntity {
@@ -14,17 +14,14 @@ export default class FoodEntity extends AbstractEntity {
   @IsUrl({}, { message: "Invalid URL" })
   imageUrl!: string;
 
-  @ManyToMany(() => ListEntity, {
-    nullable: true,
-  })
-  @JoinTable()
+  @ManyToMany(() => ListEntity, (list) => list.foods, { nullable: true })
   lists!: ListEntity[];
 
   @Column({ type: "float", default: 1 })
   inStockScore!: number;
 
-  @OneToMany(() => FoodHistoryEntity, (inStockScore) => inStockScore.food)
-  inStockScores?: FoodHistoryEntity[];
+  @OneToMany(() => FoodHistoryEntity, (foodHistory) => foodHistory.food)
+  foodHistories!: FoodHistoryEntity[];
 
   @ManyToMany(() => FoodCategoryEntity, {
     nullable: true,
@@ -34,4 +31,11 @@ export default class FoodEntity extends AbstractEntity {
 
   @Column({ default: "", length: 2000 })
   description?: string;
+
+  // async getfoodHistories(): Promise<FoodHistoryEntity[]> {
+  //   const histories = await findAllFoodHistories({
+  //     where: { food: { id: this.id } },
+  //   });
+  //   return histories;
+  // }
 }

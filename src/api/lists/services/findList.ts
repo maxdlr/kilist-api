@@ -3,12 +3,14 @@ import ListRepository from "@/repositories/ListRepository";
 import { FindOptionsWhere } from "typeorm";
 
 const findList = async (where: FindOptionsWhere<ListEntity>) => {
+  console.log("findList where:", where);
+
   const list = await ListRepository.findOne({
     where,
-    relations: ["items"],
+    relations: ["foods"],
     order: {
-      items: {
-        inStockScore: "DESC",
+      foods: {
+        inStockScore: "ASC",
       },
     },
   });

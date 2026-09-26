@@ -5,7 +5,7 @@ import FrequencyRepository from "@/repositories/FrequencyRepository";
 import { randomElement } from "@/utils/helpers";
 import { beforeEach, expect, test } from "vitest";
 import updateFrequencies from "../../services/updateFrequencies";
-import getMostLikelyNextFoods from "@/api/inventory/services/getMostLikelyNextFood";
+import getMostLikelyNextFoods from "@/api/foodHistories/services/getMostLikelyNextFood";
 
 let foods: FoodEntity[];
 
@@ -56,7 +56,7 @@ test("keeps frequency to 100 maximum", async () => {
   expect(updatedFoodFrequency.length).toBe(100);
 });
 
-test("get food frequency score", async () => {
+test("get most likely next food", async () => {
   await FrequencyRepository.save(
     Array.from({ length: 100 }, () => ({
       food: foods?.[1] as FoodEntity,

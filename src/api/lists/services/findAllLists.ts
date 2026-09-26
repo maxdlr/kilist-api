@@ -5,10 +5,10 @@ import { FindOptionsWhere } from "typeorm";
 const findAllLists = async (where?: FindOptionsWhere<ListEntity>) => {
   const lists = await ListRepository.find({
     where,
-    relations: ["items"],
+    relations: ["foods"],
     order: {
-      items: {
-        inStockScore: "DESC",
+      foods: {
+        inStockScore: "ASC",
       },
     },
   });

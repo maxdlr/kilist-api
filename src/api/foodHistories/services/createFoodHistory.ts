@@ -31,7 +31,7 @@ const createFoodHistory = async (
   try {
     await Promise.all(inStockScoreInsertPromises);
   } catch (e) {
-    throw ServiceError(`Failed to process update: ${e}`);
+    throw ServiceError(`Failed to create food history: ${e}`);
   }
 };
 

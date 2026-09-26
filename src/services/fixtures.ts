@@ -1,7 +1,10 @@
+import calculateInStockScore from "@/api/foodHistories/services/calculateInStockScore";
 import FoodCategoryEntity from "@/entities/FoodCategory";
 import FoodEntity from "@/entities/FoodEntity";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
+import FoodRepository from "@/repositories/FoodRepository";
 import ListRepository from "@/repositories/ListRepository";
 import { randomElement } from "@/utils/helpers";
 import { faker } from "@faker-js/faker";
@@ -46,15 +49,14 @@ const ensureAdminUser = async (manager: EntityManager): Promise<UserEntity> => {
 const makeGroceryLists = async (
   manager: EntityManager,
   users: UserEntity[],
-  foods: () => Promise<FoodEntity[]>,
   count: number,
 ): Promise<ListEntity[]> => {
+  const foodItems = await manager.getRepository(FoodEntity).find();
   const lists = await Promise.all(
     Array.from({ length: count }).map(async () => {
-      const foodItems = await foods();
       const list = new ListEntity();
       list.title = randomElement([faker.lorem.sentence(), faker.lorem.word()]);
-      list.items = foodItems;
+      list.foods = foodItems;
       list.description = randomElement([faker.lorem.paragraph(2), undefined]);
       list.user = randomElement(users);
       return list;
@@ -82,10 +84,12 @@ const makeFoodCategories = async (
 
 const makeFoods = async (
   manager: EntityManager,
-  foodCategories: () => Promise<FoodCategoryEntity[]>,
+  // foodCategories: () => Promise<FoodCategoryEntity[]>,
+  // foodHistories: () => Promise<FoodHistoryEntity[]>,
   count: number = 20,
 ): Promise<FoodEntity[]> => {
-  const categories = await foodCategories();
+  const categories = await manager.getRepository(FoodCategoryEntity).find();
+  // const histories = await foodHistories();
 
   const foods = manager.create(
     FoodEntity,
@@ -98,11 +102,8 @@ const makeFoods = async (
         faker.food.meat(),
         faker.food.spice(),
       ]);
-      food.inStockScore = faker.number.float({
-        min: 0,
-        max: 1,
-        fractionDigits: 2,
-      });
+      food.inStockScore = 1;
+      // food.foodHistories = histories;
       food.categories = categories;
       food.description = faker.food.description();
       food.imageUrl = faker.image.urlPicsumPhotos();
@@ -112,34 +113,56 @@ const makeFoods = async (
   return await manager.save(foods);
 };
 
+const makeFoodHistories = async (
+  manager: EntityManager,
+  count: number = 20,
+): Promise<FoodHistoryEntity[]> => {
+  const foods = await manager.getRepository(FoodEntity).find();
+  const histories = manager.create(
+    FoodHistoryEntity,
+    Array.from({ length: count }).map(() => {
+      const history = new FoodHistoryEntity();
+      history.food = randomElement(foods);
+      history.isInStock = faker.datatype.boolean();
+      return history;
+    }),
+  );
+  return await manager.save(histories);
+};
+
 // --- Public API ---
 
 export const loadFixtures = async (): Promise<void> => {
   const isDev = process.env.NODE_ENV === "development";
 
+  if (!isDev) {
+    return;
+  }
+
   await ListRepository.manager.transaction(async (manager) => {
-    if (isDev) {
-      await manager.createQueryBuilder().delete().from(ListEntity).execute();
-      await manager
-        .createQueryBuilder()
-        .delete()
-        .from(FoodCategoryEntity)
-        .execute();
-      await manager.createQueryBuilder().delete().from(FoodEntity).execute();
-      await manager.createQueryBuilder().delete().from(UserEntity).execute();
+    await manager.createQueryBuilder().delete().from(ListEntity).execute();
+    await manager
+      .createQueryBuilder()
+      .delete()
+      .from(FoodCategoryEntity)
+      .execute();
+    await manager.createQueryBuilder().delete().from(FoodEntity).execute();
+    await manager.createQueryBuilder().delete().from(UserEntity).execute();
+
+    await makeFoodCategories(manager, randomInt(1, 3));
+    await makeFoods(manager, randomInt(1, 50));
+    await makeFoodHistories(manager, randomInt(50, 100));
+
+    const foodsWithHistories = await manager.getRepository(FoodEntity).find({
+      relations: ["foodHistories"],
+    });
+
+    for await (const food of foodsWithHistories) {
+      food.inStockScore = calculateInStockScore(food.foodHistories || []);
+      await manager.save(FoodEntity, food);
     }
 
-    const foodCategories = () => makeFoodCategories(manager, randomInt(1, 3));
-    const foods = () => makeFoods(manager, foodCategories, randomInt(1, 20));
-
-    if (isDev) {
-      await makeGroceryLists(
-        manager,
-        [await ensureAdminUser(manager)],
-        foods,
-        randomInt(1, 10),
-      );
-    }
+    await makeGroceryLists(manager, [await ensureAdminUser(manager)], 1);
 
     console.log(`Fixtures loaded (${isDev ? "development" : "production"})`);
   });

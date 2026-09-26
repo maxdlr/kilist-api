@@ -1,11 +1,11 @@
 import findAllFoods from "@/api/foods/services/findAllFoods";
 import FoodEntity from "@/entities/FoodEntity";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
+import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import FoodRepository from "@/repositories/FoodRepository";
 import { faker } from "@faker-js/faker";
 import { beforeEach, describe, expect, it } from "vitest";
 import { FoodHistoryCreateType } from "../../interfaces";
-import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
-import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import createFoodHistory from "../../services/createFoodHistory";
 
 describe("createFoodHistory", () => {
@@ -77,7 +77,7 @@ describe("createFoodHistory sorts the food by inStockScores for lists", async ()
       const current = orderedFoods[i];
       const next = orderedFoods[i + 1];
       if (current && next) {
-        expect(current.inStockScore).toBeGreaterThanOrEqual(next.inStockScore);
+        expect(current.inStockScore).toBeLessThanOrEqual(next.inStockScore);
       }
     }
   });
@@ -99,7 +99,7 @@ describe("createFoodHistory sorts the food by inStockScores for lists", async ()
       const current = orderedFoods[i];
       const next = orderedFoods[i + 1];
       if (current && next) {
-        expect(current.inStockScore).toBeGreaterThanOrEqual(next.inStockScore);
+        expect(current.inStockScore).toBeLessThanOrEqual(next.inStockScore);
       }
     }
   });

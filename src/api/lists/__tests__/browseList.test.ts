@@ -30,27 +30,27 @@ beforeEach(async () => {
 
   fixtureList = await ListRepository.save({
     title: `List`,
-    items: foods,
+    foods,
     user,
   });
 });
 
 test("browseList returns a list", async () => {
   const list = await findList({ id: fixtureList.id });
-  expect(list.items).toHaveLength(10);
+  expect(list.foods).toHaveLength(10);
 });
 
 test("browseList returns a list with sorted items", async () => {
   const list = await findList({ id: fixtureList.id });
-  expect(list.items).toHaveLength(10);
+  expect(list.foods).toHaveLength(10);
 
-  assert(list.items);
-  for (let i = 0; i < list.items.length - 1; i++) {
-    const current = list.items[i];
-    const next = list.items[i + 1];
+  assert(list.foods);
+  for (let i = 0; i < list.foods.length - 1; i++) {
+    const current = list.foods[i];
+    const next = list.foods[i + 1];
 
     if (current && next) {
-      expect(current.inStockScore).toBeGreaterThanOrEqual(next.inStockScore);
+      expect(current.inStockScore).toBeLessThanOrEqual(next.inStockScore);
     }
   }
 });

@@ -10,9 +10,9 @@ export default class ListEntity extends AbstractEntity {
   @IsNotEmpty({ message: "Required" })
   title!: string;
 
-  @ManyToMany(() => FoodEntity)
+  @ManyToMany(() => FoodEntity, (food) => food.lists)
   @JoinTable()
-  items!: FoodEntity[];
+  foods!: FoodEntity[];
 
   @ManyToOne(() => UserEntity, (user) => user.lists, {
     nullable: false,

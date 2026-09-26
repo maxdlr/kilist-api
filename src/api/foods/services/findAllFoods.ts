@@ -4,7 +4,8 @@ import { FindManyOptions } from "typeorm";
 
 const findAllFoods = async (options?: FindManyOptions<FoodEntity>) => {
   const foods = await FoodRepository.find({
-    order: { inStockScore: "DESC" },
+    order: { inStockScore: "ASC" },
+    loadRelationIds: { relations: ["lists"] },
     ...options,
   });
   return foods;
