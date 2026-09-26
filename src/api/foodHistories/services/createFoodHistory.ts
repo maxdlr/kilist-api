@@ -1,38 +1,27 @@
+import updateFoodInStockScore from "@/api/foods/services/updateFoodInStockScore";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
-import calculateInStockScore from "./calculateInStockScore";
-import FoodRepository from "@/repositories/FoodRepository";
-import { FoodHistoryCreateType } from "../interfaces";
+import findManager from "@/utils/findManager";
+import { EntityManager } from "typeorm";
 
 const createFoodHistory = async (
-  foodHistoryCreate: FoodHistoryCreateType[],
+  {
+    foodId,
+    isInStock,
+  }: {
+    foodId: number;
+    isInStock: boolean;
+  },
+  manager?: EntityManager,
 ): Promise<void> => {
-  const inStockScoreInsertPromises = foodHistoryCreate.map(async (item) => {
-    await FoodHistoryRepository.save({
-      food: { id: item.foodId },
-      isInStock: item.isInStock,
-    });
+  const m = findManager(FoodHistoryRepository, manager);
 
-    const itemInStockScores = await FoodHistoryRepository.find({
-      where: { food: { id: item.foodId } },
-    });
-
-    const newInStockScore = calculateInStockScore(itemInStockScores);
-
-    const food = await FoodRepository.findOne({ where: { id: item.foodId } });
-
-    if (!food) {
-      throw ServiceError(`Food with id ${item.foodId} not found`);
-    }
-
-    food.inStockScore = newInStockScore;
-    await FoodRepository.save(food);
+  await m.save(FoodHistoryEntity, {
+    food: { id: foodId },
+    isInStock: isInStock,
   });
 
-  try {
-    await Promise.all(inStockScoreInsertPromises);
-  } catch (e) {
-    throw ServiceError(`Failed to create food history: ${e}`);
-  }
+  await updateFoodInStockScore(foodId, m);
 };
 
 export default createFoodHistory;

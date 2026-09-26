@@ -1,17 +1,26 @@
 import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
+import FoodRepository from "@/repositories/FoodRepository";
+import findManager from "@/utils/findManager";
+import { EntityManager } from "typeorm";
 
 const getMostLikelyNextFoods = async (
   foodId: number,
   count: number = 1,
+  manager?: EntityManager,
 ): Promise<number[] | null> => {
+  const m = findManager(FoodRepository, manager);
+
   if (!foodId) {
     return null;
   }
 
-  const frequencies = await findAllFrequencies({
-    where: { food: { id: foodId } },
-    loadRelationIds: false,
-  });
+  const frequencies = await findAllFrequencies(
+    {
+      where: { food: { id: foodId } },
+      loadRelationIds: false,
+    },
+    m,
+  );
 
   if (frequencies.length === 0) {
     return null;

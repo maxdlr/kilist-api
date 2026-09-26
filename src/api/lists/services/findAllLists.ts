@@ -1,9 +1,15 @@
 import ListEntity from "@/entities/ListEntity";
 import ListRepository from "@/repositories/ListRepository";
-import { FindOptionsWhere } from "typeorm";
+import findManager from "@/utils/findManager";
+import { EntityManager, FindOptionsWhere } from "typeorm";
 
-const findAllLists = async (where?: FindOptionsWhere<ListEntity>) => {
-  const lists = await ListRepository.find({
+const findAllLists = async (
+  where?: FindOptionsWhere<ListEntity>,
+  manager?: EntityManager,
+) => {
+  const m = findManager(ListRepository, manager);
+
+  const lists = await m.find(ListEntity, {
     where,
     relations: ["foods"],
     order: {
@@ -12,6 +18,7 @@ const findAllLists = async (where?: FindOptionsWhere<ListEntity>) => {
       },
     },
   });
+
   return lists;
 };
 

@@ -4,7 +4,6 @@ import FoodEntity from "@/entities/FoodEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
-import FoodRepository from "@/repositories/FoodRepository";
 import ListRepository from "@/repositories/ListRepository";
 import { randomElement } from "@/utils/helpers";
 import { faker } from "@faker-js/faker";

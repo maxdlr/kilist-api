@@ -1,9 +1,14 @@
 import FoodEntity from "@/entities/FoodEntity";
 import FoodRepository from "@/repositories/FoodRepository";
-import { FindOptionsWhere } from "typeorm";
+import findManager from "@/utils/findManager";
+import { EntityManager, FindOptionsWhere } from "typeorm";
 
-const findFood = async (where: FindOptionsWhere<FoodEntity>) => {
-  const food = await FoodRepository.findOne({ where });
+const findFood = async (
+  where: FindOptionsWhere<FoodEntity>,
+  manager?: EntityManager,
+) => {
+  const m = findManager(FoodRepository, manager);
+  const food = await m.findOne(FoodEntity, { where });
   return food;
 };
 

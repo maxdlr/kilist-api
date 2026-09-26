@@ -3,24 +3,32 @@ import createFrequency from "@/api/frequencies/services/createFrequency";
 import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
 import FoodEntity from "@/entities/FoodEntity";
 import FrequencyRepository from "@/repositories/FrequencyRepository";
+import findManager from "@/utils/findManager";
+import { EntityManager } from "typeorm";
+import removeFrequency from "./removeFrequency";
 
-const updateFrequencies = async ({
-  previous,
-  current,
-}: {
-  previous: FoodEntity["id"];
-  current: FoodEntity["id"];
-}) => {
-  const previousFood = await findFood({ id: previous });
-  const currentFood = await findFood({ id: current });
+const updateFrequencies = async (
+  frequencies: {
+    previous: FoodEntity["id"];
+    current: FoodEntity["id"];
+  },
+  manager?: EntityManager,
+) => {
+  const m = findManager(FrequencyRepository, manager);
+
+  const previousFood = await findFood({ id: frequencies.previous }, m);
+  const currentFood = await findFood({ id: frequencies.current }, m);
 
   if (!previousFood || !currentFood) {
     throw ServiceError("Food not found");
   }
 
-  const allPreviousFoodFrequencies = await findAllFrequencies({
-    where: { food: { id: previousFood.id } },
-  });
+  const allPreviousFoodFrequencies = await findAllFrequencies(
+    {
+      where: { food: { id: previousFood.id } },
+    },
+    m,
+  );
 
   if (allPreviousFoodFrequencies.length > 99) {
     const toTrimFrequencies = allPreviousFoodFrequencies.slice(
@@ -28,16 +36,17 @@ const updateFrequencies = async ({
       allPreviousFoodFrequencies.length - 99,
     );
 
-    await Promise.all(
-      toTrimFrequencies.map(async (f) => {
-        await FrequencyRepository.delete(f.id);
-      }),
-    );
+    for (const f of toTrimFrequencies) {
+      await removeFrequency({ id: f.id }, m);
+    }
 
-    await createFrequency({
-      food: previousFood,
-      nextCheckFood: currentFood,
-    });
+    await createFrequency(
+      {
+        food: previousFood,
+        nextCheckFood: currentFood,
+      },
+      m,
+    );
   }
 };
 export default updateFrequencies;
