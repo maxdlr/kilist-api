@@ -5,7 +5,7 @@ import FrequencyRepository from "@/repositories/FrequencyRepository";
 import { randomElement } from "@/utils/helpers";
 import { beforeEach, expect, test } from "vitest";
 import updateFrequencies from "../../services/updateFrequencies";
-import getMostLikelyNextFoods from "@/api/foodHistories/services/getMostLikelyNextFood";
+import getMostLikelyNextFoods from "../../services/getMostLikelyNextFood";
 
 let foods: FoodEntity[];
 
