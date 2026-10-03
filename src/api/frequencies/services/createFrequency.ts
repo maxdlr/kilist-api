@@ -7,7 +7,7 @@ import { EntityManager } from "typeorm";
 const createFrequency = async (
   foods: {
     food: FoodEntity;
-    nextCheckFood: FoodEntity;
+    nextBoughtFood: FoodEntity;
   },
   manager?: EntityManager,
 ) => {
@@ -15,7 +15,7 @@ const createFrequency = async (
 
   const createdFrequency = await m.save(FrequencyEntity, {
     food: foods.food,
-    nextCheckFood: foods.nextCheckFood,
+    nextBoughtFood: foods.nextBoughtFood,
   });
 
   return createdFrequency;

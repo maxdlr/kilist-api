@@ -2,6 +2,7 @@ import calculateInStockScore from "@/api/foodHistories/services/calculateInStock
 import FoodCategoryEntity from "@/entities/FoodCategory";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
+import FrequencyEntity from "@/entities/FrequencyEntity";
 import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
 import ListRepository from "@/repositories/ListRepository";
@@ -129,6 +130,24 @@ const makeFoodHistories = async (
   return await manager.save(histories);
 };
 
+const makeFrequencies = async (
+  manager: EntityManager,
+  count: number = 20,
+): Promise<void> => {
+  const foods = await manager.getRepository(FoodEntity).find();
+  const frequencies = manager.create(
+    FrequencyEntity,
+    Array.from({ length: count }).map(() => {
+      const frequency = {
+        food: randomElement(foods),
+        nextBoughtFood: randomElement(foods),
+      };
+      return frequency;
+    }),
+  );
+  await manager.save(FrequencyEntity, frequencies);
+};
+
 // --- Public API ---
 
 export const loadFixtures = async (): Promise<void> => {
@@ -151,6 +170,7 @@ export const loadFixtures = async (): Promise<void> => {
     await makeFoodCategories(manager, randomInt(1, 3));
     await makeFoods(manager, randomInt(1, 50));
     await makeFoodHistories(manager, randomInt(50, 100));
+    await makeFrequencies(manager, randomInt(50, 1000));
 
     const foodsWithHistories = await manager.getRepository(FoodEntity).find({
       relations: ["foodHistories"],

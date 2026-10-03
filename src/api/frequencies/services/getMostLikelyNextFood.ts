@@ -1,7 +1,7 @@
 import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager } from "typeorm";
+import { EntityManager, Not } from "typeorm";
 
 const getMostLikelyNextFoods = async (
   foodId: number,
@@ -16,8 +16,7 @@ const getMostLikelyNextFoods = async (
 
   const frequencies = await findAllFrequencies(
     {
-      where: { food: { id: foodId } },
-      loadRelationIds: false,
+      where: { food: { id: foodId }, nextBoughtFood: { inStockScore: Not(1) } },
     },
     m,
   );
@@ -29,7 +28,7 @@ const getMostLikelyNextFoods = async (
   const frequencyMap: Record<number, number> = {};
 
   frequencies.forEach((frequency) => {
-    const nextFoodId = frequency.nextCheckFood.id;
+    const nextFoodId: number = frequency.nextBoughtFood as number;
     if (nextFoodId) {
       frequencyMap[nextFoodId] = (frequencyMap[nextFoodId] || 0) + 1;
     }

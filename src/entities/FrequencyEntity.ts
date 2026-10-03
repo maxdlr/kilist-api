@@ -5,8 +5,8 @@ import FoodEntity from "./FoodEntity";
 @Entity({ name: "frequencies" })
 export default class FrequencyEntity extends AbstractEntity {
   @ManyToOne(() => FoodEntity, { nullable: true, onDelete: "CASCADE" })
-  food!: FoodEntity;
+  food!: FoodEntity | number;
 
   @ManyToOne(() => FoodEntity, { nullable: true, onDelete: "CASCADE" })
-  nextCheckFood!: FoodEntity;
+  nextBoughtFood!: FoodEntity | number;
 }

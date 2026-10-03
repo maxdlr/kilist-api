@@ -7,6 +7,12 @@ import { beforeEach, expect, test } from "vitest";
 import findAllFoods from "../services/findAllFoods";
 import findFoodSwipes from "../services/findFoodSwipes";
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
+import updateFrequencies from "@/api/frequencies/services/updateFrequencies";
+import FrequencyRepository from "@/repositories/FrequencyRepository";
+import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
+import getMostLikelyNextFoods from "@/api/frequencies/services/getMostLikelyNextFood";
+import resetFoodHistories from "@/api/foodHistories/services/resetFoodHistories";
+import findAllFoodHistories from "@/api/foodHistories/services/findAllFoodHistories";
 
 let foods: FoodEntity[];
 
@@ -23,6 +29,13 @@ beforeEach(async () => {
       food: randomElement(foods),
       isInStock: faker.datatype.boolean(),
       createdAt: faker.date.past({ years: 1 }),
+    })),
+  );
+
+  await FrequencyRepository.save(
+    Array.from({ length: 1000 }).map(() => ({
+      food: randomElement(foods),
+      nextCheckFood: randomElement(foods),
     })),
   );
 });
@@ -107,4 +120,42 @@ test("browseFoods gets 10 foods for swipes, starting by prioritizing foods with 
       );
     }
   });
+});
+
+test("updatefrequencies", async () => {
+  const previous = randomElement(foods);
+  const current = randomElement(foods);
+
+  await FrequencyRepository.save(
+    Array.from({ length: 1000 }).map(() => ({
+      food: previous,
+      nextBoughtFood: current,
+    })),
+  );
+
+  await updateFrequencies({
+    previousFoodId: previous.id,
+    currentFoodId: current.id,
+  });
+
+  await resetFoodHistories(current.id);
+
+  const frequencyCount = await findAllFrequencies({
+    where: { food: { id: previous.id } },
+  });
+
+  const foodHistories = await findAllFoodHistories({
+    where: { food: { id: current.id } },
+  });
+
+  expect(frequencyCount.length).toBeLessThanOrEqual(100);
+  expect(foodHistories.length).toBe(0);
+
+  const updatedCurrent = await findAllFoods({ where: { id: current.id } });
+  expect(updatedCurrent?.[0]?.inStockScore).toBe(1);
+
+  // current was just bought and reset to fully in stock, so it should no
+  // longer be suggested as a "next food to buy"
+  const mostLikelyNextFoodIds = await getMostLikelyNextFoods(previous.id, 1);
+  expect(mostLikelyNextFoodIds ?? []).not.toContain(current.id);
 });

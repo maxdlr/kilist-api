@@ -12,12 +12,12 @@ const updateFoodInStockScore = async (
 ) => {
   const m = findManager(FoodRepository, manager);
 
-  const itemInStockScores = await findAllFoodHistories(
+  const foodInStockScores = await findAllFoodHistories(
     { where: { food: { id: foodId } } },
     m,
   );
 
-  const newInStockScore = calculateInStockScore(itemInStockScores);
+  const newInStockScore = calculateInStockScore(foodInStockScores);
 
   const food = await findFood({ id: foodId }, m);
 

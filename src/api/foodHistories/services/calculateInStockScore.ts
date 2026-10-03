@@ -5,7 +5,7 @@ const calculateInStockScore = (inStockScores: FoodHistoryEntity[]) => {
   const inStockCount = inStockScores.filter((score) => score.isInStock).length;
 
   if (totalScores === 0) {
-    return 0;
+    return 1;
   }
 
   const result = inStockCount / totalScores;

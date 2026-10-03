@@ -9,23 +9,23 @@ import removeFrequency from "./removeFrequency";
 
 const updateFrequencies = async (
   frequencies: {
-    previous: FoodEntity["id"];
-    current: FoodEntity["id"];
+    previousFoodId: FoodEntity["id"];
+    currentFoodId: FoodEntity["id"];
   },
   manager?: EntityManager,
 ) => {
   const m = findManager(FrequencyRepository, manager);
 
-  const previousFood = await findFood({ id: frequencies.previous }, m);
-  const currentFood = await findFood({ id: frequencies.current }, m);
+  const previousFood = await findFood({ id: frequencies.previousFoodId }, m);
+  const currentFood = await findFood({ id: frequencies.currentFoodId }, m);
 
-  if (!previousFood || !currentFood) {
+  if (!currentFood) {
     throw ServiceError("Food not found");
   }
 
   const allPreviousFoodFrequencies = await findAllFrequencies(
     {
-      where: { food: { id: previousFood.id } },
+      where: { food: { id: previousFood?.id } },
     },
     m,
   );
@@ -40,13 +40,15 @@ const updateFrequencies = async (
       await removeFrequency({ id: f.id }, m);
     }
 
-    await createFrequency(
-      {
-        food: previousFood,
-        nextCheckFood: currentFood,
-      },
-      m,
-    );
+    if (previousFood) {
+      await createFrequency(
+        {
+          food: previousFood,
+          nextBoughtFood: currentFood,
+        },
+        m,
+      );
+    }
   }
 };
 export default updateFrequencies;

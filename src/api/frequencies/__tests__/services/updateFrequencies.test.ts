@@ -19,20 +19,20 @@ beforeEach(async () => {
   await FrequencyRepository.save(
     Array.from({ length: 100 }, () => ({
       food: randomElement(foods),
-      nextCheckFood: randomElement(foods),
+      nextBoughtFood: randomElement(foods),
     })),
   );
 
   await FrequencyRepository.save(
     Array.from({ length: 100 }, () => ({
       food: foods?.[0] as FoodEntity,
-      nextCheckFood: randomElement(foods),
+      nextBoughtFood: randomElement(foods),
     })),
   );
   await FrequencyRepository.save(
     Array.from({ length: 100 }, () => ({
       food: foods?.[1] as FoodEntity,
-      nextCheckFood: randomElement(foods),
+      nextBoughtFood: randomElement(foods),
     })),
   );
 });
@@ -57,10 +57,28 @@ test("keeps frequency to 100 maximum", async () => {
 });
 
 test("get most likely next food", async () => {
+  // only foods with inStockScore < 1 are eligible to be suggested as "next food"
+  const eligibleNextFoods = foods.slice(2, 8);
+  await FoodRepository.save(
+    eligibleNextFoods.map((food) => ({ ...food, inStockScore: 0.2 })),
+  );
+
+  // deterministically give foods[1] a frequency relationship with each
+  // eligible food, so requesting 5 suggestions doesn't depend on the
+  // random frequencies seeded in beforeEach covering all of them
+  for (const nextFood of eligibleNextFoods) {
+    await FrequencyRepository.save(
+      Array.from({ length: 100 }, () => ({
+        food: foods?.[1] as FoodEntity,
+        nextBoughtFood: nextFood,
+      })),
+    );
+  }
+
   await FrequencyRepository.save(
     Array.from({ length: 100 }, () => ({
       food: foods?.[1] as FoodEntity,
-      nextCheckFood: foods?.[2] as FoodEntity,
+      nextBoughtFood: foods?.[2] as FoodEntity,
     })),
   );
 

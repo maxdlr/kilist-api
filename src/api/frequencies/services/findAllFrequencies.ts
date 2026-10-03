@@ -6,13 +6,13 @@ import { EntityManager, FindManyOptions } from "typeorm";
 const findAllFrequencies = async (
   options: FindManyOptions<FrequencyEntity> = {},
   manager?: EntityManager,
-) => {
+): Promise<FrequencyEntity[]> => {
   const m = findManager(FrequencyRepository, manager);
 
   const frequencies = await m.find(FrequencyEntity, {
     loadRelationIds: true,
     order: { createdAt: "ASC" },
-    relations: ["food", "nextCheckFood"],
+    // relations: ["food", "nextBoughtFood"],
     ...options,
   });
 
