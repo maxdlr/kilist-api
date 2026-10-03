@@ -66,12 +66,12 @@ test("browseFoods gets 10 foods for swipes many times", async () => {
 
     expect(testFoods).toHaveLength(10);
 
-    await createFoodHistory(
-      Array.from({ length: testFoods.length }).map((_, index) => ({
-        foodId: testFoods?.[index]?.id || 0,
+    for (const food of testFoods) {
+      await createFoodHistory({
+        foodId: food?.id || 0,
         isInStock: faker.datatype.boolean(),
-      })),
-    );
+      });
+    }
   }
 });
 
@@ -84,12 +84,12 @@ test("browseFoods gets 10 foods for swipes, starting by prioritizing foods with 
     expect(testFoods?.[0]?.inStockScore).toBeGreaterThanOrEqual(0.5);
     expect(testFoods).toHaveLength(10);
 
-    await createFoodHistory(
-      Array.from({ length: testFoods.length }).map((_, index) => ({
-        foodId: testFoods?.[index]?.id || 0,
+    for (const food of testFoods) {
+      await createFoodHistory({
+        foodId: food?.id || 0,
         isInStock: faker.datatype.boolean(),
-      })),
-    );
+      });
+    }
 
     const allFoods = await findAllFoods({ relations: { foodHistories: true } });
 

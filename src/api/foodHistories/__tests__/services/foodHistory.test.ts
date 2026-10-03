@@ -40,7 +40,9 @@ describe("createFoodHistory", () => {
         } as FoodHistoryCreateType;
       },
     );
-    await createFoodHistory(update);
+    for (const item of update) {
+      await createFoodHistory(item);
+    }
     const updatedFoods = await FoodRepository.find({ order: { id: "ASC" } });
 
     for (let i = 0; i < updatedFoods.length; i++) {
@@ -93,7 +95,9 @@ describe("createFoodHistory sorts the food by inStockScores for lists", async ()
       },
     );
 
-    await createFoodHistory(updates);
+    for (const update of updates) {
+      await createFoodHistory(update);
+    }
 
     for (let i = 0; i < orderedFoods.length - 1; i++) {
       const current = orderedFoods[i];

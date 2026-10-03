@@ -10,13 +10,13 @@ const removeFrequency = async (
 ) => {
   const m = findManager(FrequencyRepository, manager);
 
-  const foundFrequency = await findFrequency(where, manager);
+  const foundFrequency = await findFrequency(where, m);
 
   if (!foundFrequency) {
     throw ServiceError("Frequency not found");
   }
 
-  await m.delete(FrequencyEntity, foundFrequency);
+  await m.delete(FrequencyEntity, foundFrequency.id);
 };
 
 export default removeFrequency;
