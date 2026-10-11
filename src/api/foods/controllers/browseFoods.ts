@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { In } from "typeorm";
+import { In, LessThan } from "typeorm";
 import findAllFoods from "../services/findAllFoods";
 import findFoodSwipes from "../services/findFoodSwipes";
 
 const browseFoods = async ({ query }: Request, res: Response) => {
-  const { take, forSwipes, listIds } = query;
+  const { take, forSwipes, listIds, maxInStockScore } = query;
 
   if (forSwipes) {
     const foodSwipes = await findFoodSwipes({
@@ -23,10 +23,12 @@ const browseFoods = async ({ query }: Request, res: Response) => {
       lists: listIds
         ? { id: In((listIds as string[]).map((id) => Number(id))) }
         : undefined,
+      inStockScore: LessThan(maxInStockScore ? Number(maxInStockScore) : 2),
+      snoozed: false,
     },
   });
 
-  return res.status(200).json(foods);
+  return setTimeout(() => res.status(200).json(foods), 2000);
 };
 
 export default browseFoods;

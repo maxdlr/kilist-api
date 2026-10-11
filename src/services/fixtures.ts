@@ -168,7 +168,7 @@ export const loadFixtures = async (): Promise<void> => {
     await manager.createQueryBuilder().delete().from(UserEntity).execute();
 
     await makeFoodCategories(manager, randomInt(1, 3));
-    await makeFoods(manager, randomInt(1, 50));
+    await makeFoods(manager, randomInt(20, 40));
     await makeFoodHistories(manager, randomInt(50, 100));
     await makeFrequencies(manager, randomInt(50, 1000));
 

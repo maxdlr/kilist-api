@@ -2,15 +2,12 @@ import { Request, Response } from "express";
 import findList from "../services/findList";
 
 const readList = async ({ query }: Request, res: Response) => {
-  const userId = query.id as string;
+  const { main, id } = query as { main?: boolean; id?: number };
 
-  if (!userId) {
-    throw ApiError("User ID is required");
-  }
-
-  const where = { id: Number(userId) };
-
-  const list = await findList(where);
+  const list = await findList({
+    isMain: main !== undefined ? main : false,
+    id: id !== undefined ? Number(id) : undefined,
+  });
 
   return res.status(200).json(list);
 };

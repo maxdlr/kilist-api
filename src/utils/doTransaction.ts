@@ -1,8 +1,8 @@
 import { AppDataSource } from "@/services/database/datasource";
 import { EntityManager } from "typeorm";
 
-const doTransaction = async (
-  transaction: (manager: EntityManager) => Promise<void>,
+const doTransaction = async <T>(
+  transaction: (manager: EntityManager) => Promise<T>,
 ) => {
   return await AppDataSource.manager.transaction(transaction);
 };

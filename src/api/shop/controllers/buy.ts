@@ -5,7 +5,7 @@ import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
 import { EntityManager } from "typeorm";
 
-const buyFood = async ({ body }: Request, res: Response) => {
+const buy = async ({ body }: Request, res: Response) => {
   const { previousFoodId, currentFoodId } = body;
 
   await doTransaction(async (m: EntityManager) => {
@@ -15,9 +15,7 @@ const buyFood = async ({ body }: Request, res: Response) => {
 
   const mostLikelyNextFoodIds = await getMostLikelyNextFoods(currentFoodId);
 
-  console.log({ mostLikelyNextFoodIds });
-
   return res.status(200).send(mostLikelyNextFoodIds);
 };
 
-export default buyFood;
+export default buy;

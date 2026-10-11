@@ -23,4 +23,7 @@ export default class ListEntity extends AbstractEntity {
 
   @Column({ nullable: true, length: 2000 })
   description?: string;
+
+  @Column({ default: true })
+  isMain: boolean = true;
 }
