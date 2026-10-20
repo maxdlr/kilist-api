@@ -32,13 +32,6 @@ export default class FoodEntity extends AbstractEntity {
   @Column({ default: "", length: 2000 })
   description?: string;
 
-  @Column({ default: false })
-  snoozed!: boolean;
-
-  // async getfoodHistories(): Promise<FoodHistoryEntity[]> {
-  //   const histories = await findAllFoodHistories({
-  //     where: { food: { id: this.id } },
-  //   });
-  //   return histories;
-  // }
+  @Column({ nullable: true })
+  snoozedUntil!: Date;
 }

@@ -24,7 +24,6 @@ const browseFoods = async ({ query }: Request, res: Response) => {
         ? { id: In((listIds as string[]).map((id) => Number(id))) }
         : undefined,
       inStockScore: LessThan(maxInStockScore ? Number(maxInStockScore) : 2),
-      snoozed: false,
     },
   });
 

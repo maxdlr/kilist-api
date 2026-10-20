@@ -11,6 +11,7 @@ const findSession = async (
 
   const session = await m.findOne(SessionEntity, {
     where,
+    relations: ["boughtFoods", "startFoods"],
   });
 
   return session;

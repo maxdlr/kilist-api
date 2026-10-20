@@ -4,13 +4,17 @@ import findManager from "@/utils/findManager";
 import { EntityManager } from "typeorm";
 
 const updateSession = async (
-  session: SessionEntity,
+  session: Partial<SessionEntity>,
   manager?: EntityManager,
 ) => {
   if (!session.id) {
     throw Missing("Session id is required to update a session");
   }
+
   const m = findManager(SessionRepository, manager);
-  return await m.save(SessionEntity, session);
+
+  const updatedSession = await m.save(SessionEntity, session);
+
+  return updatedSession;
 };
 export default updateSession;

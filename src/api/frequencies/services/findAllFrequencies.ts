@@ -10,7 +10,7 @@ const findAllFrequencies = async (
   const m = findManager(FrequencyRepository, manager);
 
   const frequencies = await m.find(FrequencyEntity, {
-    loadRelationIds: true,
+    loadRelationIds: { relations: ["food", "nextBoughtFood"] },
     order: { createdAt: "ASC" },
     // relations: ["food", "nextBoughtFood"],
     ...options,

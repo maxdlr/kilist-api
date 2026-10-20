@@ -1,12 +1,12 @@
-import {
-  CreateDateColumn,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import FoodEntity from "./FoodEntity";
+
+export enum SessionStatus {
+  STARTED = "started",
+  IN_PROGRESS = "in-progress",
+  COMPLETED = "completed",
+}
 
 @Entity({ name: "session" })
 export default class SessionEntity extends AbstractEntity {
@@ -14,11 +14,21 @@ export default class SessionEntity extends AbstractEntity {
     nullable: true,
   })
   @JoinTable()
-  foods!: FoodEntity[];
+  boughtFoods!: FoodEntity[] | number[];
 
-  @CreateDateColumn()
-  startedAt?: Date;
+  @ManyToMany(() => FoodEntity, {
+    nullable: true,
+  })
+  @JoinTable()
+  startFoods!: FoodEntity[] | number[];
 
-  @UpdateDateColumn()
+  @Column({ nullable: true })
   endedAt?: Date;
+
+  @Column({
+    nullable: false,
+    type: "enum",
+    enum: SessionStatus,
+  })
+  status?: SessionStatus;
 }
