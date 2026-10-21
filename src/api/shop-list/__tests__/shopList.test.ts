@@ -2,8 +2,8 @@ import FoodEntity from "@/entities/FoodEntity";
 import FoodRepository from "@/repositories/FoodRepository";
 import { faker } from "@faker-js/faker";
 import { beforeEach, expect, test } from "vitest";
-import createSession from "../services/createSession";
-import findSession from "../services/findSession";
+import createShopList from "../services/createShopList";
+import findShopList from "../services/findShopList";
 
 let foods: FoodEntity[] = [];
 beforeEach(async () => {
@@ -18,16 +18,16 @@ beforeEach(async () => {
 });
 
 test("browseShopFoods returns a list of foods", async () => {
-  const session = await createSession();
+  const shopList = await createShopList();
 
-  expect(session).toBeDefined();
-  expect(session.startFoods).toHaveLength(10);
+  expect(shopList).toBeDefined();
+  expect(shopList.startFoods).toHaveLength(10);
 });
 
-test("findSession keeps startFoods intact after a session is created and re-fetched", async () => {
-  const created = await createSession();
+test("findShopList keeps startFoods intact after a shopList is created and re-fetched", async () => {
+  const created = await createShopList();
 
-  const found = await findSession({ id: created.id });
+  const found = await findShopList({ id: created.id });
 
   expect(found?.startFoods).toHaveLength(10);
 });

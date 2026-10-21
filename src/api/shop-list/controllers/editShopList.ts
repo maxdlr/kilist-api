@@ -5,31 +5,31 @@ import updateFrequencies from "@/api/frequencies/services/updateFrequencies";
 import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
 import { EntityManager, In } from "typeorm";
-import findSession from "../services/findSession";
-import updateSession from "../services/updateSession";
 import getMostLikelyNextFoods from "@/api/frequencies/services/getMostLikelyNextFood";
 import findAllFoods from "@/api/foods/services/findAllFoods";
 import FoodEntity from "@/entities/FoodEntity";
+import findShopList from "../services/findShopList";
+import updateShopList from "../services/updateShopList";
 
-export enum SessionFoodStatus {
+export enum EditShopAction {
   BUY = "buy",
   SNOOZE = "snooze",
 }
 
-const editShopFoods = async ({ body, query }: Request, res: Response) => {
-  const { sessionId } = query;
+const editShopList = async ({ body, query }: Request, res: Response) => {
+  const { shopListId } = query;
   const { foodId, previousFoodId, action } = body;
 
-  if (!Object.values(SessionFoodStatus).includes(action)) {
+  if (!Object.values(EditShopAction).includes(action)) {
     throw ApiError(
-      `Invalid action. Must be one of: ${Object.values(SessionFoodStatus).join(
+      `Invalid action. Must be one of: ${Object.values(EditShopAction).join(
         ", ",
       )}`,
     );
   }
 
-  if (!sessionId) {
-    throw ApiError("sessionId is required in query parameters");
+  if (!shopListId) {
+    throw ApiError("shopListId is required in query parameters");
   }
 
   if (!foodId) {
@@ -39,25 +39,25 @@ const editShopFoods = async ({ body, query }: Request, res: Response) => {
   return await doTransaction(async (m: EntityManager) => {
     const id = Number(foodId);
 
-    const session = await findSession({ id: Number(sessionId) }, m);
+    const shopList = await findShopList({ id: Number(shopListId) }, m);
     let food = await findFood({ id }, m);
 
     if (!food) {
       throw ApiError(`Food with id ${foodId} not found`);
     }
 
-    if (!session) {
-      throw ApiError(`Session with id ${sessionId} not found`);
+    if (!shopList) {
+      throw ApiError(`ShopList with id ${shopListId} not found`);
     }
 
-    if (action === SessionFoodStatus.SNOOZE) {
+    if (action === EditShopAction.SNOOZE) {
       food = await snoozeFood(food);
     }
 
-    if (action === SessionFoodStatus.BUY) {
-      const boughtFood = (session.boughtFoods as FoodEntity[]) || [];
+    if (action === EditShopAction.BUY) {
+      const boughtFood = (shopList.boughtFoods as FoodEntity[]) || [];
 
-      if (action === SessionFoodStatus.BUY) {
+      if (action === EditShopAction.BUY) {
         if (!boughtFood.map((f) => f.id).includes(food.id)) {
           boughtFood.push(food);
         }
@@ -67,8 +67,8 @@ const editShopFoods = async ({ body, query }: Request, res: Response) => {
         where: { id: In(boughtFood.map((f) => f.id)) },
       });
 
-      await updateSession(
-        { id: Number(sessionId), boughtFoods: updatedBoughtFoods },
+      await updateShopList(
+        { id: Number(shopListId), boughtFoods: updatedBoughtFoods },
         m,
       );
       await updateFrequencies({ previousFoodId, currentFoodId: id }, m);
@@ -78,7 +78,7 @@ const editShopFoods = async ({ body, query }: Request, res: Response) => {
     const mostLikelyNextFoodIds = await getMostLikelyNextFoods(
       id,
       1,
-      Number(sessionId),
+      Number(shopListId),
       m,
     );
 
@@ -86,4 +86,4 @@ const editShopFoods = async ({ body, query }: Request, res: Response) => {
   });
 };
 
-export default editShopFoods;
+export default editShopList;

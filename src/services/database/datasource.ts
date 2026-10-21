@@ -7,7 +7,7 @@ import FoodCategoryEntity from "@/entities/FoodCategory";
 import ListEntity from "@/entities/ListEntity";
 import FrequencyEntity from "@/entities/FrequencyEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
-import SessionEntity from "@/entities/SessionEntity";
+import ShopListEntity from "@/entities/ShopListEntity";
 
 export const AppDataSource = new DataSource({
   type: "mariadb",
@@ -26,7 +26,7 @@ export const AppDataSource = new DataSource({
     FoodCategoryEntity,
     ListEntity,
     FrequencyEntity,
-    SessionEntity,
+    ShopListEntity,
   ],
   migrations: [__dirname + "/../../migrations/**/*.{ts,js}"],
   subscribers: [],

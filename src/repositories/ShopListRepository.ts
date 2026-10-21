@@ -1,7 +1,7 @@
-import SessionEntity from "@/entities/SessionEntity";
+import ShopListEntity from "@/entities/ShopListEntity";
 import { AppDataSource } from "@/services/database/datasource";
 
-const SessionRepository = AppDataSource.getRepository(SessionEntity);
+const ShopListRepository = AppDataSource.getRepository(ShopListEntity);
 
 // export const SessionRepository = AppDataSource.getRepository(Session).extend({
 //     findByTitle(title: string) {
@@ -11,4 +11,4 @@ const SessionRepository = AppDataSource.getRepository(SessionEntity);
 //     },
 // })
 
-export default SessionRepository;
+export default ShopListRepository;

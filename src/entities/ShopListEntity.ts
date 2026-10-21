@@ -2,14 +2,14 @@ import { Column, Entity, JoinTable, ManyToMany } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import FoodEntity from "./FoodEntity";
 
-export enum SessionStatus {
+export enum ShopListStatus {
   STARTED = "started",
   IN_PROGRESS = "in-progress",
   COMPLETED = "completed",
 }
 
-@Entity({ name: "session" })
-export default class SessionEntity extends AbstractEntity {
+@Entity({ name: "shop-list" })
+export default class ShopListEntity extends AbstractEntity {
   @ManyToMany(() => FoodEntity, {
     nullable: true,
   })
@@ -28,7 +28,7 @@ export default class SessionEntity extends AbstractEntity {
   @Column({
     nullable: false,
     type: "enum",
-    enum: SessionStatus,
+    enum: ShopListStatus,
   })
-  status?: SessionStatus;
+  status?: ShopListStatus;
 }

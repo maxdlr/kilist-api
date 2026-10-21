@@ -1,5 +1,5 @@
 import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
-import findSession from "@/api/shop/services/findSession";
+import findShopList from "@/api/shop-list/services/findShopList";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
@@ -8,7 +8,7 @@ import { EntityManager, In, IsNull, LessThan, Not, Or } from "typeorm";
 const getMostLikelyNextFoods = async (
   foodId: number,
   count: number = 1,
-  sessionId?: number,
+  shopListId?: number,
   manager?: EntityManager,
 ): Promise<number[] | null> => {
   const m = findManager(FoodRepository, manager);
@@ -17,15 +17,15 @@ const getMostLikelyNextFoods = async (
     return null;
   }
 
-  const session = await findSession({ id: sessionId }, m);
+  const shopList = await findShopList({ id: shopListId }, m);
 
   let availableFoodIds: number[] = [];
 
-  if (session) {
+  if (shopList) {
     const boughtFoodIds: number[] =
-      session.boughtFoods.map((f) => (f as FoodEntity).id) || [];
+      shopList.boughtFoods.map((f) => (f as FoodEntity).id) || [];
     const startFoodIds: number[] =
-      session.startFoods.map((f) => (f as FoodEntity).id) || [];
+      shopList.startFoods.map((f) => (f as FoodEntity).id) || [];
 
     availableFoodIds = startFoodIds.filter((id) => !boughtFoodIds.includes(id));
   }
