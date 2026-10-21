@@ -16,8 +16,8 @@ export enum EditShopAction {
   SNOOZE = "snooze",
 }
 
-const editShopList = async ({ body, query }: Request, res: Response) => {
-  const { shopListId } = query;
+const editShopList = async ({ body, params }: Request, res: Response) => {
+  const { id: shopListId } = params;
   const { foodId, previousFoodId, action } = body;
 
   if (!Object.values(EditShopAction).includes(action)) {
