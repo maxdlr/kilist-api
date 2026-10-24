@@ -1,5 +1,6 @@
 import { Router } from "express";
 import userRoutes from "./api/users/routes/index";
+import dashboardRoutes from "./api/dashboard/routes/index";
 import listsRoutes from "./api/lists/routes/index";
 import foodsRoutes from "./api/foods/routes/index";
 import shopRoutes from "./api/shop-list/routes/index";
@@ -32,5 +33,7 @@ router.use("/foods", foodsRoutes);
 router.use("/shop-list", shopRoutes);
 
 router.use("/food-histories", foodHistoriesRoutes);
+
+router.use("/dashboard", dashboardRoutes);
 
 export default router;
