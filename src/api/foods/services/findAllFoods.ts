@@ -11,7 +11,7 @@ const findAllFoods = async (
 
   const foods = await m.find(FoodEntity, {
     order: { inStockScore: "ASC" },
-    loadRelationIds: { relations: ["lists"] },
+    loadRelationIds: { relations: ["lists", "foodHistories"] },
     ...options,
   });
 

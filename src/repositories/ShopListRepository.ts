@@ -1,14 +1,6 @@
-import ShopListEntity from "@/entities/ShopListEntity";
+import SwipeListEntity from "@/entities/SwipeListEntity";
 import { AppDataSource } from "@/services/database/datasource";
 
-const ShopListRepository = AppDataSource.getRepository(ShopListEntity);
+const swipeListRepository = AppDataSource.getRepository(SwipeListEntity);
 
-// export const SessionRepository = AppDataSource.getRepository(Session).extend({
-//     findByTitle(title: string) {
-//         return this.createQueryBuilder("session")
-//             .where("session.title = :title", { title })
-//             .getMany()
-//     },
-// })
-
-export default ShopListRepository;
+export default swipeListRepository;

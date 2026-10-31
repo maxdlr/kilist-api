@@ -5,6 +5,7 @@ import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager } from "typeorm";
 import findFood from "./findFood";
+import limitFoodHistories from "@/api/foodHistories/services/limitFoodHistories";
 
 const updateFoodInStockScore = async (
   foodId: number,
@@ -28,6 +29,8 @@ const updateFoodInStockScore = async (
   food.inStockScore = newInStockScore;
 
   await m.save(FoodEntity, food);
+
+  await limitFoodHistories(foodId, m);
 };
 
 export default updateFoodInStockScore;

@@ -1,7 +1,7 @@
-import FoodEntity from "@/entities/FoodEntity";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager } from "typeorm";
+import { EntityManager, LessThan } from "typeorm";
+import findAllFoods from "./findAllFoods";
 
 const findFoodSwipes = async (
   { take }: { take: number },
@@ -9,24 +9,33 @@ const findFoodSwipes = async (
 ) => {
   const m = findManager(FoodRepository, manager);
 
-  const foodIdsQuery = await m
-    .createQueryBuilder(FoodEntity, "food")
-    .select("food.id")
-    .orderBy("food.inStockScore", "DESC")
-    .take(take)
-    .getMany();
+  const foods = await findAllFoods(
+    {
+      loadRelationIds: false,
 
-  const foodIds = foodIdsQuery.map((food) => food.id);
-  if (foodIds.length === 0) return [];
+      relations: { foodHistories: true },
 
-  const foodSwipes = await m
-    .createQueryBuilder(FoodEntity, "food")
-    .leftJoinAndSelect("food.foodHistories", "foodHistory")
-    .where("food.id IN (:...foodIds)", { foodIds })
-    .orderBy("food.inStockScore", "DESC")
-    .addOrderBy("foodHistory.createdAt", "ASC")
-    .getMany();
+      where: {
+        inStockScore: LessThan(0.75),
+      },
 
-  return foodSwipes;
+      order: { inStockScore: "DESC" },
+
+      take,
+    },
+    m,
+  );
+
+  return foods.filter((food) => {
+    const foodHistories = food.foodHistories;
+    const latestFoodHistory = foodHistories?.[foodHistories.length - 1];
+
+    if (foodHistories.length === 0 || !latestFoodHistory?.createdAt) {
+      return true;
+    }
+
+    return latestFoodHistory.createdAt < new Date(Date.now() - 24 * 360000);
+  });
 };
+
 export default findFoodSwipes;

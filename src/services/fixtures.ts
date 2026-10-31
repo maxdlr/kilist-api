@@ -46,7 +46,7 @@ const ensureAdminUser = async (manager: EntityManager): Promise<UserEntity> => {
 //   );
 // };
 
-const makeGroceryLists = async (
+const makeLists = async (
   manager: EntityManager,
   users: UserEntity[],
   count: number,
@@ -115,18 +115,27 @@ const makeFoods = async (
 
 const makeFoodHistories = async (
   manager: EntityManager,
-  count: number = 20,
+  count: number = 10,
 ): Promise<FoodHistoryEntity[]> => {
   const foods = await manager.getRepository(FoodEntity).find();
-  const histories = manager.create(
-    FoodHistoryEntity,
-    Array.from({ length: count }).map(() => {
-      const history = new FoodHistoryEntity();
-      history.food = randomElement(foods);
-      history.isInStock = faker.datatype.boolean();
-      return history;
-    }),
-  );
+  let histories: FoodHistoryEntity[] = [];
+
+  foods.forEach((food) => {
+    histories = histories.concat(
+      manager.create(
+        FoodHistoryEntity,
+        Array.from({ length: count }).map(() => {
+          const history = new FoodHistoryEntity();
+          history.food = food;
+          history.isInStock = faker.datatype.boolean();
+          history.createdAt = faker.date.past();
+          history.updatedAt = faker.date.recent();
+          return history;
+        }),
+      ),
+    );
+  });
+
   return await manager.save(histories);
 };
 
@@ -168,8 +177,8 @@ export const loadFixtures = async (): Promise<void> => {
     await manager.createQueryBuilder().delete().from(UserEntity).execute();
 
     await makeFoodCategories(manager, randomInt(1, 3));
-    await makeFoods(manager, randomInt(20, 40));
-    await makeFoodHistories(manager, randomInt(50, 100));
+    await makeFoods(manager, randomInt(20, 400));
+    await makeFoodHistories(manager);
     await makeFrequencies(manager, randomInt(50, 1000));
 
     const foodsWithHistories = await manager.getRepository(FoodEntity).find({
@@ -181,7 +190,7 @@ export const loadFixtures = async (): Promise<void> => {
       await manager.save(FoodEntity, food);
     }
 
-    await makeGroceryLists(manager, [await ensureAdminUser(manager)], 1);
+    await makeLists(manager, [await ensureAdminUser(manager)], 1);
 
     console.log(`Fixtures loaded (${isDev ? "development" : "production"})`);
   });

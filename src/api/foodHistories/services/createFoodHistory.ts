@@ -10,7 +10,7 @@ const createFoodHistory = async (
     isInStock,
   }: {
     foodId: number;
-    isInStock: boolean;
+    isInStock: boolean | null;
   },
   manager?: EntityManager,
 ): Promise<void> => {
