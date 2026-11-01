@@ -1,4 +1,4 @@
-import { IsUrl } from "class-validator";
+import { IsNotEmpty, IsOptional, IsUrl } from "class-validator";
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import FoodCategoryEntity from "./FoodCategory";
@@ -9,9 +9,11 @@ import ListEntity from "./ListEntity";
 @Entity({ name: "foods" })
 export default class FoodEntity extends AbstractEntity {
   @Column()
+  @IsNotEmpty({ message: "Required" })
   name!: string;
 
   @Column({ nullable: true })
+  @IsOptional()
   @IsUrl({}, { message: "Invalid URL" })
   imageUrl!: string;
 
