@@ -7,8 +7,9 @@ const logOut = async ({ user, signedCookies }: Request, res: Response) => {
 
   if (user && refreshToken) {
     await revokeAllRefreshTokenByUserId(user.id, "user-logout");
-    await clearAuthCookies(res);
   }
+
+  await clearAuthCookies(res);
 
   return res.status(200).end();
 };

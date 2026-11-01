@@ -11,12 +11,15 @@ import { CookieOptions, Response } from "express";
 const clearAuthCookies = async (res: Response) => {
   const isProd = process.env.NODE_ENV === "production";
 
+  // Must match the options setCookie used when the cookie was set —
+  // otherwise some clients (e.g. a Secure cookie over plain HTTP in dev)
+  // silently ignore the clear and the original cookie stays active.
   const options: CookieOptions = {
-    sameSite: isProd ? "strict" : "none",
+    sameSite: isProd ? "strict" : "lax",
     httpOnly: true,
     maxAge: 0,
     signed: true,
-    secure: true,
+    secure: isProd,
   };
 
   res.clearCookie(`auth`, options);
