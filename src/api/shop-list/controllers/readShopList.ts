@@ -6,8 +6,9 @@ import findShopList from "../services/findShopList";
 import findShopListRemainingFoods from "../services/findShopListRemainingFoods";
 import updateShopList from "../services/updateShopList";
 
-const readShopList = async ({ params }: Request, res: Response) => {
+const readShopList = async ({ params, user }: Request, res: Response) => {
   const shopListId = Number(params.id);
+  const householdId = user!.household.id;
 
   if (!shopListId || Number.isNaN(shopListId)) {
     throw ApiError("A valid shopListId is required");
@@ -15,7 +16,11 @@ const readShopList = async ({ params }: Request, res: Response) => {
 
   const shopList = await doTransaction(async (m) => {
     let shopList = await findShopList(
-      { id: shopListId, endedAt: Or(IsNull(), LessThan(new Date())) },
+      {
+        id: shopListId,
+        household: { id: householdId },
+        endedAt: Or(IsNull(), LessThan(new Date())),
+      },
       m,
     );
 

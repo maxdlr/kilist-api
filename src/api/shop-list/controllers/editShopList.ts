@@ -16,9 +16,10 @@ export enum EditShopAction {
   SNOOZE = "snooze",
 }
 
-const editShopList = async ({ body, params }: Request, res: Response) => {
+const editShopList = async ({ body, params, user }: Request, res: Response) => {
   const { id: shopListId } = params;
   const { foodId, previousFoodId, action } = body;
+  const householdId = user!.household.id;
 
   if (!Object.values(EditShopAction).includes(action)) {
     throw ApiError(
@@ -39,8 +40,11 @@ const editShopList = async ({ body, params }: Request, res: Response) => {
   return await doTransaction(async (m: EntityManager) => {
     const id = Number(foodId);
 
-    const shopList = await findShopList({ id: Number(shopListId) }, m);
-    let food = await findFood({ id }, m);
+    const shopList = await findShopList(
+      { id: Number(shopListId), household: { id: householdId } },
+      m,
+    );
+    let food = await findFood({ id, household: { id: householdId } }, m);
 
     if (!food) {
       throw ApiError(`Food with id ${foodId} not found`);

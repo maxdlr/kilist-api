@@ -4,10 +4,17 @@ import createSwipeList from "../services/createSwipeList";
 import findSwipeList from "../services/findSwipeList";
 import doTransaction from "@/utils/doTransaction";
 
-const addSwipeList = async (_: Request, res: Response) => {
+const addSwipeList = async ({ user }: Request, res: Response) => {
+  const householdId = user!.household.id;
+
   const swipeList = await doTransaction(async (m) => {
     const existingOpenSwipeList = await findSwipeList(
-      { where: { endedAt: Or(IsNull(), MoreThan(new Date())) } },
+      {
+        where: {
+          household: { id: householdId },
+          endedAt: Or(IsNull(), MoreThan(new Date())),
+        },
+      },
       m,
     );
 
@@ -15,7 +22,7 @@ const addSwipeList = async (_: Request, res: Response) => {
       return res.status(200).json(existingOpenSwipeList);
     }
 
-    const createdSwipeList = await createSwipeList(m);
+    const createdSwipeList = await createSwipeList(householdId, m);
 
     return await findSwipeList(
       {

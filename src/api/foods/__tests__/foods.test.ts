@@ -1,6 +1,9 @@
 import FoodEntity from "@/entities/FoodEntity";
+import HouseholdEntity from "@/entities/HouseholdEntity";
 import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import FoodRepository from "@/repositories/FoodRepository";
+import HouseholdRepository from "@/repositories/HouseholdRepository";
+import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/utils/helpers";
 import { faker } from "@faker-js/faker";
 import { beforeEach, expect, test } from "vitest";
@@ -15,12 +18,16 @@ import resetFoodHistories from "@/api/foodHistories/services/resetFoodHistories"
 import findAllFoodHistories from "@/api/foodHistories/services/findAllFoodHistories";
 
 let foods: FoodEntity[];
+let household: HouseholdEntity;
 
 beforeEach(async () => {
+  household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
+
   foods = await FoodRepository.save(
     Array.from({ length: 100 }).map((_, index) => ({
       name: `Food ${index + 1}`,
       description: `Description for Food ${index + 1}`,
+      household,
     })),
   );
 
@@ -36,6 +43,7 @@ beforeEach(async () => {
     Array.from({ length: 1000 }).map(() => ({
       food: randomElement(foods),
       nextCheckFood: randomElement(foods),
+      household,
     })),
   );
 });
@@ -49,7 +57,7 @@ test("browseFoods get 10 foods", async () => {
 });
 
 test("browseFoods gets 10 foods for swipes which have the oldest foodhistories", async () => {
-  const testFoods = await findFoodSwipes({ take: 10 });
+  const testFoods = await findFoodSwipes(household.id, { take: 10 });
 
   const foodsWithHistory = testFoods.filter(
     (food) => food.foodHistories && food.foodHistories.length > 0,
@@ -68,14 +76,14 @@ test("browseFoods gets 10 foods for swipes which have the oldest foodhistories",
 });
 
 test("browseFoods gets 10 foods for swipes that most likely still inStock", async () => {
-  const testFoods = await findFoodSwipes({ take: 10 });
+  const testFoods = await findFoodSwipes(household.id, { take: 10 });
 
   expect(testFoods?.[0]?.inStockScore).toBeGreaterThanOrEqual(0.5);
 });
 
 test("browseFoods gets 10 foods for swipes many times", async () => {
   for (let i = 0; i < 10; i++) {
-    const testFoods = await findFoodSwipes({ take: 10 });
+    const testFoods = await findFoodSwipes(household.id, { take: 10 });
 
     expect(testFoods).toHaveLength(10);
 
@@ -92,7 +100,7 @@ test("browseFoods gets 10 foods for swipes, starting by prioritizing foods with 
   const foodsWithNoFoodHistoriesMap = new Map<number, number>();
 
   for (let i = 0; i < 10; i++) {
-    const testFoods = await findFoodSwipes({ take: 10 });
+    const testFoods = await findFoodSwipes(household.id, { take: 10 });
 
     expect(testFoods?.[0]?.inStockScore).toBeGreaterThanOrEqual(0.5);
     expect(testFoods).toHaveLength(10);
@@ -130,6 +138,7 @@ test("updatefrequencies", async () => {
     Array.from({ length: 1000 }).map(() => ({
       food: previous,
       nextBoughtFood: current,
+      household,
     })),
   );
 

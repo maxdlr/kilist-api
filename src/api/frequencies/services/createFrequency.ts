@@ -16,6 +16,7 @@ const createFrequency = async (
   const createdFrequency = await m.save(FrequencyEntity, {
     food: foods.food,
     nextBoughtFood: foods.nextBoughtFood,
+    household: foods.food.household,
   });
 
   return createdFrequency;

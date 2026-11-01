@@ -3,9 +3,11 @@ import FoodCategoryEntity from "@/entities/FoodCategory";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import FrequencyEntity from "@/entities/FrequencyEntity";
+import HouseholdEntity from "@/entities/HouseholdEntity";
 import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
 import ListRepository from "@/repositories/ListRepository";
+import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/utils/helpers";
 import { faker } from "@faker-js/faker";
 import { randomInt } from "crypto";
@@ -13,7 +15,22 @@ import { EntityManager } from "typeorm";
 
 // --- Helpers ---
 
-const ensureAdminUser = async (manager: EntityManager): Promise<UserEntity> => {
+const ensureHousehold = async (
+  manager: EntityManager,
+): Promise<HouseholdEntity> => {
+  const existing = await manager.findOne(HouseholdEntity, { where: {} });
+  if (existing) return existing;
+
+  const household = new HouseholdEntity();
+  household.name = "Dev Household";
+  household.joinCode = generateJoinCode();
+  return await manager.save(HouseholdEntity, household);
+};
+
+const ensureAdminUser = async (
+  manager: EntityManager,
+  household: HouseholdEntity,
+): Promise<UserEntity> => {
   if (!process.env.ADMIN_PASSWORD) {
     throw new Error("ADMIN_PASSWORD environment variable is not set");
   }
@@ -27,6 +44,7 @@ const ensureAdminUser = async (manager: EntityManager): Promise<UserEntity> => {
   user.password = process.env.ADMIN_PASSWORD;
   user.description = "Creator of this platform";
   user.type = "admin";
+  user.household = household;
   return await manager.save(UserEntity, user);
 };
 
@@ -48,7 +66,7 @@ const ensureAdminUser = async (manager: EntityManager): Promise<UserEntity> => {
 
 const makeLists = async (
   manager: EntityManager,
-  users: UserEntity[],
+  household: HouseholdEntity,
   count: number,
 ): Promise<ListEntity[]> => {
   const foodItems = await manager.getRepository(FoodEntity).find();
@@ -58,7 +76,7 @@ const makeLists = async (
       list.title = randomElement([faker.lorem.sentence(), faker.lorem.word()]);
       list.foods = foodItems;
       list.description = randomElement([faker.lorem.paragraph(2), undefined]);
-      list.user = randomElement(users);
+      list.household = household;
       return list;
     }),
   );
@@ -68,6 +86,7 @@ const makeLists = async (
 
 const makeFoodCategories = async (
   manager: EntityManager,
+  household: HouseholdEntity,
   count: number = 10,
 ): Promise<FoodCategoryEntity[]> => {
   const categories = manager.create(
@@ -76,6 +95,7 @@ const makeFoodCategories = async (
       const category = new FoodCategoryEntity();
       category.name = faker.word.noun();
       category.description = faker.lorem.sentence();
+      category.household = household;
       return category;
     }),
   );
@@ -84,6 +104,7 @@ const makeFoodCategories = async (
 
 const makeFoods = async (
   manager: EntityManager,
+  household: HouseholdEntity,
   // foodCategories: () => Promise<FoodCategoryEntity[]>,
   // foodHistories: () => Promise<FoodHistoryEntity[]>,
   count: number = 20,
@@ -107,6 +128,7 @@ const makeFoods = async (
       food.categories = categories;
       food.description = faker.food.description();
       food.imageUrl = faker.image.urlPicsumPhotos();
+      food.household = household;
       return food;
     }),
   );
@@ -141,6 +163,7 @@ const makeFoodHistories = async (
 
 const makeFrequencies = async (
   manager: EntityManager,
+  household: HouseholdEntity,
   count: number = 20,
 ): Promise<void> => {
   const foods = await manager.getRepository(FoodEntity).find();
@@ -150,6 +173,7 @@ const makeFrequencies = async (
       const frequency = {
         food: randomElement(foods),
         nextBoughtFood: randomElement(foods),
+        household,
       };
       return frequency;
     }),
@@ -175,11 +199,14 @@ export const loadFixtures = async (): Promise<void> => {
       .execute();
     await manager.createQueryBuilder().delete().from(FoodEntity).execute();
     await manager.createQueryBuilder().delete().from(UserEntity).execute();
+    await manager.createQueryBuilder().delete().from(HouseholdEntity).execute();
 
-    await makeFoodCategories(manager, randomInt(1, 3));
-    await makeFoods(manager, randomInt(20, 400));
+    const household = await ensureHousehold(manager);
+
+    await makeFoodCategories(manager, household, randomInt(1, 3));
+    await makeFoods(manager, household, randomInt(20, 400));
     await makeFoodHistories(manager);
-    await makeFrequencies(manager, randomInt(50, 1000));
+    await makeFrequencies(manager, household, randomInt(50, 1000));
 
     const foodsWithHistories = await manager.getRepository(FoodEntity).find({
       relations: ["foodHistories"],
@@ -190,7 +217,8 @@ export const loadFixtures = async (): Promise<void> => {
       await manager.save(FoodEntity, food);
     }
 
-    await makeLists(manager, [await ensureAdminUser(manager)], 1);
+    await ensureAdminUser(manager, household);
+    await makeLists(manager, household, 1);
 
     console.log(`Fixtures loaded (${isDev ? "development" : "production"})`);
   });

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import findSwipeList from "../services/findSwipeList";
 
-const readSwipeList = async ({ params }: Request, res: Response) => {
+const readSwipeList = async ({ params, user }: Request, res: Response) => {
   const { id } = params;
 
   if (!id) {
@@ -9,7 +9,7 @@ const readSwipeList = async ({ params }: Request, res: Response) => {
   }
 
   const swipeList = await findSwipeList({
-    where: { id: Number(id) },
+    where: { id: Number(id), household: { id: user!.household.id } },
     loadRelationIds: false,
     relations: ["startFoods"],
   });

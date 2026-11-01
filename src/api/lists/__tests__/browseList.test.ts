@@ -1,37 +1,35 @@
 import FoodEntity from "@/entities/FoodEntity";
+import HouseholdEntity from "@/entities/HouseholdEntity";
 import ListEntity from "@/entities/ListEntity";
-import UserEntity from "@/entities/UserEntity";
 import FoodRepository from "@/repositories/FoodRepository";
+import HouseholdRepository from "@/repositories/HouseholdRepository";
 import ListRepository from "@/repositories/ListRepository";
-import UserRepository from "@/repositories/UserRepository";
+import generateJoinCode from "@/utils/generateJoinCode";
 import { faker } from "@faker-js/faker";
 import { assert, beforeEach, expect, test } from "vitest";
 import findList from "../services/findList";
 
 let foods: FoodEntity[] = [];
-let user: UserEntity;
+let household: HouseholdEntity;
 let fixtureList: ListEntity;
 
 beforeEach(async () => {
+  household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
+
   foods = await FoodRepository.save(
     Array.from({ length: 10 }, (_, i) => {
       return FoodRepository.create({
         name: `Food ${i + 1}`,
         inStockScore: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        household,
       });
     }),
   );
-  user = new UserEntity();
-  user.username = faker.internet.displayName();
-  user.email = faker.internet.email();
-  user.password = faker.internet.password();
-
-  user = await UserRepository.save(user);
 
   fixtureList = await ListRepository.save({
     title: `List`,
     foods,
-    user,
+    household,
   });
 });
 

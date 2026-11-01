@@ -34,9 +34,7 @@ const findUser = async (
           : email
             ? { email }
             : {},
-      loadRelationIds: {
-        relations: ["lists"],
-      },
+      relations: ["household"],
     });
   }
 

@@ -27,9 +27,14 @@ interface Dashboard {
   };
 }
 
-const getDashboard = async (_req: Request, res: Response) => {
+const getDashboard = async (req: Request, res: Response) => {
+  const householdId = req.user!.household.id;
+
   const dashboard: Dashboard = await doTransaction(async (m) => {
-    const foods = await findAllFoods({}, m);
+    const foods = await findAllFoods(
+      { where: { household: { id: householdId } } },
+      m,
+    );
 
     const foodsByScore = Object.fromEntries(
       Object.entries(classifyFoodsByScore(foods)).map(([score, foods]) => [
@@ -42,7 +47,7 @@ const getDashboard = async (_req: Request, res: Response) => {
       (await findAllShopLists(
         {
           order: { endedAt: "DESC" },
-          where: { endedAt: Not(IsNull()) },
+          where: { household: { id: householdId }, endedAt: Not(IsNull()) },
         },
         m,
       )) || [];

@@ -3,7 +3,7 @@ import findShopList from "../services/findShopList";
 import updateShopList from "../services/updateShopList";
 import doTransaction from "@/utils/doTransaction";
 
-const cancelShopList = async ({ params }: Request, res: Response) => {
+const cancelShopList = async ({ params, user }: Request, res: Response) => {
   if (!params.id) {
     throw ApiError("ShopList id is required");
   }
@@ -12,6 +12,7 @@ const cancelShopList = async ({ params }: Request, res: Response) => {
     const shopList = await findShopList(
       {
         id: Number(params.id),
+        household: { id: user!.household.id },
       },
       m,
     );

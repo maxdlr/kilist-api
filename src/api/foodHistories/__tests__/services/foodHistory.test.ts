@@ -1,8 +1,11 @@
 import findAllFoods from "@/api/foods/services/findAllFoods";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
+import HouseholdEntity from "@/entities/HouseholdEntity";
 import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import FoodRepository from "@/repositories/FoodRepository";
+import HouseholdRepository from "@/repositories/HouseholdRepository";
+import generateJoinCode from "@/utils/generateJoinCode";
 import { faker } from "@faker-js/faker";
 import { beforeEach, describe, expect, it } from "vitest";
 import { FoodHistoryCreateType } from "../../interfaces";
@@ -10,11 +13,16 @@ import createFoodHistory from "../../services/createFoodHistory";
 
 describe("createFoodHistory", () => {
   let foods: FoodEntity[];
+  let household: HouseholdEntity;
+
   beforeEach(async () => {
+    household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
+
     foods = Array.from({ length: 10 }, (_, i) => {
       return FoodRepository.create({
         name: `Food ${i + 1}`,
         inStockScore: 1,
+        household,
       } as Partial<FoodEntity>);
     });
 
@@ -61,12 +69,16 @@ describe("createFoodHistory", () => {
 describe("createFoodHistory sorts the food by inStockScores for lists", async () => {
   let orderedFoods: FoodEntity[];
   let foods: FoodEntity[];
+  let household: HouseholdEntity;
 
   beforeEach(async () => {
+    household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
+
     foods = Array.from({ length: 10 }, (_, i) => {
       return FoodRepository.create({
         name: `Food ${i + 1}`,
         inStockScore: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        household,
       } as Partial<FoodEntity>);
     });
 

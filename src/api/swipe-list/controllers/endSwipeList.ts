@@ -3,7 +3,7 @@ import findSwipeList from "../services/findSwipeList";
 import updateSwipeList from "../services/updateSwipeList";
 import doTransaction from "@/utils/doTransaction";
 
-const endSwipeList = async ({ params }: Request, res: Response) => {
+const endSwipeList = async ({ params, user }: Request, res: Response) => {
   if (!params.id) {
     throw ApiError("SwipeList id is required");
   }
@@ -13,6 +13,7 @@ const endSwipeList = async ({ params }: Request, res: Response) => {
       {
         where: {
           id: Number(params.id),
+          household: { id: user!.household.id },
         },
       },
       m,

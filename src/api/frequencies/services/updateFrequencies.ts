@@ -1,4 +1,3 @@
-import findFood from "@/api/foods/services/findFood";
 import createFrequency from "@/api/frequencies/services/createFrequency";
 import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
 import FoodEntity from "@/entities/FoodEntity";
@@ -16,8 +15,16 @@ const updateFrequencies = async (
 ) => {
   const m = findManager(FrequencyRepository, manager);
 
-  const previousFood = await findFood({ id: frequencies.previousFoodId }, m);
-  const currentFood = await findFood({ id: frequencies.currentFoodId }, m);
+  // Food ids here are already validated against the caller's household at
+  // the controller entry point (editShopList) — no need to re-scope.
+  const previousFood = await m.findOne(FoodEntity, {
+    where: { id: frequencies.previousFoodId },
+    relations: ["household"],
+  });
+  const currentFood = await m.findOne(FoodEntity, {
+    where: { id: frequencies.currentFoodId },
+    relations: ["household"],
+  });
 
   if (!currentFood) {
     throw ServiceError("Food not found");

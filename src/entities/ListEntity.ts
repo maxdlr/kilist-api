@@ -1,7 +1,7 @@
 import { IsNotEmpty } from "class-validator";
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
-import UserEntity from "./UserEntity";
+import HouseholdEntity from "./HouseholdEntity";
 import FoodEntity from "./FoodEntity";
 
 @Entity({ name: "lists" })
@@ -14,12 +14,12 @@ export default class ListEntity extends AbstractEntity {
   @JoinTable()
   foods!: FoodEntity[];
 
-  @ManyToOne(() => UserEntity, (user) => user.lists, {
+  @ManyToOne(() => HouseholdEntity, {
     nullable: false,
     eager: true,
     onDelete: "CASCADE",
   })
-  user!: UserEntity;
+  household!: HouseholdEntity;
 
   @Column({ nullable: true, length: 2000 })
   description?: string;

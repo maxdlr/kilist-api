@@ -4,7 +4,7 @@ import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
 import { EntityManager } from "typeorm";
 
-const editFoods = async ({ body, params }: Request, res: Response) => {
+const editFoods = async ({ body, params, user }: Request, res: Response) => {
   const { id: foodId } = params;
   const foodHistory: { foodId: number; isInStock: boolean | null } = body;
 
@@ -13,7 +13,10 @@ const editFoods = async ({ body, params }: Request, res: Response) => {
   }
 
   return await doTransaction(async (m: EntityManager) => {
-    const food = await findFood({ id: Number(foodId) }, m);
+    const food = await findFood(
+      { id: Number(foodId), household: { id: user!.household.id } },
+      m,
+    );
 
     if (!food) {
       throw Missing(`Food with id ${foodHistory.foodId} not found`);

@@ -1,6 +1,7 @@
-import { Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import FoodEntity from "./FoodEntity";
+import HouseholdEntity from "./HouseholdEntity";
 
 export enum SwipeListStatus {
   STARTED = "started",
@@ -31,4 +32,10 @@ export default class SwipeListEntity extends AbstractEntity {
     enum: SwipeListStatus,
   })
   status?: SwipeListStatus;
+
+  @ManyToOne(() => HouseholdEntity, {
+    nullable: false,
+    onDelete: "CASCADE",
+  })
+  household!: HouseholdEntity;
 }

@@ -1,8 +1,9 @@
 import { IsUrl } from "class-validator";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import FoodCategoryEntity from "./FoodCategory";
 import FoodHistoryEntity from "./FoodHistoryEntity";
+import HouseholdEntity from "./HouseholdEntity";
 import ListEntity from "./ListEntity";
 
 @Entity({ name: "foods" })
@@ -34,4 +35,10 @@ export default class FoodEntity extends AbstractEntity {
 
   @Column({ nullable: true })
   snoozedUntil!: Date;
+
+  @ManyToOne(() => HouseholdEntity, {
+    nullable: false,
+    onDelete: "CASCADE",
+  })
+  household!: HouseholdEntity;
 }

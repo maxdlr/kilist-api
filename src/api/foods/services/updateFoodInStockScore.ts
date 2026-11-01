@@ -4,7 +4,6 @@ import FoodEntity from "@/entities/FoodEntity";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager } from "typeorm";
-import findFood from "./findFood";
 import limitFoodHistories from "@/api/foodHistories/services/limitFoodHistories";
 
 const updateFoodInStockScore = async (
@@ -20,7 +19,10 @@ const updateFoodInStockScore = async (
 
   const newInStockScore = calculateInStockScore(foodInStockScores);
 
-  const food = await findFood({ id: foodId }, m);
+  // foodId is already validated against the caller's household at the
+  // controller entry point (e.g. editFoods, editSwipeList) — no need to
+  // re-scope this internal lookup.
+  const food = await m.findOne(FoodEntity, { where: { id: foodId } });
 
   if (!food) {
     throw ServiceError(`Food with id ${foodId} not found`);

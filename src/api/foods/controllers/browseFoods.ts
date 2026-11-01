@@ -4,12 +4,14 @@ import { In, LessThan } from "typeorm";
 import findAllFoods from "../services/findAllFoods";
 import findFoodSwipes from "../services/findFoodSwipes";
 
-const browseFoods = async ({ query }: Request, res: Response) => {
+const browseFoods = async ({ query, user }: Request, res: Response) => {
   const { take, forSwipes, listIds, maxInStockScore } = query;
+  const householdId = user!.household.id;
 
   return await doTransaction(async (m) => {
     if (forSwipes) {
       const foodSwipes = await findFoodSwipes(
+        householdId,
         {
           take: take ? parseInt(take as string, 10) : 10,
         },
@@ -25,6 +27,7 @@ const browseFoods = async ({ query }: Request, res: Response) => {
       {
         take: take ? parseInt(take as string, 10) : undefined,
         where: {
+          household: { id: householdId },
           lists: listIds
             ? { id: In((listIds as string[]).map((id) => Number(id))) }
             : undefined,

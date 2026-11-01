@@ -4,12 +4,13 @@ import ShopListRepository from "@/repositories/ShopListRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager, IsNull, LessThan, Or } from "typeorm";
 
-const createShopList = async (manager?: EntityManager) => {
+const createShopList = async (householdId: number, manager?: EntityManager) => {
   const m = findManager(ShopListRepository, manager);
 
   const foods = await findAllFoods(
     {
       where: {
+        household: { id: householdId },
         inStockScore: LessThan(1),
         snoozedUntil: Or(IsNull(), LessThan(new Date())),
       },
@@ -20,6 +21,7 @@ const createShopList = async (manager?: EntityManager) => {
   const shopList = new ShopListEntity();
 
   shopList.startFoods = foods;
+  shopList.household = { id: householdId } as ShopListEntity["household"];
 
   const createdShopList = await m.save(ShopListEntity, shopList);
 

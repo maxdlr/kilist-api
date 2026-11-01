@@ -1,18 +1,76 @@
+import createHousehold from "@/api/households/services/createHousehold";
+import findHousehold from "@/api/households/services/findHousehold";
+import HouseholdEntity from "@/entities/HouseholdEntity";
 import UserEntity from "@/entities/UserEntity";
-import UserRepository from "@/repositories/UserRepository";
+import doTransaction from "@/utils/doTransaction";
 import validateCrudPayload from "@/services/validateCrudPayload";
 import PasswordCheck from "@/utils/PasswordCheck";
 import { validate } from "class-validator";
+import { EntityManager } from "typeorm";
 import findUser from "./findUser";
+
+type HouseholdChoice =
+  | { householdChoice: "join"; joinCode: string }
+  | { householdChoice: "create"; householdName?: string };
 
 type CreateUserInput = {
   email: string;
   username: string;
   password: string;
   description?: string;
+} & HouseholdChoice;
+
+const resolveHousehold = async (
+  input: HouseholdChoice,
+  manager: EntityManager,
+): Promise<HouseholdEntity> => {
+  if (input.householdChoice === "join") {
+    const household = await findHousehold(
+      { joinCode: input.joinCode },
+      manager,
+    );
+    if (!household) {
+      throw ApiError(404, "No household found for this join code");
+    }
+    return household;
+  }
+
+  return await createHousehold(input.householdName, manager);
 };
 
+const isValidHouseholdChoice = (input: unknown): input is HouseholdChoice => {
+  if (typeof input !== "object" || input === null) return false;
+  const candidate = input as Record<string, unknown>;
+
+  if (candidate.householdChoice === "join") {
+    return typeof candidate.joinCode === "string" && candidate.joinCode.length > 0;
+  }
+
+  if (candidate.householdChoice === "create") {
+    return (
+      candidate.householdName === undefined ||
+      typeof candidate.householdName === "string"
+    );
+  }
+
+  return false;
+};
+
+/**
+ * Creates a new user and attaches them to a household — either by joining
+ * an existing household via its join code, or by creating a new one.
+ *
+ * @param user - User details plus the household join/create choice
+ * @returns The newly created user
+ */
 const createUser = async (user: CreateUserInput): Promise<UserEntity> => {
+  if (!isValidHouseholdChoice(user)) {
+    throw ApiError(
+      400,
+      'A valid householdChoice ("join" with joinCode, or "create") is required',
+    );
+  }
+
   const existingUser = await findUser({ username: user.username }).catch(
     () => {},
   );
@@ -22,25 +80,29 @@ const createUser = async (user: CreateUserInput): Promise<UserEntity> => {
 
   const { email, username, password, description } = user;
 
-  const userEntity = new UserEntity();
-  userEntity.username = username;
-  userEntity.email = email;
-  userEntity.description = description;
-
   // Validate password before hashing
   const pwCheck = new PasswordCheck();
   pwCheck.password = password;
   const pwErrors = await validate(pwCheck);
 
-  userEntity.password = password;
+  return await doTransaction(async (m) => {
+    const household = await resolveHousehold(user, m);
 
-  await validateCrudPayload(userEntity, pwErrors);
+    const userEntity = new UserEntity();
+    userEntity.username = username;
+    userEntity.email = email;
+    userEntity.description = description;
+    userEntity.household = household;
+    userEntity.password = password;
 
-  const newUser = await UserRepository.save(userEntity).catch((e) => {
-    throw ApiError("Cannot create new user" + e.message);
+    await validateCrudPayload(userEntity, pwErrors);
+
+    const newUser = await m.save(UserEntity, userEntity).catch((e) => {
+      throw ApiError("Cannot create new user" + e.message);
+    });
+
+    return newUser;
   });
-
-  return newUser;
 };
 
 export default createUser;

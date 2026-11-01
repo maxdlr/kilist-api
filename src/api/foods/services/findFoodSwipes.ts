@@ -4,6 +4,7 @@ import { EntityManager, LessThan } from "typeorm";
 import findAllFoods from "./findAllFoods";
 
 const findFoodSwipes = async (
+  householdId: number,
   { take }: { take: number },
   manager?: EntityManager,
 ) => {
@@ -16,6 +17,7 @@ const findFoodSwipes = async (
       relations: { foodHistories: true },
 
       where: {
+        household: { id: householdId },
         inStockScore: LessThan(0.75),
       },
 

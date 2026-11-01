@@ -1,18 +1,25 @@
 import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
 import FoodEntity from "@/entities/FoodEntity";
+import HouseholdEntity from "@/entities/HouseholdEntity";
 import FoodRepository from "@/repositories/FoodRepository";
 import FrequencyRepository from "@/repositories/FrequencyRepository";
+import HouseholdRepository from "@/repositories/HouseholdRepository";
+import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/utils/helpers";
 import { beforeEach, expect, test } from "vitest";
 import updateFrequencies from "../../services/updateFrequencies";
 import getMostLikelyNextFoods from "../../services/getMostLikelyNextFood";
 
 let foods: FoodEntity[];
+let household: HouseholdEntity;
 
 beforeEach(async () => {
+  household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
+
   foods = await FoodRepository.save(
     Array.from({ length: 20 }, (_, i) => ({
       name: `Food ${i + 1}`,
+      household,
     })),
   );
 
@@ -20,6 +27,7 @@ beforeEach(async () => {
     Array.from({ length: 100 }, () => ({
       food: randomElement(foods),
       nextBoughtFood: randomElement(foods),
+      household,
     })),
   );
 
@@ -27,12 +35,14 @@ beforeEach(async () => {
     Array.from({ length: 100 }, () => ({
       food: foods?.[0] as FoodEntity,
       nextBoughtFood: randomElement(foods),
+      household,
     })),
   );
   await FrequencyRepository.save(
     Array.from({ length: 100 }, () => ({
       food: foods?.[1] as FoodEntity,
       nextBoughtFood: randomElement(foods),
+      household,
     })),
   );
 });
@@ -45,8 +55,8 @@ test("keeps frequency to 100 maximum", async () => {
   expect(foodFrequency.length).toBeGreaterThan(100);
 
   await updateFrequencies({
-    previous: foods?.[0]?.id as number,
-    current: randomElement(foods)?.id,
+    previousFoodId: foods?.[0]?.id as number,
+    currentFoodId: randomElement(foods)?.id as number,
   });
 
   const updatedFoodFrequency = await findAllFrequencies({
@@ -71,6 +81,7 @@ test("get most likely next food", async () => {
       Array.from({ length: 100 }, () => ({
         food: foods?.[1] as FoodEntity,
         nextBoughtFood: nextFood,
+        household,
       })),
     );
   }
@@ -79,6 +90,7 @@ test("get most likely next food", async () => {
     Array.from({ length: 100 }, () => ({
       food: foods?.[1] as FoodEntity,
       nextBoughtFood: foods?.[2] as FoodEntity,
+      household,
     })),
   );
 
