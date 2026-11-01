@@ -10,6 +10,12 @@ const findFoodSwipes = async (
 ) => {
   const m = findManager(FoodRepository, manager);
 
+  // take is intentionally not passed to the query here: TypeORM applies
+  // LIMIT to the joined (food x foodHistories) row count, not the number of
+  // distinct foods, so a food with several histories can "use up" more of
+  // the limit than a single row — silently returning fewer than `take`
+  // distinct foods once enough history accumulates. Slice in JS instead,
+  // after the recency filter below, to guarantee distinct-food semantics.
   const foods = await findAllFoods(
     {
       loadRelationIds: false,
@@ -22,22 +28,33 @@ const findFoodSwipes = async (
       },
 
       order: { inStockScore: "DESC" },
-
-      take,
     },
     m,
   );
 
-  return foods.filter((food) => {
+  const eligibleFoods = foods.filter((food) => {
     const foodHistories = food.foodHistories;
-    const latestFoodHistory = foodHistories?.[foodHistories.length - 1];
 
-    if (foodHistories.length === 0 || !latestFoodHistory?.createdAt) {
+    if (!foodHistories || foodHistories.length === 0) {
+      return true;
+    }
+
+    // Array order from the DB isn't guaranteed to be chronological, so find
+    // the latest history explicitly rather than assuming the last element is.
+    const latestFoodHistory = foodHistories.reduce((latest, current) =>
+      (current.createdAt?.getTime() ?? 0) > (latest.createdAt?.getTime() ?? 0)
+        ? current
+        : latest,
+    );
+
+    if (!latestFoodHistory?.createdAt) {
       return true;
     }
 
     return latestFoodHistory.createdAt < new Date(Date.now() - 24 * 360000);
   });
+
+  return eligibleFoods.slice(0, take);
 };
 
 export default findFoodSwipes;

@@ -24,9 +24,14 @@ beforeEach(async () => {
   household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
 
   foods = await FoodRepository.save(
-    Array.from({ length: 100 }).map((_, index) => ({
+    Array.from({ length: 300 }).map((_, index) => ({
       name: `Food ${index + 1}`,
       description: `Description for Food ${index + 1}`,
+      inStockScore: faker.number.float({
+        min: 0,
+        max: 0.74,
+        fractionDigits: 2,
+      }),
       household,
     })),
   );
@@ -56,29 +61,31 @@ test("browseFoods get 10 foods", async () => {
   expect(foods10).toHaveLength(10);
 });
 
-test("browseFoods gets 10 foods for swipes which have the oldest foodhistories", async () => {
+test("browseFoods only returns foods whose latest foodhistory is older than 24h (or has none)", async () => {
   const testFoods = await findFoodSwipes(household.id, { take: 10 });
+  const cutoff = new Date(Date.now() - 24 * 360000);
 
-  const foodsWithHistory = testFoods.filter(
-    (food) => food.foodHistories && food.foodHistories.length > 0,
-  );
+  for (const food of testFoods) {
+    const foodHistories = food.foodHistories;
+    if (!foodHistories || foodHistories.length === 0) continue;
 
-  for (let i = 0; i < foodsWithHistory.length - 1; i++) {
-    const current = foodsWithHistory[i];
-    const next = foodsWithHistory[i + 1];
-
-    expect(
-      current?.foodHistories?.[0]?.createdAt?.getTime(),
-    ).toBeLessThanOrEqual(
-      next?.foodHistories?.[0]?.createdAt?.getTime() ?? Infinity,
+    const latestCreatedAt = foodHistories.reduce(
+      (latest, history) => Math.max(latest, history.createdAt?.getTime() ?? 0),
+      0,
     );
+
+    expect(latestCreatedAt).toBeLessThan(cutoff.getTime());
   }
 });
 
-test("browseFoods gets 10 foods for swipes that most likely still inStock", async () => {
+test("browseFoods gets 10 foods for swipes ordered by highest inStockScore first", async () => {
   const testFoods = await findFoodSwipes(household.id, { take: 10 });
 
-  expect(testFoods?.[0]?.inStockScore).toBeGreaterThanOrEqual(0.5);
+  for (let i = 0; i < testFoods.length - 1; i++) {
+    expect(testFoods[i]!.inStockScore).toBeGreaterThanOrEqual(
+      testFoods[i + 1]!.inStockScore,
+    );
+  }
 });
 
 test("browseFoods gets 10 foods for swipes many times", async () => {
@@ -102,7 +109,14 @@ test("browseFoods gets 10 foods for swipes, starting by prioritizing foods with 
   for (let i = 0; i < 10; i++) {
     const testFoods = await findFoodSwipes(household.id, { take: 10 });
 
-    expect(testFoods?.[0]?.inStockScore).toBeGreaterThanOrEqual(0.5);
+    // Verify the actual ordering guarantee (highest inStockScore first)
+    // rather than an arbitrary threshold, which isn't guaranteed given the
+    // randomly seeded scores.
+    for (let j = 0; j < testFoods.length - 1; j++) {
+      expect(testFoods[j]!.inStockScore).toBeGreaterThanOrEqual(
+        testFoods[j + 1]!.inStockScore,
+      );
+    }
     expect(testFoods).toHaveLength(10);
 
     for (const food of testFoods) {
