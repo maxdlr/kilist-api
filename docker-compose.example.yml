@@ -1,0 +1,36 @@
+# Copy this file to docker-compose.yml (or docker-compose.prod.yml) on the
+# VPS, fill in a real .env next to it (see .env.example), then run:
+#   docker compose up -d
+#
+# This pulls the prebuilt image from Docker Hub rather than building it on
+# the VPS - push a new tag from your dev machine with:
+#   docker build -t maxdlr/kilist-api:latest .
+#   docker push maxdlr/kilist-api:latest
+
+services:
+  kilist-api:
+    image: maxdlr/kilist-api:latest
+    container_name: kilist-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: kilist-db
+      DB_PORT: 3306
+    ports:
+      - "${BACK_PORT:-8080}:8080"
+    depends_on:
+      - kilist-db
+
+  kilist-db:
+    image: mariadb
+    container_name: kilist-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MARIADB_DATABASE: ${APP_NAME}
+    volumes:
+      - kilist-db-data:/var/lib/mysql
+
+volumes:
+  kilist-db-data:

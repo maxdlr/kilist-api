@@ -9,11 +9,18 @@ const deleteUser = async (
     throw Unauthorized();
   }
 
-  if (user.id !== query.id && user.type !== "admin") {
+  const targetId = Number(query.id);
+  if (!query.id || Number.isNaN(targetId)) {
+    throw BadValidation([
+      { property: "id", messages: ["id must be a valid number"] },
+    ]);
+  }
+
+  if (user.id !== targetId && user.type !== "admin") {
     throw Unauthorized();
   }
 
-  await removeUser(query);
+  await removeUser({ id: targetId });
 
   return res.status(200).send("User deleted");
 };

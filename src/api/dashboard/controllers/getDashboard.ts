@@ -1,5 +1,6 @@
 import findAllFoods from "@/api/foods/services/findAllFoods";
 import findAllShopLists from "@/api/shop-list/services/findAllShopLists";
+import findAllSwipeLists from "@/api/swipe-list/services/findAllSwipeLists";
 import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
 import { IsNull, Not } from "typeorm";
@@ -52,6 +53,22 @@ const getDashboard = async (req: Request, res: Response) => {
         m,
       )) || [];
 
+    const swipeLists =
+      (await findAllSwipeLists(
+        {
+          loadRelationIds: { relations: ["inStockFoods", "outOfStockFoods"] },
+          order: { endedAt: "DESC" },
+          where: { household: { id: householdId }, endedAt: Not(IsNull()) },
+        },
+        m,
+      )) || [];
+
+    const latestSwipeList = swipeLists[0];
+    const latestSwipedCount = latestSwipeList
+      ? (latestSwipeList.inStockFoods as number[]).length +
+        (latestSwipeList.outOfStockFoods as number[]).length
+      : 0;
+
     return {
       foods: {
         total: foods.length,
@@ -64,6 +81,13 @@ const getDashboard = async (req: Request, res: Response) => {
           snoozed: shopLists[0]?.startFoods?.length || 0,
         },
         total: shopLists.length,
+      },
+      swipes: {
+        latest: {
+          date: latestSwipeList?.endedAt as Date,
+          swiped: latestSwipedCount,
+        },
+        total: swipeLists.length,
       },
     };
   });
