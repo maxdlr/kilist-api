@@ -6,6 +6,7 @@ import foodsRoutes from "./api/foods/routes/index";
 import shopListRoutes from "./api/shop-list/routes/index";
 import swipeListRoutes from "./api/swipe-list/routes/index";
 import foodHistoriesRoutes from "./api/foodHistories/routes/index";
+import householdsRoutes from "./api/households/routes/index";
 import getMe from "./api/auth/controllers/getMe";
 import logIn from "./api/auth/controllers/logIn";
 import authenticate from "./middlewares/authenticate";
@@ -36,6 +37,8 @@ router.use("/shop-list", shopListRoutes);
 router.use("/swipe-list", swipeListRoutes);
 
 router.use("/food-histories", foodHistoriesRoutes);
+
+router.use("/households", householdsRoutes);
 
 router.use("/dashboard", dashboardRoutes);
 

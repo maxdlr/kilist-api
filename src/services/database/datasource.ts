@@ -18,7 +18,11 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || "root",
   password: process.env.DB_PASSWORD || "root",
   database: process.env.APP_NAME,
-  synchronize: process.env.NODE_ENV !== "production",
+  // Auto-create/update schema from entities. Normally off in production, but
+  // can be force-enabled via DB_SYNC=true (used for the throwaway beta, where
+  // there are no migrations yet). Switch DB_SYNC off once real migrations exist.
+  synchronize:
+    process.env.NODE_ENV !== "production" || process.env.DB_SYNC === "true",
   logging: false,
   entities: [
     FoodEntity,

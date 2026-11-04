@@ -6,6 +6,13 @@
 # the VPS - push a new tag from your dev machine with:
 #   docker build -t maxdlr/kilist-api:latest .
 #   docker push maxdlr/kilist-api:latest
+#
+# Networking: kilist-api joins two networks - an "internal" network it shares
+# with kilist-db (so DB_HOST=kilist-db resolves), and your reverse-proxy
+# network (e.g. Nginx Proxy Manager) so the proxy can reach it. kilist-db stays
+# on the internal network only - it is never exposed to the proxy or the host.
+# If you use a reverse proxy, the API does not need published host ports; the
+# proxy reaches it over the shared proxy network on container port 8080.
 
 services:
   kilist-api:
@@ -17,10 +24,13 @@ services:
     environment:
       DB_HOST: kilist-db
       DB_PORT: 3306
-    ports:
-      - "${BACK_PORT:-8080}:8080"
+    expose:
+      - "8080"
     depends_on:
       - kilist-db
+    networks:
+      - internal
+      - shared_proxy_network
 
   kilist-db:
     image: mariadb
@@ -31,6 +41,15 @@ services:
       MARIADB_DATABASE: ${APP_NAME}
     volumes:
       - kilist-db-data:/var/lib/mysql
+    networks:
+      - internal
 
 volumes:
   kilist-db-data:
+
+networks:
+  internal:
+  # Created outside this compose project (e.g. by Nginx Proxy Manager).
+  # Create it once with: docker network create shared_proxy_network
+  shared_proxy_network:
+    external: true

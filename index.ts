@@ -68,11 +68,42 @@ app.use(serviceErrorHandler);
 
 /**
  * TypeOrm
+ *
+ * In containerized deployments the database may not accept connections the
+ * instant this process starts - depends_on only waits for the DB container to
+ * start, not for MariaDB to finish booting and register its network alias.
+ * Retry with a fixed backoff so the API waits for the DB instead of dying on
+ * the first failed connection.
  */
+const DB_CONNECT_MAX_RETRIES = 10;
+const DB_CONNECT_RETRY_DELAY_MS = 3000;
 
-AppDataSource.initialize()
-  .then(async () => await loadFixtures())
-  .catch((error) => console.trace(error));
+const initDatabaseWithRetry = async (): Promise<void> => {
+  for (let attempt = 1; attempt <= DB_CONNECT_MAX_RETRIES; attempt++) {
+    try {
+      await AppDataSource.initialize();
+      await loadFixtures();
+      return;
+    } catch (error) {
+      const isLastAttempt = attempt === DB_CONNECT_MAX_RETRIES;
+      console.error(
+        `Database connection failed (attempt ${attempt}/${DB_CONNECT_MAX_RETRIES})` +
+          (isLastAttempt
+            ? ""
+            : `, retrying in ${DB_CONNECT_RETRY_DELAY_MS}ms...`),
+      );
+      if (isLastAttempt) {
+        console.trace(error);
+        return;
+      }
+      await new Promise((resolve) =>
+        setTimeout(resolve, DB_CONNECT_RETRY_DELAY_MS),
+      );
+    }
+  }
+};
+
+void initDatabaseWithRetry();
 
 /**
  * Listener
