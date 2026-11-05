@@ -22,7 +22,6 @@ const readHousehold = async (
     members: members.map((m) => ({
       id: m.id,
       username: m.username,
-      email: m.email,
       type: m.type,
     })),
   });
