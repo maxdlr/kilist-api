@@ -9,7 +9,7 @@ import { classifyFoodsByScore } from "../services/classifyFoodsByScore";
 interface Dashboard {
   foods: {
     total: number;
-    scoreSummary: Record<1 | 2 | 3 | 4 | 5, number>;
+    scoreSummary: Record<0 | 0.25 | 0.5 | 0.75 | 1, number>;
   };
   shopLists: {
     latest: {
@@ -63,6 +63,21 @@ const getDashboard = async (req: Request, res: Response) => {
         m,
       )) || [];
 
+    const now = new Date();
+
+    const doneShopLists = shopLists.filter(
+      (shopList) => shopList.boughtFoods.length > 0,
+    );
+    const latestShopList = doneShopLists[0];
+    const latestBoughtIds = (latestShopList?.boughtFoods ?? []) as number[];
+    const latestStartIds = (latestShopList?.startFoods ?? []) as number[];
+    const latestSnoozedCount = foods.filter(
+      (food) =>
+        latestStartIds.includes(food.id) &&
+        !latestBoughtIds.includes(food.id) &&
+        food.snoozedUntil > now,
+    ).length;
+
     const latestSwipeList = swipeLists[0];
     const latestSwipedCount = latestSwipeList
       ? (latestSwipeList.inStockFoods as number[]).length +
@@ -76,11 +91,11 @@ const getDashboard = async (req: Request, res: Response) => {
       },
       shopLists: {
         latest: {
-          date: shopLists[0]?.endedAt as Date,
-          bought: shopLists[0]?.boughtFoods?.length || 0,
-          snoozed: shopLists[0]?.startFoods?.length || 0,
+          date: latestShopList?.endedAt as Date,
+          bought: latestBoughtIds.length,
+          snoozed: latestSnoozedCount,
         },
-        total: shopLists.length,
+        total: doneShopLists.length,
       },
       swipes: {
         latest: {
