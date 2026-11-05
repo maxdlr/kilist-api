@@ -10,14 +10,14 @@ import findList from "@/api/lists/services/findList";
  *
  * @param householdId - The household the food belongs to
  * @param listId - The list to attach the new food to
- * @param data - The food's name and optional description
+ * @param data - The food's name, optional description and optional starting score
  * @param manager - Optional entity manager for transaction support
  * @returns The newly created food
  */
 const createFood = async (
   householdId: number,
   listId: number,
-  data: { name: string; description?: string },
+  data: { name: string; description?: string; inStockScore?: number },
   manager?: EntityManager,
 ): Promise<FoodEntity> => {
   const m = findManager(FoodRepository, manager);
@@ -30,6 +30,9 @@ const createFood = async (
   const food = new FoodEntity();
   food.name = data.name;
   food.description = data.description;
+  if (data.inStockScore !== undefined) {
+    food.inStockScore = data.inStockScore;
+  }
   food.household = { id: householdId } as FoodEntity["household"];
   food.lists = [list];
 
