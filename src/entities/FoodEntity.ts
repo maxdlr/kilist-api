@@ -20,6 +20,9 @@ export default class FoodEntity extends AbstractEntity {
   @ManyToMany(() => ListEntity, (list) => list.foods, { nullable: true })
   lists!: ListEntity[];
 
+  @Column({ type: "varchar", nullable: true })
+  icon?: string | null;
+
   @Column({ type: "float", default: 1 })
   inStockScore!: number;
 

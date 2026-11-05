@@ -46,6 +46,26 @@ describe("addFood", () => {
     expect(food.inStockScore).toBe(0.5);
   });
 
+  it("gives onboarding foods their food bank icon", async () => {
+    const swiped = await post({ name: "Milk", fromOnboarding: true });
+    const typed = await post({ name: " ground BEEF ", fromOnboarding: true });
+
+    expect(swiped.icon).toBe("milk");
+    expect(typed.icon).toBe("ground-beef");
+  });
+
+  it("leaves onboarding foods without a matching icon empty", async () => {
+    const unknown = await post({ name: "Toilet paper", fromOnboarding: true });
+
+    expect(unknown.icon).toBeNull();
+  });
+
+  it("gives no icon to foods added outside onboarding", async () => {
+    const food = await post({ name: "Milk" });
+
+    expect(food.icon).toBeNull();
+  });
+
   it("keeps the default score for other foods", async () => {
     const food = await post({ name: "Milk" });
 

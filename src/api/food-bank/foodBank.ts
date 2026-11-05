@@ -1,3 +1,5 @@
+import findFoodIcon from "./findFoodIcon";
+
 /**
  * A small, hardcoded catalogue of the most common household food items, used
  * to help new users populate their list during onboarding. Intentionally
@@ -7,29 +9,30 @@
 export type FoodBankItem = {
   name: string;
   description?: string;
+  icon?: string;
 };
 
 const FOOD_BANK: FoodBankItem[] = [
-  { name: "Pasta" },
-  { name: "Rice" },
-  { name: "Bread" },
-  { name: "Milk" },
-  { name: "Eggs" },
-  { name: "Butter" },
-  { name: "Cheese" },
-  { name: "Yogurt" },
-  { name: "Chicken" },
-  { name: "Ground beef" },
-  { name: "Tomatoes" },
-  { name: "Onions" },
-  { name: "Potatoes" },
-  { name: "Garlic" },
-  { name: "Apples" },
-  { name: "Bananas" },
-  { name: "Coffee" },
-  { name: "Olive oil" },
-  { name: "Flour" },
-  { name: "Sugar" },
-];
+  "Pasta",
+  "Rice",
+  "Bread",
+  "Milk",
+  "Eggs",
+  "Butter",
+  "Cheese",
+  "Yogurt",
+  "Chicken",
+  "Ground beef",
+  "Tomatoes",
+  "Onions",
+  "Potatoes",
+  "Garlic",
+  "Apples",
+  "Bananas",
+  "Coffee",
+  "Olive oil",
+  "Flour",
+  "Sugar",
+].map((name) => ({ name, icon: findFoodIcon(name) }));
 
 export default FOOD_BANK;

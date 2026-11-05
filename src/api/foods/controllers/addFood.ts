@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import findFoodIcon from "@/api/food-bank/findFoodIcon";
 import createFood from "../services/createFood";
 
 const ONBOARDING_IN_STOCK_SCORE = 0.5;
@@ -19,6 +20,7 @@ const addFood = async ({ body, user }: Request, res: Response) => {
     description,
     ...(fromOnboarding === true && {
       inStockScore: ONBOARDING_IN_STOCK_SCORE,
+      icon: findFoodIcon(name),
     }),
   });
 
