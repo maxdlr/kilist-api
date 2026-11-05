@@ -18,6 +18,10 @@ const createShopList = async (householdId: number, manager?: EntityManager) => {
     m,
   );
 
+  if (foods.length === 0) {
+    return null;
+  }
+
   const shopList = new ShopListEntity();
 
   shopList.startFoods = foods;

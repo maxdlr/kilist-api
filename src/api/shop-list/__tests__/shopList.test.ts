@@ -28,14 +28,14 @@ beforeEach(async () => {
 });
 
 test("browseShopFoods returns a list of foods", async () => {
-  const shopList = await createShopList(household.id);
+  const shopList = (await createShopList(household.id))!;
 
   expect(shopList).toBeDefined();
   expect(shopList.startFoods).toHaveLength(10);
 });
 
 test("findShopList keeps startFoods intact after a shopList is created and re-fetched", async () => {
-  const created = await createShopList(household.id);
+  const created = (await createShopList(household.id))!;
 
   const found = await findShopList({ id: created.id });
 

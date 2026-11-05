@@ -65,7 +65,7 @@ describe("addFood", () => {
     expect(swipes.map(({ id }) => id)).toContain(food.id);
 
     const shopList = await createShopList(user.household.id);
-    expect(shopList.startFoods.map((f) => (f as { id: number }).id)).toContain(
+    expect(shopList?.startFoods.map((f) => (f as { id: number }).id)).toContain(
       food.id,
     );
   });
