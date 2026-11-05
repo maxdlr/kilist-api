@@ -5,8 +5,11 @@ import completeSwipeList from "../controllers/completeSwipeList";
 import addSwipeList from "../controllers/addSwipeList";
 import editSwipeList from "../controllers/editSwipeList";
 import endSwipeList from "../controllers/endSwipeList";
+import readSwipeGame from "../controllers/readSwipeGame";
 
 const router = Router();
+
+router.get("/game", authenticate, [readSwipeGame]);
 
 router.get("/read/:id", authenticate, [readSwipeList]);
 

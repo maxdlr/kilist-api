@@ -1,10 +1,21 @@
+import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
+import getSwipeGame, { parseTzOffset } from "../services/getSwipeGame";
 import recordSwipeSession from "../services/recordSwipeSession";
 
-const completeSwipeList = async ({ user }: Request, res: Response) => {
-  await recordSwipeSession(user!.household.id);
+const completeSwipeList = async ({ body, user }: Request, res: Response) => {
+  const householdId = user!.household.id;
+  const tzOffset = parseTzOffset(body?.tzOffset);
 
-  return res.status(201).end();
+  const game = await doTransaction(async (m) => {
+    const current = await getSwipeGame(householdId, tzOffset, m);
+    if (current.playedToday) return current;
+
+    await recordSwipeSession(householdId, m);
+    return getSwipeGame(householdId, tzOffset, m);
+  });
+
+  return res.status(201).json(game);
 };
 
 export default completeSwipeList;

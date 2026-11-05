@@ -9,6 +9,7 @@ import foodHistoriesRoutes from "./api/foodHistories/routes/index";
 import householdsRoutes from "./api/households/routes/index";
 import foodBankRoutes from "./api/food-bank/routes/index";
 import getMe from "./api/auth/controllers/getMe";
+import editMySkin from "./api/auth/controllers/editMySkin";
 import logIn from "./api/auth/controllers/logIn";
 import authenticate from "./middlewares/authenticate";
 import getRefreshToken from "./api/auth/controllers/getRefreshToken";
@@ -26,6 +27,7 @@ router.post("/logout", authenticate, logOut);
 router.post("/refresh", getRefreshToken);
 
 router.get("/me", authenticate, getMe);
+router.put("/me/skin", authenticate, editMySkin);
 
 router.use("/users", userRoutes);
 

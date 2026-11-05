@@ -4,6 +4,9 @@ import { Column, Entity, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import HouseholdEntity from "./HouseholdEntity";
 
+export const DEFAULT_SKIN = "roast";
+export const SKIN_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
+
 @Entity({ name: "users" })
 export default class UserEntity extends AbstractEntity {
   @Column({ name: "password", select: false })
@@ -29,6 +32,9 @@ export default class UserEntity extends AbstractEntity {
 
   @Column({ nullable: false, default: "user" })
   type!: "user" | "admin";
+
+  @Column({ nullable: false, default: DEFAULT_SKIN, length: 32 })
+  skin!: string;
 
   set password(value: string) {
     this._password = bcrypt.hashSync(value, 10);
