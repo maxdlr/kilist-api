@@ -39,11 +39,17 @@ describe("editMySkin", () => {
   });
 
   it("saves the chosen skin and returns the user", async () => {
-    const out = await call({ skin: "zen-garden" });
+    const out = await call({ skin: "roast" });
 
     expect(out.status).toBe(200);
-    expect(out.body.skin).toBe("zen-garden");
-    expect((await findUser({ id: user.id })).skin).toBe("zen-garden");
+    expect(out.body.skin).toBe("roast");
+    expect((await findUser({ id: user.id })).skin).toBe("roast");
+  });
+
+  it("refuses a skin that isn't in the prize catalog", async () => {
+    await expect(call({ skin: "zen-garden" })).rejects.toMatchObject({
+      status: 400,
+    });
   });
 
   it.each([undefined, "", "Roast", "roast skin", "a".repeat(33), 42])(

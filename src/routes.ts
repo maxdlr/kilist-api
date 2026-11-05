@@ -8,6 +8,8 @@ import swipeListRoutes from "./api/swipe-list/routes/index";
 import foodHistoriesRoutes from "./api/foodHistories/routes/index";
 import householdsRoutes from "./api/households/routes/index";
 import foodBankRoutes from "./api/food-bank/routes/index";
+import prizesRoutes from "./api/prizes/routes/index";
+import adminRoutes from "./api/admin/routes/index";
 import getMe from "./api/auth/controllers/getMe";
 import editMySkin from "./api/auth/controllers/editMySkin";
 import logIn from "./api/auth/controllers/logIn";
@@ -46,5 +48,9 @@ router.use("/households", householdsRoutes);
 router.use("/food-bank", foodBankRoutes);
 
 router.use("/dashboard", dashboardRoutes);
+
+router.use("/prizes", prizesRoutes);
+
+router.use("/admin", adminRoutes);
 
 export default router;

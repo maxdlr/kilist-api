@@ -10,6 +10,9 @@ import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import ShopListEntity from "@/entities/ShopListEntity";
 import SwipeListEntity from "@/entities/SwipeListEntity";
 import HouseholdEntity from "@/entities/HouseholdEntity";
+import TicketEntryEntity from "@/entities/TicketEntryEntity";
+import UnlockEntity from "@/entities/UnlockEntity";
+import AdminJobRunEntity from "@/entities/AdminJobRunEntity";
 
 export const AppDataSource = new DataSource({
   type: "mariadb",
@@ -35,6 +38,9 @@ export const AppDataSource = new DataSource({
     ShopListEntity,
     SwipeListEntity,
     HouseholdEntity,
+    TicketEntryEntity,
+    UnlockEntity,
+    AdminJobRunEntity,
   ],
   migrations: [__dirname + "/../../migrations/**/*.{ts,js}"],
   subscribers: [],
