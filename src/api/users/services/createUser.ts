@@ -1,5 +1,6 @@
 import createHousehold from "@/api/households/services/createHousehold";
 import findHousehold from "@/api/households/services/findHousehold";
+import createList from "@/api/lists/services/createList";
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import UserEntity from "@/entities/UserEntity";
 import doTransaction from "@/utils/doTransaction";
@@ -35,7 +36,16 @@ const resolveHousehold = async (
     return household;
   }
 
-  return await createHousehold(input.householdName, manager);
+  // A brand-new household starts with an empty main list so the user lands in
+  // a working app (the List tab reads the main list) and can populate it via
+  // onboarding. Joiners reuse their household's existing main list.
+  const household = await createHousehold(input.householdName, manager);
+  await createList(
+    household.id,
+    { title: "My list", isMain: true },
+    manager,
+  );
+  return household;
 };
 
 const isValidHouseholdChoice = (input: unknown): input is HouseholdChoice => {

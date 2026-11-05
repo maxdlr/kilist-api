@@ -1,4 +1,5 @@
 import HouseholdRepository from "@/repositories/HouseholdRepository";
+import ListRepository from "@/repositories/ListRepository";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "vitest";
@@ -113,5 +114,41 @@ describe("createUser", () => {
       relations: ["members"],
     });
     expect(household?.members).toHaveLength(2);
+  });
+
+  it("creates a main list for a newly created household", async () => {
+    const user = await createUser({
+      ...validUserInput(),
+      householdChoice: "create",
+      householdName: "Listful Home",
+    });
+
+    const lists = await ListRepository.find({
+      where: { household: { id: user.household.id } },
+    });
+
+    expect(lists).toHaveLength(1);
+    expect(lists[0]?.isMain).toBe(true);
+  });
+
+  it("does not create an extra list when joining an existing household", async () => {
+    const owner = await createUser({
+      ...validUserInput(),
+      householdChoice: "create",
+      householdName: "Join Target",
+    });
+
+    const joiner = await createUser({
+      ...validUserInput(),
+      householdChoice: "join",
+      joinCode: owner.household.joinCode,
+    });
+
+    const lists = await ListRepository.find({
+      where: { household: { id: joiner.household.id } },
+    });
+
+    // Still just the single main list created with the household.
+    expect(lists).toHaveLength(1);
   });
 });
