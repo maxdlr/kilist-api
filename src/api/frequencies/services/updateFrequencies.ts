@@ -8,21 +8,20 @@ import removeFrequency from "./removeFrequency";
 
 const updateFrequencies = async (
   frequencies: {
-    previousFoodId: FoodEntity["id"];
+    previousFoodId?: FoodEntity["id"];
     currentFoodId: FoodEntity["id"];
   },
   manager?: EntityManager,
 ) => {
   const m = findManager(FrequencyRepository, manager);
+  const { previousFoodId, currentFoodId } = frequencies;
 
-  // Food ids here are already validated against the caller's household at
-  // the controller entry point (editShopList) — no need to re-scope.
-  const previousFood = await m.findOne(FoodEntity, {
-    where: { id: frequencies.previousFoodId },
-    relations: ["household"],
-  });
+  if (!previousFoodId || Number(previousFoodId) === Number(currentFoodId)) {
+    return;
+  }
+
   const currentFood = await m.findOne(FoodEntity, {
-    where: { id: frequencies.currentFoodId },
+    where: { id: currentFoodId },
     relations: ["household"],
   });
 
@@ -30,9 +29,21 @@ const updateFrequencies = async (
     throw ServiceError("Food not found");
   }
 
+  const previousFood = await m.findOne(FoodEntity, {
+    where: {
+      id: Number(previousFoodId),
+      household: { id: currentFood.household.id },
+    },
+    relations: ["household"],
+  });
+
+  if (!previousFood) {
+    return;
+  }
+
   const allPreviousFoodFrequencies = await findAllFrequencies(
     {
-      where: { food: { id: previousFood?.id } },
+      where: { food: { id: previousFood.id } },
     },
     m,
   );
@@ -46,16 +57,14 @@ const updateFrequencies = async (
     for (const f of toTrimFrequencies) {
       await removeFrequency({ id: f.id }, m);
     }
-
-    if (previousFood) {
-      await createFrequency(
-        {
-          food: previousFood,
-          nextBoughtFood: currentFood,
-        },
-        m,
-      );
-    }
   }
+
+  await createFrequency(
+    {
+      food: previousFood,
+      nextBoughtFood: currentFood,
+    },
+    m,
+  );
 };
 export default updateFrequencies;

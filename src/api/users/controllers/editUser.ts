@@ -10,7 +10,7 @@ const editUser = async (
     throw ApiError("User missing");
   }
 
-  const updatedUser = await updateUser({ id: user.id, ...body });
+  const updatedUser = await updateUser({ ...body, id: user.id });
   return res.status(200).send(updatedUser);
 };
 

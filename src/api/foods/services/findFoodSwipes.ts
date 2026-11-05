@@ -51,7 +51,7 @@ const findFoodSwipes = async (
       return true;
     }
 
-    return latestFoodHistory.createdAt < new Date(Date.now() - 24 * 360000);
+    return latestFoodHistory.createdAt < new Date(Date.now() - 24 * 3600000);
   });
 
   return eligibleFoods.slice(0, take);

@@ -34,7 +34,12 @@ const authenticate = async (
     return next(Unauthorized());
   }
 
-  const user: UserEntity | null = await findUser({ id: Number(decoded.id) });
+  const user: UserEntity | null = await findUser({
+    id: Number(decoded.id),
+  }).catch((error) => {
+    if (isApiError(error) && error.status === 404) return null;
+    throw error;
+  });
   if (!user) {
     return next(Unauthorized());
   }

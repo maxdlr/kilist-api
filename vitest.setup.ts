@@ -1,4 +1,7 @@
+import registerGlobals from "@/services/registerGlobals";
 import { afterAll, afterEach, beforeAll } from "vitest";
+
+registerGlobals();
 
 // Redirects the shared AppDataSource to the test database (see docker-compose.yml /
 // Makefile db-*-test targets) instead of the dev/prod one, so integration tests never

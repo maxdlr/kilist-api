@@ -1,3 +1,4 @@
+import clearAuthCookies from "@/api/auth/services/clearAuthCookies";
 import { Request, Response } from "express";
 import removeUser from "../../users/services/removeUser";
 
@@ -5,7 +6,7 @@ const deleteUser = async (
   { query, user }: Request,
   res: Response,
 ): Promise<Response<string>> => {
-  if (!user || user.type !== "admin") {
+  if (!user) {
     throw Unauthorized();
   }
 
@@ -16,11 +17,21 @@ const deleteUser = async (
     ]);
   }
 
-  if (user.id !== targetId && user.type !== "admin") {
-    throw Unauthorized();
+  const isSelf = user.id === targetId;
+
+  if (!isSelf && user.type !== "admin") {
+    throw Forbidden();
+  }
+
+  if (isSelf && user.type === "admin") {
+    throw ApiError(400, "The admin account cannot be deleted");
   }
 
   await removeUser({ id: targetId });
+
+  if (isSelf) {
+    await clearAuthCookies(res);
+  }
 
   return res.status(200).send("User deleted");
 };

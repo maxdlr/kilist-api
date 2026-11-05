@@ -7,6 +7,7 @@ import HouseholdEntity from "@/entities/HouseholdEntity";
 import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
 import ListRepository from "@/repositories/ListRepository";
+import ensureAdminUser from "@/services/ensureAdminUser";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/utils/helpers";
 import { faker } from "@faker-js/faker";
@@ -25,27 +26,6 @@ const ensureHousehold = async (
   household.name = "Dev Household";
   household.joinCode = generateJoinCode();
   return await manager.save(HouseholdEntity, household);
-};
-
-const ensureAdminUser = async (
-  manager: EntityManager,
-  household: HouseholdEntity,
-): Promise<UserEntity> => {
-  if (!process.env.ADMIN_PASSWORD) {
-    throw new Error("ADMIN_PASSWORD environment variable is not set");
-  }
-
-  const existing = await manager.findOneBy(UserEntity, { username: "maxdlr" });
-  if (existing) return existing;
-
-  const user = new UserEntity();
-  user.username = "maxdlr";
-  user.email = "contact@maxdlr.com";
-  user.password = process.env.ADMIN_PASSWORD;
-  user.description = "Creator of this platform";
-  user.type = "admin";
-  user.household = household;
-  return await manager.save(UserEntity, user);
 };
 
 // const makeUsers = async (
@@ -217,7 +197,7 @@ export const loadFixtures = async (): Promise<void> => {
       await manager.save(FoodEntity, food);
     }
 
-    await ensureAdminUser(manager, household);
+    await ensureAdminUser(household, manager);
     await makeLists(manager, household, 1);
 
     console.log(`Fixtures loaded (${isDev ? "development" : "production"})`);

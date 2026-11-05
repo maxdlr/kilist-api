@@ -1,3 +1,4 @@
+import createList from "@/api/lists/services/createList";
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
 import findManager from "@/utils/findManager";
@@ -33,7 +34,10 @@ const createHousehold = async (
   household.name = name;
   household.joinCode = joinCode;
 
-  return await m.save(HouseholdEntity, household);
+  const created = await m.save(HouseholdEntity, household);
+  await createList(created.id, { title: "My list", isMain: true }, m);
+
+  return created;
 };
 
 export default createHousehold;

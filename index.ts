@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import "reflect-metadata";
 
-dotenv.config({ path: "../../.env" });
+dotenv.config();
 
 import registerGlobals from "@/services/registerGlobals";
 registerGlobals();
@@ -9,6 +9,7 @@ registerGlobals();
 import routes from "@/routes";
 import setCors from "@/services/cors";
 import { AppDataSource } from "@/services/database/datasource";
+import ensureAdminUser from "@/services/ensureAdminUser";
 import { loadFixtures } from "@/services/fixtures";
 import { requestLogger } from "@/services/requestLogger";
 import serviceErrorHandler from "@/services/serviceErrorHandlers";
@@ -82,7 +83,6 @@ const initDatabaseWithRetry = async (): Promise<void> => {
   for (let attempt = 1; attempt <= DB_CONNECT_MAX_RETRIES; attempt++) {
     try {
       await AppDataSource.initialize();
-      await loadFixtures();
       return;
     } catch (error) {
       const isLastAttempt = attempt === DB_CONNECT_MAX_RETRIES;
@@ -103,7 +103,18 @@ const initDatabaseWithRetry = async (): Promise<void> => {
   }
 };
 
-void initDatabaseWithRetry();
+const bootstrapDatabase = async (): Promise<void> => {
+  await initDatabaseWithRetry();
+  if (!AppDataSource.isInitialized) return;
+
+  await loadFixtures();
+  await ensureAdminUser();
+};
+
+bootstrapDatabase().catch((error) => {
+  console.error("Database bootstrap failed:", error);
+  process.exit(1);
+});
 
 /**
  * Listener

@@ -6,7 +6,7 @@ import FrequencyRepository from "@/repositories/FrequencyRepository";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/utils/helpers";
-import { beforeEach, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import updateFrequencies from "../../services/updateFrequencies";
 import getMostLikelyNextFoods from "../../services/getMostLikelyNextFood";
 
@@ -120,4 +120,57 @@ test("get most likely next food", async () => {
 
   expect(mostLikely1In5NextFoodIds?.length).toBe(5);
   expect(mostLikely1In5NextFoodIds?.[0]).toBe(foods?.[2]?.id);
+});
+
+describe("recording purchases", () => {
+  const makeFoods = async () => {
+    const home = await HouseholdRepository.save({
+      joinCode: generateJoinCode(),
+    });
+    const [first, second] = await FoodRepository.save([
+      { name: "First", household: home },
+      { name: "Second", household: home },
+    ]);
+    return { first: first as FoodEntity, second: second as FoodEntity };
+  };
+
+  const countFor = async (foodId: number) =>
+    (await findAllFrequencies({ where: { food: { id: foodId } } })).length;
+
+  test("records the first frequency of a food with no history", async () => {
+    const { first, second } = await makeFoods();
+
+    await updateFrequencies({
+      previousFoodId: first.id,
+      currentFoodId: second.id,
+    });
+
+    const [frequency] = await findAllFrequencies({
+      where: { food: { id: first.id } },
+    });
+    expect(await countFor(first.id)).toBe(1);
+    expect(frequency?.nextBoughtFood).toBe(second.id);
+  });
+
+  test("records nothing without a previous food, leaving other households alone", async () => {
+    const { second } = await makeFoods();
+    const total = await FrequencyRepository.count();
+
+    await updateFrequencies({ currentFoodId: second.id });
+
+    expect(await FrequencyRepository.count()).toBe(total);
+  });
+
+  test("ignores a previous food from another household", async () => {
+    const { second } = await makeFoods();
+    const foreign = foods?.[0] as FoodEntity;
+    const before = await countFor(foreign.id);
+
+    await updateFrequencies({
+      previousFoodId: foreign.id,
+      currentFoodId: second.id,
+    });
+
+    expect(await countFor(foreign.id)).toBe(before);
+  });
 });

@@ -3,7 +3,7 @@ import UserRepository from "@/repositories/UserRepository";
 import validateCrudPayload from "@/services/validateCrudPayload";
 import findUser from "./findUser";
 
-const UPDATABLE_FIELDS = ["username", "email", "description", "type"] as const;
+const UPDATABLE_FIELDS = ["username", "email", "description"] as const;
 
 const updateUser = async (user: Partial<UserEntity>): Promise<UserEntity> => {
   if (!user.id) {

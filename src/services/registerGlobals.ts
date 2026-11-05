@@ -14,6 +14,16 @@ const registerGlobalErrors = (): void => {
     return error;
   };
 
+  global.ServiceError = (statusOrMessage: number | string, message?: string) => {
+    const hasStatus = typeof statusOrMessage === "number";
+    const error = new Error(
+      hasStatus ? message : statusOrMessage,
+    ) as TServiceError;
+    error.name = "ServiceError";
+    error.status = hasStatus ? statusOrMessage : 500;
+    return error;
+  };
+
   global.Missing = (message: string) => ApiError(404, message);
 
   global.BadValidation = (errors: TValidationError["validation"]) => {
@@ -26,12 +36,15 @@ const registerGlobalErrors = (): void => {
   global.Unauthorized = (type: "user" | "origin" = "user") =>
     ApiError(401, `${type} authentication required`);
 
-  global.Forbidden = () => ApiError(403);
+  global.Forbidden = () => ApiError(403, "Forbidden");
 
   global.isApiError = (error: any): error is TApiError =>
     error &&
     error instanceof Error &&
     typeof (error as any).status === "number";
+
+  global.isServiceError = (error: any): error is TServiceError =>
+    isApiError(error) && error.name === "ServiceError";
 };
 
 const registerGlobalResponses = (): void => {

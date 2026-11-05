@@ -1,6 +1,6 @@
-import SwipeListEntity from "@/entities/SwipeListEntity";
+import ShopListEntity from "@/entities/ShopListEntity";
 import { AppDataSource } from "@/services/database/datasource";
 
-const swipeListRepository = AppDataSource.getRepository(SwipeListEntity);
+const ShopListRepository = AppDataSource.getRepository(ShopListEntity);
 
-export default swipeListRepository;
+export default ShopListRepository;

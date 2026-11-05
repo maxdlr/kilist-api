@@ -7,6 +7,10 @@ const doTransaction = async <T>(
   try {
     return await AppDataSource.manager.transaction(transaction);
   } catch (error: any) {
+    if (isApiError(error)) {
+      throw error;
+    }
+
     throw ApiError(
       500,
       error?.message || "An error occurred during the transaction",

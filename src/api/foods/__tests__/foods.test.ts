@@ -63,7 +63,7 @@ test("browseFoods get 10 foods", async () => {
 
 test("browseFoods only returns foods whose latest foodhistory is older than 24h (or has none)", async () => {
   const testFoods = await findFoodSwipes(household.id, { take: 10 });
-  const cutoff = new Date(Date.now() - 24 * 360000);
+  const cutoff = new Date(Date.now() - 24 * 3600000);
 
   for (const food of testFoods) {
     const foodHistories = food.foodHistories;

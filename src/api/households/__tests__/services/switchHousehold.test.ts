@@ -1,5 +1,6 @@
 import createUser from "@/api/users/services/createUser";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
+import ListRepository from "@/repositories/ListRepository";
 import UserRepository from "@/repositories/UserRepository";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { faker } from "@faker-js/faker";
@@ -36,6 +37,21 @@ describe("switchHousehold", () => {
       relations: ["household"],
     });
     expect(reloaded?.household.id).toBe(target.id);
+  });
+
+  it("gives a household created by switching its own main list", async () => {
+    const user = await makeUser();
+
+    const result = await switchHousehold(user.id, {
+      householdChoice: "create",
+      householdName: "Fresh Household",
+    });
+
+    const lists = await ListRepository.find({
+      where: { household: { id: result.id } },
+    });
+    expect(lists).toHaveLength(1);
+    expect(lists[0]?.isMain).toBe(true);
   });
 
   it("creates and moves the user into a brand new household", async () => {
