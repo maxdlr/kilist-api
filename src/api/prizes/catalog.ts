@@ -15,6 +15,7 @@ export const PAID_SWIPES_PER_DAY = 10;
 export const PRIZES: Prize[] = [
   { id: "skin:arcade", kind: "skin", skin: "arcade", price: 0 },
   { id: "skin:roast", kind: "skin", skin: "roast", price: 500 },
+  { id: "skin:versus", kind: "skin", skin: "versus", price: 500 },
 ];
 
 export const findPrize = (id: string) => PRIZES.find((prize) => prize.id === id);

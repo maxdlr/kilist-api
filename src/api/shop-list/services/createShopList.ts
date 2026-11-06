@@ -4,7 +4,11 @@ import ShopListRepository from "@/repositories/ShopListRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager, IsNull, LessThan, Or } from "typeorm";
 
-const createShopList = async (householdId: number, manager?: EntityManager) => {
+const createShopList = async (
+  householdId: number,
+  manager?: EntityManager,
+  userId?: number,
+) => {
   const m = findManager(ShopListRepository, manager);
 
   const foods = await findAllFoods(
@@ -26,6 +30,8 @@ const createShopList = async (householdId: number, manager?: EntityManager) => {
 
   shopList.startFoods = foods;
   shopList.household = { id: householdId } as ShopListEntity["household"];
+  shopList.user = userId ? ({ id: userId } as ShopListEntity["user"]) : null;
+  shopList.buyLog = [];
 
   const createdShopList = await m.save(ShopListEntity, shopList);
 

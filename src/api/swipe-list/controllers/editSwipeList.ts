@@ -21,7 +21,7 @@ const editSwipeList = async ({ body, params, user }: Request, res: Response) => 
       m,
     );
 
-    await createFoodHistory(foodHistory, m);
+    await createFoodHistory({ ...foodHistory, userId: user!.id }, m);
 
     if (!swipeList) {
       throw ApiError(`SwipeList with id ${swipeListId} not found`);

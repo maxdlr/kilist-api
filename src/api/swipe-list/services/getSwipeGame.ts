@@ -16,7 +16,7 @@ export const parseTzOffset = (value: unknown): number => {
     : 0;
 };
 
-const toLocalDay = (date: Date, tzOffset: number) =>
+export const toLocalDay = (date: Date, tzOffset: number) =>
   new Date(date.getTime() - tzOffset * 60000).toISOString().slice(0, 10);
 
 const getSwipeGame = async (

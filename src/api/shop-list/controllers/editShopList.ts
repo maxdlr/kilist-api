@@ -71,8 +71,13 @@ const editShopList = async ({ body, params, user }: Request, res: Response) => {
         where: { id: In(boughtFood.map((f) => f.id)) },
       });
 
+      const buyLog = shopList.buyLog ?? [];
+      if (!buyLog.some((entry) => entry.foodId === food.id)) {
+        buyLog.push({ foodId: food.id, at: new Date().toISOString() });
+      }
+
       await updateShopList(
-        { id: Number(shopListId), boughtFoods: updatedBoughtFoods },
+        { id: Number(shopListId), boughtFoods: updatedBoughtFoods, buyLog },
         m,
       );
       await updateFrequencies({ previousFoodId, currentFoodId: id }, m);

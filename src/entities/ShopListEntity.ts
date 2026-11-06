@@ -2,6 +2,9 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import FoodEntity from "./FoodEntity";
 import HouseholdEntity from "./HouseholdEntity";
+import UserEntity from "./UserEntity";
+
+export type ShopBuy = { foodId: number; at: string };
 
 export enum ShopListStatus {
   STARTED = "started",
@@ -32,6 +35,12 @@ export default class ShopListEntity extends AbstractEntity {
     enum: ShopListStatus,
   })
   status?: ShopListStatus;
+
+  @ManyToOne(() => UserEntity, { nullable: true, onDelete: "SET NULL" })
+  user?: UserEntity | null;
+
+  @Column({ type: "simple-json", nullable: true })
+  buyLog?: ShopBuy[] | null;
 
   @ManyToOne(() => HouseholdEntity, {
     nullable: false,

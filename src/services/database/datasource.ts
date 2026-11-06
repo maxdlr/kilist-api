@@ -13,6 +13,8 @@ import HouseholdEntity from "@/entities/HouseholdEntity";
 import TicketEntryEntity from "@/entities/TicketEntryEntity";
 import UnlockEntity from "@/entities/UnlockEntity";
 import AdminJobRunEntity from "@/entities/AdminJobRunEntity";
+import RaceEntity from "@/entities/RaceEntity";
+import RaceRunEntity from "@/entities/RaceRunEntity";
 
 export const AppDataSource = new DataSource({
   type: "mariadb",
@@ -41,6 +43,8 @@ export const AppDataSource = new DataSource({
     TicketEntryEntity,
     UnlockEntity,
     AdminJobRunEntity,
+    RaceEntity,
+    RaceRunEntity,
   ],
   migrations: [__dirname + "/../../migrations/**/*.{ts,js}"],
   subscribers: [],

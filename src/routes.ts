@@ -10,6 +10,7 @@ import householdsRoutes from "./api/households/routes/index";
 import foodBankRoutes from "./api/food-bank/routes/index";
 import prizesRoutes from "./api/prizes/routes/index";
 import adminRoutes from "./api/admin/routes/index";
+import versusRoutes from "./api/versus/routes/index";
 import getMe from "./api/auth/controllers/getMe";
 import editMySkin from "./api/auth/controllers/editMySkin";
 import logIn from "./api/auth/controllers/logIn";
@@ -52,5 +53,7 @@ router.use("/dashboard", dashboardRoutes);
 router.use("/prizes", prizesRoutes);
 
 router.use("/admin", adminRoutes);
+
+router.use("/versus", versusRoutes);
 
 export default router;

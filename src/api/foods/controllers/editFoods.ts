@@ -28,7 +28,7 @@ const editFoods = async ({ body, params, user }: Request, res: Response) => {
       throw Missing(`Food with id ${foodId} not found`);
     }
 
-    await createFoodHistory({ foodId: food.id, isInStock }, m);
+    await createFoodHistory({ foodId: food.id, isInStock, userId: user!.id }, m);
   });
 
   const reward = await awardSwipe(user!.id, foodId).catch((error) => {

@@ -8,9 +8,11 @@ const createFoodHistory = async (
   {
     foodId,
     isInStock,
+    userId,
   }: {
     foodId: number;
     isInStock: boolean | null;
+    userId?: number;
   },
   manager?: EntityManager,
 ): Promise<void> => {
@@ -19,6 +21,7 @@ const createFoodHistory = async (
   await m.save(FoodHistoryEntity, {
     food: { id: foodId },
     isInStock: isInStock,
+    user: userId ? { id: userId } : null,
   });
 
   await updateFoodInStockScore(foodId, m);

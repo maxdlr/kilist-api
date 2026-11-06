@@ -25,7 +25,7 @@ const addShopList = async ({ user }: Request, res: Response) => {
     });
   }
 
-  const shopList = await createShopList(householdId);
+  const shopList = await createShopList(householdId, undefined, user!.id);
 
   return res.status(200).json(shopList?.id ?? null);
 };
