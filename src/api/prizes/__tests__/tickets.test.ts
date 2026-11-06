@@ -177,6 +177,15 @@ describe("tickets", () => {
 });
 
 describe("prizes", () => {
+  it("lets admins wear every skin without owning it", async () => {
+    const counter = await prizeCounter(user.id, undefined, true);
+    const roast = counter.prizes.find((prize) => prize.skin === "roast");
+
+    expect(roast?.owned).toBe(false);
+    expect(roast?.wearable).toBe(true);
+    expect((await prizeCounter(user.id)).prizes.find((prize) => prize.skin === "roast")?.wearable).toBe(false);
+  });
+
   it("lists the catalog with the balance", async () => {
     await grant(120);
     const counter = await prizeCounter(user.id);

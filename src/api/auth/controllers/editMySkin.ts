@@ -14,7 +14,7 @@ const editMySkin = async ({ body, user }: Request, res: Response) => {
     throw ApiError("skin must be a lowercase skin id");
   }
 
-  const access = await skinAccess(user.id, skin);
+  const access = await skinAccess(user.id, skin, undefined, user.type === "admin");
   if (access === "unknown") {
     throw ApiError(400, `Unknown skin ${skin}`);
   }

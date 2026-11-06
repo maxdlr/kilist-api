@@ -109,21 +109,21 @@ const ownedPrizeIds = async (userId: number, manager?: EntityManager) => {
   return new Set(unlocks.map((unlock) => unlock.prizeId));
 };
 
-const buildCounter = (balance: number, owned: Set<string>) => ({
+const buildCounter = (balance: number, owned: Set<string>, isAdmin = false) => ({
   balance,
   premium: PREMIUM_FOR_EVERYONE,
   prizes: PRIZES.map((prize) => {
     const isOwned = prize.price === 0 || owned.has(prize.id);
-    return { ...prize, owned: isOwned, wearable: isOwned || PREMIUM_FOR_EVERYONE };
+    return { ...prize, owned: isOwned, wearable: isOwned || isAdmin || PREMIUM_FOR_EVERYONE };
   }),
 });
 
-export const prizeCounter = async (userId: number, manager?: EntityManager) => {
+export const prizeCounter = async (userId: number, manager?: EntityManager, isAdmin = false) => {
   const [balance, owned] = await Promise.all([
     ticketBalance(userId, manager),
     ownedPrizeIds(userId, manager),
   ]);
-  return buildCounter(balance, owned);
+  return buildCounter(balance, owned, isAdmin);
 };
 
 export type SkinAccess = "unknown" | "locked" | "allowed";
@@ -132,10 +132,11 @@ export const skinAccess = async (
   userId: number,
   skin: string,
   manager?: EntityManager,
+  isAdmin = false,
 ): Promise<SkinAccess> => {
   const prize = prizeForSkin(skin);
   if (!prize) return "unknown";
-  if (prize.price === 0 || PREMIUM_FOR_EVERYONE) return "allowed";
+  if (prize.price === 0 || isAdmin || PREMIUM_FOR_EVERYONE) return "allowed";
   return (await ownedPrizeIds(userId, manager)).has(prize.id)
     ? "allowed"
     : "locked";

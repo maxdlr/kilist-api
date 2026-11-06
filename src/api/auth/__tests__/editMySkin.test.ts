@@ -46,6 +46,14 @@ describe("editMySkin", () => {
     expect((await findUser({ id: user.id })).skin).toBe("calm");
   });
 
+  it("lets an admin wear any skin", async () => {
+    user.type = "admin";
+    const out = await call({ skin: "versus" });
+
+    expect(out.status).toBe(200);
+    expect(out.body.skin).toBe("versus");
+  });
+
   it("refuses a premium skin the user hasn't unlocked", async () => {
     await expect(call({ skin: "roast" })).rejects.toMatchObject({ status: 403 });
     expect((await findUser({ id: user.id })).skin).toBe(DEFAULT_SKIN);
