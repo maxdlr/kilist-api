@@ -10,7 +10,7 @@ import ShopListRepository from "@/repositories/ShopListRepository";
 import { AppDataSource } from "@/services/database/datasource";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { answerRace, raceView } from "../services/race";
-import { houseVotes, shopRecords, shopTip } from "../services/shop";
+import { houseVotes, shopRecords } from "../services/shop";
 import { meStats, standings } from "../services/stats";
 
 let me: UserEntity;
@@ -237,45 +237,6 @@ describe("versus shop", () => {
     expect(records.houseRecord).toEqual(expect.objectContaining({ userId: sam.id, ms: 540000 }));
     expect(records.myBest?.ms).toBe(720000);
     expect(records.houseRecord?.splits).toEqual([60000, 120000]);
-  });
-
-  it("suggests what the mate usually buys alongside", async () => {
-    const bread = foods[0]!;
-    const bananas = foods[1]!;
-    await shop(sam, [bread, bananas], 10);
-    await shop(sam, [bread, bananas], 10);
-    await shop(sam, [bread, foods[2]!, bananas], 10);
-    const current = await ShopListRepository.save(
-      ShopListRepository.create({
-        household: me.household,
-        user: me,
-        boughtFoods: [bread],
-        startFoods: [bread, bananas],
-        status: ShopListStatus.STARTED,
-      } as Partial<ShopListEntity>),
-    );
-
-    const tip = await shopTip(me, current.id, bread.id);
-
-    expect(tip).toEqual(
-      expect.objectContaining({ userId: sam.id, count: 3, of: 3, isSelf: false }),
-    );
-    expect(tip?.food.id).toBe(bananas.id);
-  });
-
-  it("has no tip without a habit", async () => {
-    await shop(sam, [foods[0]!, foods[1]!], 10);
-    const current = await ShopListRepository.save(
-      ShopListRepository.create({
-        household: me.household,
-        user: me,
-        boughtFoods: [],
-        startFoods: [foods[0]!],
-        status: ShopListStatus.STARTED,
-      } as Partial<ShopListEntity>),
-    );
-
-    expect(await shopTip(me, current.id, foods[0]!.id)).toBeNull();
   });
 });
 

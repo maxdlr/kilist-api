@@ -5,7 +5,7 @@ export type Prize = {
   price: number;
 };
 
-export const PREMIUM_FOR_EVERYONE = true;
+export const PREMIUM_FOR_EVERYONE = false;
 
 export const SWIPE_TICKETS = 10;
 export const SPEED_BONUS_TICKETS = 5;

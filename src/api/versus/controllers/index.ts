@@ -1,7 +1,7 @@
 import { parseTzOffset } from "@/api/swipe-list/services/getSwipeGame";
 import { Request, Response } from "express";
 import { answerRace, raceView } from "../services/race";
-import { houseVotes, shopRecords, shopTip } from "../services/shop";
+import { houseVotes, shopRecords } from "../services/shop";
 import { meStats, standings } from "../services/stats";
 
 const idParam = (value: unknown, name: string) => {
@@ -38,11 +38,6 @@ export const readMe = async ({ query, user }: Request, res: Response) =>
 
 export const readShop = async ({ user }: Request, res: Response) =>
   res.status(200).json(await shopRecords(user!));
-
-export const readShopTip = async ({ params, query, user }: Request, res: Response) =>
-  res
-    .status(200)
-    .json(await shopTip(user!, idParam(params.id, "shop list id"), idParam(query.after, "food id")));
 
 export const readVotes = async ({ user }: Request, res: Response) =>
   res.status(200).json(await houseVotes(user!));

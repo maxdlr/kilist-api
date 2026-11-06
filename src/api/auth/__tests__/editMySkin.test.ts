@@ -39,11 +39,16 @@ describe("editMySkin", () => {
   });
 
   it("saves the chosen skin and returns the user", async () => {
-    const out = await call({ skin: "roast" });
+    const out = await call({ skin: "calm" });
 
     expect(out.status).toBe(200);
-    expect(out.body.skin).toBe("roast");
-    expect((await findUser({ id: user.id })).skin).toBe("roast");
+    expect(out.body.skin).toBe("calm");
+    expect((await findUser({ id: user.id })).skin).toBe("calm");
+  });
+
+  it("refuses a premium skin the user hasn't unlocked", async () => {
+    await expect(call({ skin: "roast" })).rejects.toMatchObject({ status: 403 });
+    expect((await findUser({ id: user.id })).skin).toBe(DEFAULT_SKIN);
   });
 
   it("refuses a skin that isn't in the prize catalog", async () => {

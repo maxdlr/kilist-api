@@ -11,6 +11,8 @@ import FoodEntity from "@/entities/FoodEntity";
 import findShopList from "../services/findShopList";
 import updateShopList from "../services/updateShopList";
 
+export const SAME_TRIP_MS = 30 * 60 * 1000;
+
 export enum EditShopAction {
   BUY = "buy",
   SNOOZE = "snooze",
@@ -18,7 +20,7 @@ export enum EditShopAction {
 
 const editShopList = async ({ body, params, user }: Request, res: Response) => {
   const { id: shopListId } = params;
-  const { foodId, previousFoodId, action } = body;
+  const { foodId, action } = body;
   const householdId = user!.household.id;
 
   if (!Object.values(EditShopAction).includes(action)) {
@@ -72,8 +74,14 @@ const editShopList = async ({ body, params, user }: Request, res: Response) => {
       });
 
       const buyLog = shopList.buyLog ?? [];
+      const now = new Date();
+      const last = buyLog[buyLog.length - 1];
+      const previousFoodId =
+        last && now.getTime() - new Date(last.at).getTime() <= SAME_TRIP_MS
+          ? last.foodId
+          : undefined;
       if (!buyLog.some((entry) => entry.foodId === food.id)) {
-        buyLog.push({ foodId: food.id, at: new Date().toISOString() });
+        buyLog.push({ foodId: food.id, at: now.toISOString() });
       }
 
       await updateShopList(

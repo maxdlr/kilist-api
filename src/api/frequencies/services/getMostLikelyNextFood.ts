@@ -27,7 +27,13 @@ const getMostLikelyNextFoods = async (
     const startFoodIds: number[] =
       shopList.startFoods.map((f) => (f as FoodEntity).id) || [];
 
-    availableFoodIds = startFoodIds.filter((id) => !boughtFoodIds.includes(id));
+    availableFoodIds = startFoodIds.filter(
+      (id) => !boughtFoodIds.includes(id) && id !== foodId,
+    );
+
+    if (availableFoodIds.length === 0) {
+      return [];
+    }
   }
 
   const frequencies = await findAllFrequencies(
@@ -45,7 +51,7 @@ const getMostLikelyNextFoods = async (
   );
 
   if (frequencies.length === 0) {
-    return null;
+    return [];
   }
 
   const frequencyMap: Record<number, number> = {};
