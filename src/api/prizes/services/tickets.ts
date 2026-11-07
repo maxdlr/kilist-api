@@ -163,7 +163,7 @@ export const redeemPrize = (
       throw UserError(402, "prizes.notEnough");
     }
 
-    await m.save(UnlockEntity, { user: userRef(userId), prizeId: prize.id });
+    await m.save(UnlockEntity, { user: userRef(userId), prizeId: prize.id, source: "points" });
     await m.save(TicketEntryEntity, {
       user: userRef(userId),
       amount: -prize.price,

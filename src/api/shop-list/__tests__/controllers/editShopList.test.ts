@@ -100,6 +100,21 @@ describe("learning the order of the store", () => {
     expect(await act(second, butter)).toEqual([]);
   });
 
+  it("records whether the suggested food was bought next", async () => {
+    const first = await trip();
+    await act(first, butter);
+    await act(first, cheese);
+
+    await restock();
+    const second = await trip();
+    await act(second, butter);
+    await act(second, cheese);
+    await act(second, butter);
+
+    const list = await ShopListRepository.findOneByOrFail({ id: second });
+    expect(list.suggestionLog?.[0]).toEqual({ foodId: cheese.id, taken: true });
+  });
+
   it("learns nothing from a snooze", async () => {
     const id = await trip();
     await act(id, butter, "snooze");

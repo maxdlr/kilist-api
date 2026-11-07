@@ -10,6 +10,7 @@ import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
 import ListRepository from "@/repositories/ListRepository";
 import ensureAdminUser from "@/services/ensureAdminUser";
+import { makeFakeUsers } from "@/services/fakeUsers";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/utils/helpers";
 import { faker } from "@faker-js/faker";
@@ -199,6 +200,7 @@ export const loadFixtures = async (): Promise<void> => {
 
     await ensureAdminUser(household, manager);
     await makeLists(manager, household, 1);
+    await makeFakeUsers(manager);
 
     console.log(`Fixtures loaded (${isDev ? "development" : "production"})`);
   });

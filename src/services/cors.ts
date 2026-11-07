@@ -16,7 +16,7 @@ const setCors = (req: Request, res: Response) => {
   );
   res.header(
     "Access-Control-Allow-Headers",
-    "Accept, Authorization, Content-Type, X-Requested-With, Range",
+    "Accept, Accept-Language, Authorization, Content-Type, X-Device-Language, X-Requested-With, Range",
   );
 };
 

@@ -1,3 +1,5 @@
+import { isLang } from "@/i18n";
+import UserRepository from "@/repositories/UserRepository";
 import findUser from "@/api/users/services/findUser";
 import UserEntity from "@/entities/UserEntity";
 import { NextFunction, Request, Response } from "express";
@@ -42,6 +44,12 @@ const authenticate = async (
   });
   if (!user) {
     return next(Unauthorized());
+  }
+
+  const device = req.headers["x-device-language"];
+  if (isLang(device) && device !== user.deviceLanguage) {
+    await UserRepository.update(user.id, { deviceLanguage: device });
+    user.deviceLanguage = device;
   }
 
   req.user = user;

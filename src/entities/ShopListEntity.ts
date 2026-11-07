@@ -5,6 +5,7 @@ import HouseholdEntity from "./HouseholdEntity";
 import UserEntity from "./UserEntity";
 
 export type ShopBuy = { foodId: number; at: string };
+export type ShopSuggestion = { foodId: number; taken: boolean };
 
 export enum ShopListStatus {
   STARTED = "started",
@@ -41,6 +42,9 @@ export default class ShopListEntity extends AbstractEntity {
 
   @Column({ type: "simple-json", nullable: true })
   buyLog?: ShopBuy[] | null;
+
+  @Column({ type: "simple-json", nullable: true })
+  suggestionLog?: ShopSuggestion[] | null;
 
   @ManyToOne(() => HouseholdEntity, {
     nullable: false,

@@ -6,6 +6,7 @@ export enum TicketReason {
   SWIPE = "swipe",
   SPEED = "speed",
   REDEEM = "redeem",
+  ADMIN = "admin",
 }
 
 @Entity({ name: "ticket_entries" })

@@ -84,8 +84,18 @@ const editShopList = async ({ body, params, user }: Request, res: Response) => {
         buyLog.push({ foodId: food.id, at: now.toISOString() });
       }
 
+      const lastSuggestion = shopList.suggestionLog?.at(-1);
+      if (lastSuggestion && !lastSuggestion.taken && lastSuggestion.foodId === food.id) {
+        lastSuggestion.taken = true;
+      }
+
       await updateShopList(
-        { id: Number(shopListId), boughtFoods: updatedBoughtFoods, buyLog },
+        {
+          id: Number(shopListId),
+          boughtFoods: updatedBoughtFoods,
+          buyLog,
+          suggestionLog: shopList.suggestionLog ?? null,
+        },
         m,
       );
       await updateFrequencies({ previousFoodId, currentFoodId: id }, m);
@@ -98,6 +108,17 @@ const editShopList = async ({ body, params, user }: Request, res: Response) => {
       Number(shopListId),
       m,
     );
+
+    const suggested = mostLikelyNextFoodIds?.[0];
+    if (suggested) {
+      await updateShopList(
+        {
+          id: Number(shopListId),
+          suggestionLog: [...(shopList.suggestionLog ?? []), { foodId: suggested, taken: false }],
+        },
+        m,
+      );
+    }
 
     return res.status(200).send(mostLikelyNextFoodIds);
   });
