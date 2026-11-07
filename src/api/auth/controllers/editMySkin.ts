@@ -16,10 +16,10 @@ const editMySkin = async ({ body, user }: Request, res: Response) => {
 
   const access = await skinAccess(user.id, skin, undefined, user.type === "admin");
   if (access === "unknown") {
-    throw ApiError(400, `Unknown skin ${skin}`);
+    throw UserError(400, "skins.unknown");
   }
   if (access === "locked") {
-    throw ApiError(403, "You don't own this skin");
+    throw UserError(403, "skins.locked");
   }
 
   await UserRepository.update(user.id, { skin });

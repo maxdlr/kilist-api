@@ -1,3 +1,4 @@
+import type { MessageCode } from "@/i18n/messages";
 import { Response } from "express";
 
 export {};
@@ -5,6 +6,7 @@ export {};
 declare global {
   interface TApiError extends Error {
     status: number;
+    code?: MessageCode;
   }
 
   interface TValidationError extends Error {
@@ -19,6 +21,7 @@ declare global {
   interface TApiResponse {
     status: number;
     message: string;
+    code?: string;
     count?: number;
     error?: any;
     body?: any;
@@ -40,6 +43,8 @@ declare global {
     (status: number, message?: string): TServiceError;
     (message: string): TServiceError;
   };
+
+  var UserError: (status: number, code: MessageCode) => TApiError;
 
   var Missing: (message: string) => TApiError;
 

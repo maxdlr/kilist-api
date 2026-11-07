@@ -1,3 +1,4 @@
+import { translate } from "@/i18n/messages";
 import { Response } from "express";
 
 /**
@@ -24,6 +25,12 @@ const registerGlobalErrors = (): void => {
     return error;
   };
 
+  global.UserError = (status, code) => {
+    const error = ApiError(status, translate(code));
+    error.code = code;
+    return error;
+  };
+
   global.Missing = (message: string) => ApiError(404, message);
 
   global.BadValidation = (errors: TValidationError["validation"]) => {
@@ -33,10 +40,13 @@ const registerGlobalErrors = (): void => {
     return error;
   };
 
-  global.Unauthorized = (type: "user" | "origin" = "user") =>
-    ApiError(401, `${type} authentication required`);
+  global.Unauthorized = (type: "user" | "origin" = "user") => {
+    const error = UserError(401, "auth.required");
+    error.message = `${type} authentication required`;
+    return error;
+  };
 
-  global.Forbidden = () => ApiError(403, "Forbidden");
+  global.Forbidden = () => UserError(403, "auth.forbidden");
 
   global.isApiError = (error: any): error is TApiError =>
     error &&

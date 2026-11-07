@@ -14,6 +14,9 @@ const singularize = (word: string): string => {
 
 const normalize = (text: string): string =>
   text
+    .toLowerCase()
+    .replace(/œ/g, "oe")
+    .replace(/æ/g, "ae")
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .toLowerCase()

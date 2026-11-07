@@ -13,12 +13,12 @@ export default class UserEntity extends AbstractEntity {
   private _password!: string;
 
   @Column({ unique: true })
-  @MinLength(3, { message: "Too short! Minimum is 3 characters" })
-  @IsNotEmpty({ message: "Required" })
+  @MinLength(3, { message: "validation.username.short" })
+  @IsNotEmpty({ message: "validation.username.required" })
   username!: string;
 
   @Column({ unique: true })
-  @IsEmail({}, { message: "Doesn't look like an email" })
+  @IsEmail({}, { message: "validation.email.invalid" })
   email!: string;
 
   @Column({ default: "", length: 2000 })
@@ -35,6 +35,9 @@ export default class UserEntity extends AbstractEntity {
 
   @Column({ nullable: false, default: DEFAULT_SKIN, length: 32 })
   skin!: string;
+
+  @Column({ type: "varchar", nullable: true, default: null, length: 8 })
+  language!: string | null;
 
   set password(value: string) {
     this._password = bcrypt.hashSync(value, 10);

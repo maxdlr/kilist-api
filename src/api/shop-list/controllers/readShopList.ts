@@ -51,7 +51,7 @@ const readShopList = async ({ params, user }: Request, res: Response) => {
   });
 
   if (!shopList) {
-    throw ApiError("ShopList is completed. No more foods to buy.");
+    throw UserError(400, "shop.completed");
   }
 
   const remainingFoods = findShopListRemainingFoods(shopList);

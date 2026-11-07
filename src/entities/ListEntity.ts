@@ -7,7 +7,7 @@ import FoodEntity from "./FoodEntity";
 @Entity({ name: "lists" })
 export default class ListEntity extends AbstractEntity {
   @Column({ default: "New list", length: 2000 })
-  @IsNotEmpty({ message: "Required" })
+  @IsNotEmpty({ message: "validation.name.required" })
   title!: string;
 
   @ManyToMany(() => FoodEntity, (food) => food.lists)

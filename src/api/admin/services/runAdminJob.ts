@@ -2,13 +2,19 @@ import AdminJobRunEntity from "@/entities/AdminJobRunEntity";
 import UserEntity from "@/entities/UserEntity";
 import doTransaction from "@/utils/doTransaction";
 import { findAdminJob } from "../jobs";
+import { AdminJobInput } from "../jobs/types";
 
-const runAdminJob = async (jobId: string, dryRun: boolean, userId: number) => {
+const runAdminJob = async (
+  jobId: string,
+  dryRun: boolean,
+  userId: number,
+  input: AdminJobInput = {},
+) => {
   const job = findAdminJob(jobId);
   if (!job) throw Missing(`Job ${jobId} not found`);
 
   return doTransaction(async (m) => {
-    const result = await job.run(m, dryRun);
+    const result = await job.run(m, dryRun, input);
     const run = await m.save(AdminJobRunEntity, {
       jobId: job.id,
       ranBy: { id: userId } as UserEntity,

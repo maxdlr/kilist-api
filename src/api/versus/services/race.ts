@@ -188,7 +188,7 @@ export const answerRace = async (
       where: { id: raceId, household: { id: householdId } },
     });
     if (!race) throw Missing(`Race ${raceId} not found`);
-    if (!race.foodIds.includes(foodId)) throw ApiError("This food is not in the race");
+    if (!race.foodIds.includes(foodId)) throw UserError(400, "race.notInRace");
 
     let run = await m.findOne(RaceRunEntity, {
       where: { race: { id: race.id }, user: { id: user.id } },
@@ -210,7 +210,7 @@ export const answerRace = async (
         });
       }
     }
-    if (run.finishedAt) throw ApiError(409, "You already finished today's race");
+    if (run.finishedAt) throw UserError(409, "race.finished");
 
     const fresh = !run.answers.some((entry) => entry.foodId === foodId);
     if (fresh) {

@@ -24,7 +24,7 @@ const deleteUser = async (
   }
 
   if (isSelf && user.type === "admin") {
-    throw ApiError(400, "The admin account cannot be deleted");
+    throw UserError(400, "account.adminUndeletable");
   }
 
   await removeUser({ id: targetId });

@@ -12,6 +12,7 @@ import prizesRoutes from "./api/prizes/routes/index";
 import adminRoutes from "./api/admin/routes/index";
 import versusRoutes from "./api/versus/routes/index";
 import getMe from "./api/auth/controllers/getMe";
+import editMyLanguage from "./api/auth/controllers/editMyLanguage";
 import editMySkin from "./api/auth/controllers/editMySkin";
 import logIn from "./api/auth/controllers/logIn";
 import authenticate from "./middlewares/authenticate";
@@ -31,6 +32,7 @@ router.post("/refresh", getRefreshToken);
 
 router.get("/me", authenticate, getMe);
 router.put("/me/skin", authenticate, editMySkin);
+router.put("/me/language", authenticate, editMyLanguage);
 
 router.use("/users", userRoutes);
 

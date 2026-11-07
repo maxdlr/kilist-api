@@ -11,6 +11,8 @@ import type { Server } from "http";
 import type { AddressInfo } from "net";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import runAdminJob from "../services/runAdminJob";
+import { AppDataSource } from "@/services/database/datasource";
+import UnlockEntity from "@/entities/UnlockEntity";
 
 let admin: UserEntity;
 let server: Server;
@@ -117,5 +119,62 @@ describe("admin jobs", () => {
 
     expect((await res.json()).dryRun).toBe(true);
     expect(await skinOf(user)).toBe("roast");
+  });
+});
+
+describe("gift a skin", () => {
+  const owns = async (user: UserEntity, prizeId: string) =>
+    (await AppDataSource.manager.count(UnlockEntity, { where: { user: { id: user.id }, prizeId } })) > 0;
+
+  it("previews the gift without giving it", async () => {
+    const user = await makeUser("gifted", "arcade");
+
+    const result = await runAdminJob("gift-skin", true, admin.id, { prizeId: "skin:roast", email: "GIFTED@example.com" });
+
+    expect(result).toMatchObject({ affected: 1, summary: "gifted (gifted@example.com) would get Roast." });
+    expect(await owns(user, "skin:roast")).toBe(false);
+  });
+
+  it("unlocks the skin for that user only", async () => {
+    const user = await makeUser("gifted", "arcade");
+    const other = await makeUser("other", "arcade");
+
+    await runAdminJob("gift-skin", false, admin.id, { prizeId: "skin:versus", email: "gifted@example.com" });
+
+    expect(await owns(user, "skin:versus")).toBe(true);
+    expect(await owns(other, "skin:versus")).toBe(false);
+  });
+
+  it("says so when the user already has it", async () => {
+    await makeUser("gifted", "arcade");
+    await runAdminJob("gift-skin", false, admin.id, { prizeId: "skin:roast", email: "gifted@example.com" });
+
+    const again = await runAdminJob("gift-skin", false, admin.id, { prizeId: "skin:roast", email: "gifted@example.com" });
+
+    expect(again).toMatchObject({ affected: 0, summary: "gifted (gifted@example.com) already has Roast." });
+  });
+
+  it("reports an unknown email or a missing skin instead of failing", async () => {
+    expect(await runAdminJob("gift-skin", false, admin.id, { prizeId: "skin:roast", email: "nobody@example.com" }))
+      .toMatchObject({ affected: 0, summary: "No account uses nobody@example.com." });
+    expect(await runAdminJob("gift-skin", false, admin.id, { prizeId: "skin:arcade", email: "boss@example.com" }))
+      .toMatchObject({ affected: 0, summary: "Pick a skin to give." });
+  });
+
+  it("lists its fields and takes them over HTTP", async () => {
+    const user = await makeUser("gifted", "arcade");
+    const list = await (await fetch(`${baseUrl}/admin/jobs`, { headers: { "x-test-user": String(admin.id) } })).json();
+    const gift = list.find((job: { id: string }) => job.id === "gift-skin");
+
+    expect(gift.fields.map((field: { name: string }) => field.name)).toEqual(["prizeId", "email"]);
+    expect(gift.fields[0].options.map((option: { value: string }) => option.value)).toEqual(["skin:roast", "skin:versus"]);
+
+    await fetch(`${baseUrl}/admin/jobs/gift-skin/run`, {
+      method: "POST",
+      headers: { "x-test-user": String(admin.id), "content-type": "application/json" },
+      body: JSON.stringify({ dryRun: false, input: { prizeId: "skin:roast", email: "gifted@example.com" } }),
+    });
+
+    expect(await owns(user, "skin:roast")).toBe(true);
   });
 });

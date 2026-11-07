@@ -155,12 +155,12 @@ export const redeemPrize = (
 
     const owned = await ownedPrizeIds(userId, m);
     if (prize.price === 0 || owned.has(prize.id)) {
-      throw ApiError(409, "You already own this prize");
+      throw UserError(409, "prizes.alreadyOwned");
     }
 
     const balance = await ticketBalance(userId, m);
     if (balance < prize.price) {
-      throw ApiError(402, "Not enough tickets");
+      throw UserError(402, "prizes.notEnough");
     }
 
     await m.save(UnlockEntity, { user: userRef(userId), prizeId: prize.id });

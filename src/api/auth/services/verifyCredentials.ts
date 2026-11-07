@@ -16,10 +16,10 @@ const verifyCredentials = async (data: { username: string; password: string }) =
   //   .where("user.username = :username", { username })
   //   .getOne();
 
-  if (!user) throw ApiError("Email ou mot de passe incorrect");
+  if (!user) throw UserError(400, "auth.badCredentials");
 
   const pwdMatch = bcrypt.compareSync(password, user.password);
-  if (!pwdMatch) throw ApiError("Email ou mot de passe incorrect");
+  if (!pwdMatch) throw UserError(400, "auth.badCredentials");
 
   return user;
 };

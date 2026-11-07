@@ -1,4 +1,5 @@
-import FOOD_BANK from "@/api/food-bank/foodBank";
+import { FOOD_BANKS } from "@/api/food-bank/foodBank";
+import { langOf } from "@/i18n";
 import findList from "@/api/lists/services/findList";
 import { Request, Response } from "express";
 
@@ -8,9 +9,10 @@ import { Request, Response } from "express";
  * main list, so the deck shrinks as the user adds items.
  */
 const browseFoodBank = async (
-  { user }: Request,
+  req: Request,
   res: Response,
 ): Promise<Response> => {
+  const { user } = req;
   if (!user) {
     throw Unauthorized("user");
   }
@@ -26,7 +28,7 @@ const browseFoodBank = async (
     (mainList?.foods ?? []).map((food) => food.name.trim().toLowerCase()),
   );
 
-  const suggestions = FOOD_BANK.filter(
+  const suggestions = FOOD_BANKS[langOf(req)].filter(
     (item) => !existingNames.has(item.name.trim().toLowerCase()),
   );
 

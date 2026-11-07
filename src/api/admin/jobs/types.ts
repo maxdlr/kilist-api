@@ -5,9 +5,16 @@ export type AdminJobResult = {
   summary: string;
 };
 
+export type AdminJobField =
+  | { name: string; label: string; kind: "choice"; options: { value: string; label: string }[] }
+  | { name: string; label: string; kind: "email" };
+
+export type AdminJobInput = Record<string, string>;
+
 export type AdminJob = {
   id: string;
   title: string;
   description: string;
-  run: (m: EntityManager, dryRun: boolean) => Promise<AdminJobResult>;
+  fields?: AdminJobField[];
+  run: (m: EntityManager, dryRun: boolean, input: AdminJobInput) => Promise<AdminJobResult>;
 };

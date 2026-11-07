@@ -136,7 +136,7 @@ describe("versus race", () => {
 
     await expect(
       answerRace(me, view.raceId!, { foodId: outsider.id, answer: "in", ms: 100 }),
-    ).rejects.toThrow("not in the race");
+    ).rejects.toMatchObject({ code: "race.notInRace" });
   });
 
   it("refuses answers after the run is finished", async () => {

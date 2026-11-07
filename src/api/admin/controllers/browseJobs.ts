@@ -5,7 +5,7 @@ import { ADMIN_JOBS } from "../jobs";
 
 const browseJobs = async (_req: Request, res: Response) => {
   const jobs = await Promise.all(
-    ADMIN_JOBS.map(async ({ id, title, description }) => {
+    ADMIN_JOBS.map(async ({ id, title, description, fields }) => {
       const lastRun: AdminJobRunEntity | null =
         await AdminJobRunRepository.findOne({
           where: { jobId: id },
@@ -16,6 +16,7 @@ const browseJobs = async (_req: Request, res: Response) => {
         id,
         title,
         description,
+        fields: fields ?? [],
         lastRun: lastRun && {
           dryRun: lastRun.dryRun,
           affected: lastRun.affected,

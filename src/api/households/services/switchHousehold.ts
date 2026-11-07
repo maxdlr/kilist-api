@@ -38,7 +38,7 @@ const resolveHousehold = async (
   if (input.householdChoice === "join") {
     const household = await findHousehold({ joinCode: input.joinCode }, manager);
     if (!household) {
-      throw ApiError(404, "No household found for this join code");
+      throw UserError(404, "household.codeNotFound");
     }
     return household;
   }
@@ -79,7 +79,7 @@ const switchHousehold = async (
     const household = await resolveHousehold(choice, m);
 
     if (user.household?.id === household.id) {
-      throw ApiError(400, "You are already in this household");
+      throw UserError(400, "household.alreadyMember");
     }
 
     user.household = household;

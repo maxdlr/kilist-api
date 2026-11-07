@@ -7,11 +7,11 @@ const logIn = async ({ body }: Request, res: Response) => {
   const user = await findUser({ username: body.username }, true);
 
   if (!user) {
-    throw ApiError("Email ou mot de passe incorrect");
+    throw UserError(400, "auth.badCredentials");
   }
 
   if (!bcrypt.compareSync(body.password, user.password)) {
-    throw ApiError("Email ou mot de passe incorrect");
+    throw UserError(400, "auth.badCredentials");
   }
 
   const { id, email, username } = user;

@@ -1,3 +1,5 @@
+import findFoodIcon from "@/api/food-bank/findFoodIcon";
+import { FOOD_ICON_ALIASES } from "@/api/food-bank/foodIconAliases";
 import calculateInStockScore from "@/api/foodHistories/services/calculateInStockScore";
 import FoodCategoryEntity from "@/entities/FoodCategory";
 import FoodEntity from "@/entities/FoodEntity";
@@ -92,22 +94,20 @@ const makeFoods = async (
   const categories = await manager.getRepository(FoodCategoryEntity).find();
   // const histories = await foodHistories();
 
+  const names = faker.helpers
+    .shuffle(Object.values(FOOD_ICON_ALIASES).map((aliases) => aliases[0]!))
+    .slice(0, count)
+    .map((alias) => alias.charAt(0).toUpperCase() + alias.slice(1));
+
   const foods = manager.create(
     FoodEntity,
-    Array.from({ length: count }).map(() => {
+    names.map((name) => {
       const food = new FoodEntity();
-      food.name = randomElement([
-        faker.food.vegetable(),
-        faker.food.fruit(),
-        faker.food.ingredient(),
-        faker.food.meat(),
-        faker.food.spice(),
-      ]);
+      food.name = name;
+      food.icon = findFoodIcon(name) ?? null;
       food.inStockScore = 1;
-      // food.foodHistories = histories;
       food.categories = categories;
       food.description = faker.food.description();
-      food.imageUrl = faker.image.urlPicsumPhotos();
       food.household = household;
       return food;
     }),

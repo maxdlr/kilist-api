@@ -30,7 +30,7 @@ const resolveHousehold = async (
       manager,
     );
     if (!household) {
-      throw ApiError(404, "No household found for this join code");
+      throw UserError(404, "household.codeNotFound");
     }
     return household;
   }
@@ -75,7 +75,7 @@ const createUser = async (user: CreateUserInput): Promise<UserEntity> => {
     () => {},
   );
   if (existingUser) {
-    throw ApiError("User already exists");
+    throw UserError(400, "auth.userExists");
   }
 
   const { email, username, password, description } = user;

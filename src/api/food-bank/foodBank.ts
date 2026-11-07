@@ -1,3 +1,4 @@
+import { Lang } from "@/i18n";
 import findFoodIcon from "./findFoodIcon";
 
 /**
@@ -12,7 +13,7 @@ export type FoodBankItem = {
   icon?: string;
 };
 
-const FOOD_BANK: FoodBankItem[] = [
+const ENGLISH_FOODS = [
   "Pasta",
   "Rice",
   "Bread",
@@ -33,6 +34,46 @@ const FOOD_BANK: FoodBankItem[] = [
   "Olive oil",
   "Flour",
   "Sugar",
-].map((name) => ({ name, icon: findFoodIcon(name) }));
+];
+
+const FRENCH_FOODS = [
+  "Pâtes",
+  "Riz",
+  "Baguette",
+  "Pain de mie",
+  "Lait",
+  "Œufs",
+  "Beurre",
+  "Emmental râpé",
+  "Yaourts",
+  "Crème fraîche",
+  "Poulet",
+  "Jambon",
+  "Lardons",
+  "Tomates",
+  "Oignons",
+  "Pommes de terre",
+  "Ail",
+  "Carottes",
+  "Salade",
+  "Pommes",
+  "Bananes",
+  "Café",
+  "Huile d'olive",
+  "Farine",
+  "Sucre",
+  "Moutarde",
+  "Thon en boîte",
+];
+
+const toItems = (names: string[]): FoodBankItem[] =>
+  names.map((name) => ({ name, icon: findFoodIcon(name) }));
+
+export const FOOD_BANKS: Record<Lang, FoodBankItem[]> = {
+  en: toItems(ENGLISH_FOODS),
+  fr: toItems(FRENCH_FOODS),
+};
+
+const FOOD_BANK = FOOD_BANKS.en;
 
 export default FOOD_BANK;

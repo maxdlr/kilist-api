@@ -9,12 +9,12 @@ import ListEntity from "./ListEntity";
 @Entity({ name: "foods" })
 export default class FoodEntity extends AbstractEntity {
   @Column()
-  @IsNotEmpty({ message: "Required" })
+  @IsNotEmpty({ message: "validation.name.required" })
   name!: string;
 
   @Column({ nullable: true })
   @IsOptional()
-  @IsUrl({}, { message: "Invalid URL" })
+  @IsUrl({}, { message: "validation.url.invalid" })
   imageUrl!: string;
 
   @ManyToMany(() => ListEntity, (list) => list.foods, { nullable: true })
