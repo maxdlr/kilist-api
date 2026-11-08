@@ -1,5 +1,6 @@
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import FoodRepository from "@/repositories/FoodRepository";
+import ListRepository from "@/repositories/ListRepository";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { faker } from "@faker-js/faker";
@@ -12,6 +13,8 @@ let household: HouseholdEntity;
 beforeEach(async () => {
   household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
 
+  const list = await ListRepository.save({ title: "Main list", household });
+
   await FoodRepository.save(
     Array.from({ length: 10 }, (_, i) => {
       return FoodRepository.create({
@@ -22,6 +25,7 @@ beforeEach(async () => {
           fractionDigits: 2,
         }),
         household,
+        lists: [list],
       });
     }),
   );

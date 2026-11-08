@@ -3,6 +3,7 @@ import createUser from "@/api/users/services/createUser";
 import FoodEntity from "@/entities/FoodEntity";
 import UserEntity from "@/entities/UserEntity";
 import FoodRepository from "@/repositories/FoodRepository";
+import ListRepository from "@/repositories/ListRepository";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -46,8 +47,9 @@ beforeEach(async () => {
     password: "Str0ng!Passw0rd",
     householdChoice: "create",
   });
+  const list = await ListRepository.findOneByOrFail({ household: { id: user.household.id }, isMain: true });
   [butter, cheese, milk] = (await FoodRepository.save(
-    ["Butter", "Cheese", "Milk"].map((name) => ({ name, inStockScore: 0, household: user.household })),
+    ["Butter", "Cheese", "Milk"].map((name) => ({ name, inStockScore: 0, household: user.household, lists: [list] })),
   )) as [FoodEntity, FoodEntity, FoodEntity];
 });
 

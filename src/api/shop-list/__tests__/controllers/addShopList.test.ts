@@ -3,6 +3,7 @@ import FoodEntity from "@/entities/FoodEntity";
 import { ShopListStatus } from "@/entities/ShopListEntity";
 import UserEntity from "@/entities/UserEntity";
 import FoodRepository from "@/repositories/FoodRepository";
+import ListRepository from "@/repositories/ListRepository";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -25,11 +26,12 @@ const start = async (): Promise<number | null> => {
   return id;
 };
 
-const addFood = (): Promise<FoodEntity> =>
+const addFood = async (): Promise<FoodEntity> =>
   FoodRepository.save({
     name: "Milk",
     inStockScore: 0.5,
     household: user.household,
+    lists: [await ListRepository.findOneByOrFail({ household: { id: user.household.id }, isMain: true })],
   });
 
 beforeEach(async () => {

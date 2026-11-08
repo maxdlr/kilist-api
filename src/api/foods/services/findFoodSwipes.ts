@@ -1,6 +1,6 @@
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager, LessThan } from "typeorm";
+import { EntityManager, IsNull, LessThan, Not } from "typeorm";
 import findAllFoods from "./findAllFoods";
 
 const findFoodSwipes = async (
@@ -24,6 +24,7 @@ const findFoodSwipes = async (
 
       where: {
         household: { id: householdId },
+        lists: { id: Not(IsNull()) },
         inStockScore: LessThan(0.75),
       },
 

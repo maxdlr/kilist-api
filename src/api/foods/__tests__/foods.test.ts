@@ -2,6 +2,7 @@ import FoodEntity from "@/entities/FoodEntity";
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import FoodRepository from "@/repositories/FoodRepository";
+import ListRepository from "@/repositories/ListRepository";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/helpers/random";
@@ -23,6 +24,8 @@ let household: HouseholdEntity;
 beforeEach(async () => {
   household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
 
+  const list = await ListRepository.save({ title: "Main list", household });
+
   foods = await FoodRepository.save(
     Array.from({ length: 300 }).map((_, index) => ({
       name: `Food ${index + 1}`,
@@ -33,6 +36,7 @@ beforeEach(async () => {
         fractionDigits: 2,
       }),
       household,
+      lists: [list],
     })),
   );
 

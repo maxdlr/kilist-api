@@ -2,7 +2,7 @@ import findAllFoods from "@/api/foods/services/findAllFoods";
 import ShopListEntity from "@/entities/ShopListEntity";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager, IsNull, LessThan, Or } from "typeorm";
+import { EntityManager, IsNull, LessThan, Not, Or } from "typeorm";
 
 const createShopList = async (
   householdId: number,
@@ -15,6 +15,7 @@ const createShopList = async (
     {
       where: {
         household: { id: householdId },
+        lists: { id: Not(IsNull()) },
         inStockScore: LessThan(1),
         snoozedUntil: Or(IsNull(), LessThan(new Date())),
       },

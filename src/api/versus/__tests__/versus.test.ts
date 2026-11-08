@@ -5,6 +5,7 @@ import RaceEntity from "@/entities/RaceEntity";
 import ShopListEntity, { ShopListStatus } from "@/entities/ShopListEntity";
 import UserEntity from "@/entities/UserEntity";
 import FoodRepository from "@/repositories/FoodRepository";
+import ListRepository from "@/repositories/ListRepository";
 import RaceRepository from "@/repositories/RaceRepository";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import { AppDataSource } from "@/services/database/datasource";
@@ -54,12 +55,14 @@ beforeEach(async () => {
     householdChoice: "create",
   });
   sam = await join("sam", me.household.joinCode);
+  const list = await ListRepository.findOneByOrFail({ household: { id: me.household.id }, isMain: true });
   foods = await FoodRepository.save(
     Array.from({ length: 12 }, (_, i) =>
       FoodRepository.create({
         name: `Food ${i}`,
         inStockScore: 0.2,
         household: me.household,
+        lists: [list],
       }),
     ),
   );
@@ -160,9 +163,10 @@ describe("versus solo", () => {
       password: "Str0ng!Passw0rd",
       householdChoice: "create",
     });
+    const soloList = await ListRepository.findOneByOrFail({ household: { id: solo.household.id }, isMain: true });
     await FoodRepository.save(
       Array.from({ length: 10 }, (_, i) =>
-        FoodRepository.create({ name: `Solo ${i}`, inStockScore: 0.2, household: solo.household }),
+        FoodRepository.create({ name: `Solo ${i}`, inStockScore: 0.2, household: solo.household, lists: [soloList] }),
       ),
     );
     vi.useFakeTimers({ toFake: ["Date"] });
