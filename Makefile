@@ -7,6 +7,7 @@
 #j for invocation information.
 #m for information during makefile remakes.
 DOCKER = docker
+DOCKER_IMAGE = maxdlr/kilist-api
 MAKEFLAGS += --no-print-directory -s
 #MAKEFLAGS += --debug=v
 # MAKEFLAGS += -s
@@ -32,6 +33,17 @@ prod-down: ## Stop production environment
 
 prod-logs: ## Show production logs
 	docker compose -f docker-compose.prod.yml logs -f
+
+release: ## Build and push the Docker image to Docker Hub (latest + commit SHA)
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "✘ Uncommitted changes: commit them first, the image is tagged with the commit SHA"; \
+		exit 1; \
+	fi
+	@SHA=$$(git rev-parse --short HEAD); \
+	echo "Releasing $(DOCKER_IMAGE):$$SHA from $$(git branch --show-current)..."; \
+	docker buildx build --platform linux/amd64,linux/arm64 \
+		-t $(DOCKER_IMAGE):latest -t $(DOCKER_IMAGE):$$SHA --push . \
+		&& echo "✔ Pushed $(DOCKER_IMAGE):latest and $(DOCKER_IMAGE):$$SHA"
 
 pt: ## Run Posting with the project request collection
 	posting --collection ./request-collection
