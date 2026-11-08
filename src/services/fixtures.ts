@@ -12,7 +12,7 @@ import ListRepository from "@/repositories/ListRepository";
 import ensureAdminUser from "@/services/ensureAdminUser";
 import { makeFakeUsers } from "@/services/fakeUsers";
 import generateJoinCode from "@/utils/generateJoinCode";
-import { randomElement } from "@/utils/helpers";
+import { randomElement } from "@/helpers/random";
 import { faker } from "@faker-js/faker";
 import { randomInt } from "crypto";
 import { EntityManager } from "typeorm";

@@ -1,10 +1,15 @@
-import type RefreshTokenEntity from "@/entities/RefreshTokenEntity";
+import RefreshTokenEntity from "@/entities/RefreshTokenEntity";
 import RefreshTokenRepository from "@/repositories/RefreshTokenRepository";
+import findManager from "@/utils/findManager";
+import { EntityManager } from "typeorm";
 
 const revokeAllRefreshTokenByUserId = async (
   userId: number,
   reason: RefreshTokenEntity["revokedReason"],
+  manager?: EntityManager,
 ) => {
+  const m = findManager(RefreshTokenRepository, manager);
+
   if (!userId) {
     throw ApiError("User ID is required to revoke refresh tokens");
   }
@@ -13,7 +18,8 @@ const revokeAllRefreshTokenByUserId = async (
     throw ApiError("Reason is required to revoke refresh tokens");
   }
 
-  return await RefreshTokenRepository.update(
+  return await m.update(
+    RefreshTokenEntity,
     { userId: userId },
     {
       revokedOn: new Date(),

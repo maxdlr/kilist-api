@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import getSwipeGame, { parseTzOffset } from "../services/getSwipeGame";
+import { parseTzOffset } from "@/helpers/localDay";
+import getSwipeGame from "../services/getSwipeGame";
 
 const readSwipeGame = async ({ query, user }: Request, res: Response) => {
   const game = await getSwipeGame(

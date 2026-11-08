@@ -1,6 +1,6 @@
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import UserEntity from "@/entities/UserEntity";
-import doTransaction from "@/utils/doTransaction";
+import inTransaction from "@/helpers/inTransaction";
 import { EntityManager } from "typeorm";
 import createHousehold from "./createHousehold";
 import findHousehold from "./findHousehold";
@@ -59,6 +59,7 @@ const resolveHousehold = async (
 const switchHousehold = async (
   userId: number,
   choice: unknown,
+  manager?: EntityManager,
 ): Promise<HouseholdEntity> => {
   if (!isValidHouseholdChoice(choice)) {
     throw ApiError(
@@ -67,7 +68,7 @@ const switchHousehold = async (
     );
   }
 
-  return await doTransaction(async (m) => {
+  return await inTransaction(manager, async (m) => {
     const user = await m.findOne(UserEntity, {
       where: { id: userId },
       relations: ["household"],

@@ -1,3 +1,4 @@
+import doTransaction from "@/utils/doTransaction";
 import { NextFunction, Request, Response } from "express";
 import checkRefreshToken from "../services/checkRefreshToken";
 import rotateRefreshToken from "../services/rotateRefreshToken";
@@ -15,29 +16,32 @@ const getRefreshToken = async (
     return next(Unauthorized());
   }
 
-  // Validate refresh token in DB
-  const response: any = await checkRefreshToken(refreshToken);
+  const refreshed = await doTransaction(async (m) => {
+    // Validate refresh token in DB
+    const response: any = await checkRefreshToken(refreshToken, m);
 
-  if (!response?.decoded) {
+    if (!response?.decoded) {
+      return null;
+    }
+
+    // Rotate refresh token to prevent replay attacks
+    const rotated = await rotateRefreshToken(refreshToken, "token-replaced", m);
+
+    return { decoded: response.decoded, ...rotated };
+  });
+
+  if (!refreshed) {
     return next(Unauthorized());
   }
 
-  const decoded = response.decoded;
-
   //  All good, issue a new access token, rotate refresh token and let the user know
   const payload = {
-    ...decoded,
+    ...refreshed.decoded,
   };
   delete payload.iat;
   delete payload.exp;
 
-  // Rotate refresh token to prevent replay attacks
-  const { newRefreshToken, refreshTokenMaxAge } = await rotateRefreshToken(
-    refreshToken,
-    "token-replaced",
-  );
-
-  setCookie(res, `refresh`, newRefreshToken, refreshTokenMaxAge);
+  setCookie(res, `refresh`, refreshed.newRefreshToken, refreshed.refreshTokenMaxAge);
 
   const token = deliverJwtToken(payload, "4m");
 

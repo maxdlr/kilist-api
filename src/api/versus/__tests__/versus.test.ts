@@ -9,9 +9,12 @@ import RaceRepository from "@/repositories/RaceRepository";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import { AppDataSource } from "@/services/database/datasource";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { answerRace, raceView } from "../services/race";
-import { houseVotes, shopRecords } from "../services/shop";
-import { meStats, standings } from "../services/stats";
+import answerRace from "../services/answerRace";
+import houseVotes from "../services/houseVotes";
+import meStats from "../services/meStats";
+import raceView from "../services/raceView";
+import shopRecords from "../services/shopRecords";
+import standings from "../services/standings";
 
 let me: UserEntity;
 let sam: UserEntity;

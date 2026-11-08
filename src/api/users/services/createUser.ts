@@ -2,7 +2,7 @@ import createHousehold from "@/api/households/services/createHousehold";
 import findHousehold from "@/api/households/services/findHousehold";
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import UserEntity from "@/entities/UserEntity";
-import doTransaction from "@/utils/doTransaction";
+import inTransaction from "@/helpers/inTransaction";
 import validateCrudPayload from "@/services/validateCrudPayload";
 import PasswordCheck from "@/utils/PasswordCheck";
 import { validate } from "class-validator";
@@ -63,7 +63,10 @@ const isValidHouseholdChoice = (input: unknown): input is HouseholdChoice => {
  * @param user - User details plus the household join/create choice
  * @returns The newly created user
  */
-const createUser = async (user: CreateUserInput): Promise<UserEntity> => {
+const createUser = async (
+  user: CreateUserInput,
+  manager?: EntityManager,
+): Promise<UserEntity> => {
   if (!isValidHouseholdChoice(user)) {
     throw ApiError(
       400,
@@ -71,7 +74,7 @@ const createUser = async (user: CreateUserInput): Promise<UserEntity> => {
     );
   }
 
-  const existingUser = await findUser({ username: user.username }).catch(
+  const existingUser = await findUser({ username: user.username }, false, manager).catch(
     () => {},
   );
   if (existingUser) {
@@ -85,7 +88,7 @@ const createUser = async (user: CreateUserInput): Promise<UserEntity> => {
   pwCheck.password = password;
   const pwErrors = await validate(pwCheck);
 
-  return await doTransaction(async (m) => {
+  return await inTransaction(manager, async (m) => {
     const household = await resolveHousehold(user, m);
 
     const userEntity = new UserEntity();

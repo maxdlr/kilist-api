@@ -9,11 +9,10 @@ import getMostLikelyNextFoods from "@/api/frequencies/services/getMostLikelyNext
 import findAllFoods from "@/api/foods/services/findAllFoods";
 import FoodEntity from "@/entities/FoodEntity";
 import findShopList from "../services/findShopList";
+import { SAME_TRIP_MS } from "../helpers";
 import updateShopList from "../services/updateShopList";
 
-export const SAME_TRIP_MS = 30 * 60 * 1000;
-
-export enum EditShopAction {
+enum EditShopAction {
   BUY = "buy",
   SNOOZE = "snooze",
 }

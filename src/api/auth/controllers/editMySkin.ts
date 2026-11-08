@@ -1,7 +1,8 @@
+import skinAccess from "@/api/prizes/services/skinAccess";
 import findUser from "@/api/users/services/findUser";
+import updateUserColumns from "@/api/users/services/updateUserColumns";
 import { SKIN_PATTERN } from "@/entities/UserEntity";
-import { skinAccess } from "@/api/prizes/services/tickets";
-import UserRepository from "@/repositories/UserRepository";
+import doTransaction from "@/utils/doTransaction";
 import type { Request, Response } from "express";
 
 const editMySkin = async ({ body, user }: Request, res: Response) => {
@@ -14,17 +15,21 @@ const editMySkin = async ({ body, user }: Request, res: Response) => {
     throw ApiError("skin must be a lowercase skin id");
   }
 
-  const access = await skinAccess(user.id, skin, undefined, user.type === "admin");
-  if (access === "unknown") {
-    throw UserError(400, "skins.unknown");
-  }
-  if (access === "locked") {
-    throw UserError(403, "skins.locked");
-  }
+  const updated = await doTransaction(async (m) => {
+    const access = await skinAccess(user.id, skin, m, user.type === "admin");
+    if (access === "unknown") {
+      throw UserError(400, "skins.unknown");
+    }
+    if (access === "locked") {
+      throw UserError(403, "skins.locked");
+    }
 
-  await UserRepository.update(user.id, { skin });
+    await updateUserColumns(user.id, { skin }, m);
 
-  return res.status(200).send(await findUser({ id: user.id }));
+    return findUser({ id: user.id }, false, m);
+  });
+
+  return res.status(200).send(updated);
 };
 
 export default editMySkin;

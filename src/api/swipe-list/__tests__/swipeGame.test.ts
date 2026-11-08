@@ -6,7 +6,8 @@ import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import completeSwipeList from "../controllers/completeSwipeList";
 import readSwipeGame from "../controllers/readSwipeGame";
-import getSwipeGame, { parseTzOffset } from "../services/getSwipeGame";
+import { parseTzOffset } from "@/helpers/localDay";
+import getSwipeGame from "../services/getSwipeGame";
 
 const DAY = 24 * 3600000;
 let user: UserEntity;

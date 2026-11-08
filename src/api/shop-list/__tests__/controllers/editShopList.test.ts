@@ -6,7 +6,8 @@ import FoodRepository from "@/repositories/FoodRepository";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
-import editShopList, { SAME_TRIP_MS } from "../../controllers/editShopList";
+import editShopList from "../../controllers/editShopList";
+import { SAME_TRIP_MS } from "../../helpers";
 import createShopList from "../../services/createShopList";
 
 let user: UserEntity;

@@ -4,7 +4,7 @@ import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import FoodRepository from "@/repositories/FoodRepository";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
 import generateJoinCode from "@/utils/generateJoinCode";
-import { randomElement } from "@/utils/helpers";
+import { randomElement } from "@/helpers/random";
 import { faker } from "@faker-js/faker";
 import { beforeEach, expect, test } from "vitest";
 import findAllFoods from "../services/findAllFoods";

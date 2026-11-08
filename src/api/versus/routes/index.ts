@@ -1,13 +1,11 @@
 import authenticate from "@/middlewares/authenticate";
 import { Router } from "express";
-import {
-  answerRaceFood,
-  readMe,
-  readRace,
-  readShop,
-  readStandings,
-  readVotes,
-} from "../controllers";
+import answerRaceFood from "../controllers/answerRaceFood";
+import readMe from "../controllers/readMe";
+import readRace from "../controllers/readRace";
+import readShop from "../controllers/readShop";
+import readStandings from "../controllers/readStandings";
+import readVotes from "../controllers/readVotes";
 
 const router = Router();
 

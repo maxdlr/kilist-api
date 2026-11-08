@@ -1,15 +1,19 @@
 import findUser from "@/api/users/services/findUser";
 import bcrypt from "bcrypt";
+import { EntityManager } from "typeorm";
 import validateSignIn from "./validateSignIn";
 
-const verifyCredentials = async (data: { username: string; password: string }) => {
+const verifyCredentials = async (
+  data: { username: string; password: string },
+  manager?: EntityManager,
+) => {
   data.username = data.username.trim().toLowerCase();
   const { error } = validateSignIn(data);
   if (error) throw error;
 
   const { username, password } = data;
 
-  const user = await findUser({ username }, true);
+  const user = await findUser({ username }, true, manager);
 
   // const user = await UserRepository.createQueryBuilder("user")
   //   .addSelect("user._password")

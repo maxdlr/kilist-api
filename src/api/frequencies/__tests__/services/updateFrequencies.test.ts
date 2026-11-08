@@ -5,7 +5,7 @@ import FoodRepository from "@/repositories/FoodRepository";
 import FrequencyRepository from "@/repositories/FrequencyRepository";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
 import generateJoinCode from "@/utils/generateJoinCode";
-import { randomElement } from "@/utils/helpers";
+import { randomElement } from "@/helpers/random";
 import { beforeEach, describe, expect, test } from "vitest";
 import updateFrequencies from "../../services/updateFrequencies";
 import getMostLikelyNextFoods from "../../services/getMostLikelyNextFood";

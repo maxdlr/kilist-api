@@ -1,4 +1,4 @@
-import { adminStats } from "@/api/admin/services/stats";
+import adminStats from "@/api/admin/services/stats/adminStats";
 import UserEntity from "@/entities/UserEntity";
 import { AppDataSource } from "@/services/database/datasource";
 import { describe, expect, it, vi } from "vitest";

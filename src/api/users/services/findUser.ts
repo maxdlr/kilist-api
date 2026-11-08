@@ -1,5 +1,7 @@
 import UserEntity from "@/entities/UserEntity";
 import UserRepository from "@/repositories/UserRepository";
+import findManager from "@/utils/findManager";
+import { EntityManager } from "typeorm";
 
 const findUser = async (
   {
@@ -8,7 +10,9 @@ const findUser = async (
     email,
   }: Partial<Pick<UserEntity, "id" | "username" | "email">>,
   withPassword: boolean = false,
+  manager?: EntityManager,
 ): Promise<UserEntity> => {
+  const m = findManager(UserRepository, manager);
   let user!: UserEntity | null;
 
   if (withPassword) {
@@ -21,12 +25,13 @@ const findUser = async (
           ? { email }
           : {};
 
-    user = await UserRepository.createQueryBuilder("user")
+    user = await m
+      .createQueryBuilder(UserEntity, "user")
       .addSelect("user._password")
       .where(alias, value)
       .getOne();
   } else {
-    user = await UserRepository.findOne({
+    user = await m.findOne(UserEntity, {
       where: id
         ? { id: Number(id) }
         : username

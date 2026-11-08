@@ -2,6 +2,8 @@ import RefreshTokenEntity from "@/entities/RefreshTokenEntity";
 import checkRefreshToken from "./checkRefreshToken";
 import deliverJwtToken from "./deliverJwtToken";
 import RefreshTokenRepository from "@/repositories/RefreshTokenRepository";
+import findManager from "@/utils/findManager";
+import { EntityManager } from "typeorm";
 
 const refreshSecret = process.env.JWT_REFRESH_SECRET;
 
@@ -14,15 +16,17 @@ const refreshSecret = process.env.JWT_REFRESH_SECRET;
 const rotateRefreshToken = async (
   token: string,
   reason: RefreshTokenEntity["revokedReason"],
+  manager?: EntityManager,
 ) => {
+  const m = findManager(RefreshTokenRepository, manager);
   const { decoded: jwtPayload, refreshToken: refreshTokenDocument }: any =
-    await checkRefreshToken(token);
+    await checkRefreshToken(token, m);
 
   // 1. Revoke old token
   refreshTokenDocument.revokedReason = reason;
   refreshTokenDocument.revokedOn = new Date();
 
-  await RefreshTokenRepository.save(refreshTokenDocument);
+  await m.save(RefreshTokenEntity, refreshTokenDocument);
   // await refreshTokenDocument.save();
 
   // 2. Prepare payload (remove old JWT metadata)
@@ -46,7 +50,7 @@ const rotateRefreshToken = async (
 
   // 5. Create new DB record
 
-  const newRefreshTokenDocument = await RefreshTokenRepository.save({
+  const newRefreshTokenDocument = await m.save(RefreshTokenEntity, {
     token: newRefreshToken,
     expireOn,
     userId: jwtPayload.id,
@@ -56,7 +60,7 @@ const rotateRefreshToken = async (
 
   // 6. Link oldRecord → newRecord
   refreshTokenDocument.rotatedTo = newRefreshTokenDocument.id;
-  await RefreshTokenRepository.save(refreshTokenDocument);
+  await m.save(RefreshTokenEntity, refreshTokenDocument);
 
   return {
     newRefreshToken,

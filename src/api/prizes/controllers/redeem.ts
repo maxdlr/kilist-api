@@ -1,6 +1,6 @@
 import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
-import { redeemPrize } from "../services/tickets";
+import redeemPrize from "../services/redeemPrize";
 
 const redeem = async ({ params, user }: Request, res: Response) => {
   const prizeId = String(params.id ?? "");

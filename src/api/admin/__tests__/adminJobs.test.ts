@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 import type { Server } from "http";
 import type { AddressInfo } from "net";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import runAdminJob from "../services/runAdminJob";
+import runAdminJob from "../services/jobs/runAdminJob";
 
 let admin: UserEntity;
 let server: Server;

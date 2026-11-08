@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rankByName } from "../foodSearch";
+import { rankByName } from "../helpers";
 
 const foods = ["Milk", "MILK", "milk ", "Oat milk", "Pineapple", "Pine apple", "Apple", "Pâtes", "Lait", "Ananas", "Pineaple"].map((name, index) => ({
   id: index + 1,

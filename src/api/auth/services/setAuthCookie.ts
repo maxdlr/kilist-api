@@ -1,9 +1,14 @@
 import { Response } from "express";
+import { EntityManager } from "typeorm";
 import deliverJwtToken from "./deliverJwtToken";
 import setCookie from "./setCookie";
 import createRefreshToken from "./createRefreshToken";
 
-const setAuthCookies = async (res: Response, payload: any) => {
+const setAuthCookies = async (
+  res: Response,
+  payload: any,
+  manager?: EntityManager,
+) => {
   const refreshSecret = process.env.JWT_REFRESH_SECRET;
 
   if (!refreshSecret) {
@@ -27,7 +32,7 @@ const setAuthCookies = async (res: Response, payload: any) => {
   setCookie(res, refreshTokenName, refreshToken, refreshTokenMaxAge);
 
   const userId = payload.id || payload.id;
-  await createRefreshToken(refreshToken, userId);
+  await createRefreshToken(refreshToken, userId, manager);
 
   return { accessToken, refreshToken };
 };

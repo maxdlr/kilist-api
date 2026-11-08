@@ -7,13 +7,11 @@ import TicketEntryRepository from "@/repositories/TicketEntryRepository";
 import { Request, Response } from "express";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import editFoods from "@/api/foods/controllers/editFoods";
-import {
-  awardSwipe,
-  prizeCounter,
-  redeemPrize,
-  skinAccess,
-  ticketBalance,
-} from "../services/tickets";
+import awardSwipe from "../services/awardSwipe";
+import prizeCounter from "../services/prizeCounter";
+import redeemPrize from "../services/redeemPrize";
+import skinAccess from "../services/skinAccess";
+import ticketBalance from "../services/ticketBalance";
 
 let user: UserEntity;
 let foods: FoodEntity[];

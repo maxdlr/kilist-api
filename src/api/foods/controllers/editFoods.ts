@@ -1,6 +1,6 @@
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
 import findFood from "@/api/foods/services/findFood";
-import { awardSwipe } from "@/api/prizes/services/tickets";
+import awardSwipe from "@/api/prizes/services/awardSwipe";
 import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
 import { EntityManager } from "typeorm";
