@@ -9,6 +9,9 @@ import addMember from "../controllers/households/addMember";
 import addUser from "../controllers/users/addUser";
 import adjustPoints from "../controllers/users/adjustPoints";
 import browseActions from "../controllers/stats/browseActions";
+import browseEmailHistory from "../controllers/emails/browseEmailHistory";
+import browseEmailTemplates from "../controllers/emails/browseEmailTemplates";
+import readEmailTemplate from "../controllers/emails/readEmailTemplate";
 import browseFoods from "../controllers/foods/browseFoods";
 import browseHouseholds from "../controllers/households/browseHouseholds";
 import browseJobs from "../controllers/jobs/browseJobs";
@@ -71,6 +74,10 @@ router.post("/households/:id/join-code", ...admin, [newJoinCode]);
 router.post("/households/:id/members", ...admin, [addMember]);
 router.delete("/households/:id/members/:userId", ...admin, [removeMember]);
 router.delete("/households/:id", ...admin, [deleteHousehold]);
+
+router.get("/emails/templates", ...admin, [browseEmailTemplates]);
+router.get("/emails/templates/:id", ...admin, [readEmailTemplate]);
+router.get("/emails/history", ...admin, [browseEmailHistory]);
 
 router.get("/foods", ...admin, [browseFoods]);
 router.post("/foods", ...admin, [addFood]);

@@ -14,6 +14,7 @@ import TicketEntryEntity from "@/entities/TicketEntryEntity";
 import UnlockEntity from "@/entities/UnlockEntity";
 import AdminJobRunEntity from "@/entities/AdminJobRunEntity";
 import AdminActionEntity from "@/entities/AdminActionEntity";
+import EmailLogEntity from "@/entities/EmailLogEntity";
 import RaceEntity from "@/entities/RaceEntity";
 import RaceRunEntity from "@/entities/RaceRunEntity";
 
@@ -45,6 +46,7 @@ export const AppDataSource = new DataSource({
     UnlockEntity,
     AdminJobRunEntity,
     AdminActionEntity,
+    EmailLogEntity,
     RaceEntity,
     RaceRunEntity,
   ],
