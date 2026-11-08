@@ -10,6 +10,8 @@ import RaceRepository from "@/repositories/RaceRepository";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import { AppDataSource } from "@/services/database/datasource";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import startShopClock from "@/api/shop-list/controllers/startShopClock";
+import { Request, Response } from "express";
 import answerRace from "../services/answerRace";
 import houseVotes from "../services/houseVotes";
 import meStats from "../services/meStats";
@@ -234,6 +236,20 @@ describe("versus shop", () => {
         })),
       } as Partial<ShopListEntity>),
     );
+
+  it("times a run from the moment the clock was started", async () => {
+    const list = await shop(me, [foods[0]!], 90);
+    const res = { status: () => ({ end: () => undefined }) } as unknown as Response;
+
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-03-10T11:00:00Z"));
+    await startShopClock({ params: { id: String(list.id) }, user: me } as unknown as Request, res);
+    vi.useRealTimers();
+
+    const records = await shopRecords(me);
+
+    expect(records.myBest?.ms).toBe(30 * 60000);
+  });
 
   it("finds the house record and your best run", async () => {
     await shop(sam, [foods[0]!, foods[1]!], 9);

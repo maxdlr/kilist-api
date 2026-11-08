@@ -198,7 +198,7 @@ describe("prizes", () => {
   });
 
   it("redeems a prize and spends the tickets", async () => {
-    await grant(600);
+    await grant(1100);
     const counter = await redeemPrize(user.id, "skin:roast");
 
     expect(counter.balance).toBe(100);
@@ -208,16 +208,16 @@ describe("prizes", () => {
   });
 
   it("refuses a prize you can't afford", async () => {
-    await grant(499);
+    await grant(999);
 
     await expect(redeemPrize(user.id, "skin:roast")).rejects.toMatchObject({
       status: 402,
     });
-    expect(await ticketBalance(user.id)).toBe(499);
+    expect(await ticketBalance(user.id)).toBe(999);
   });
 
   it("lets only one of two parallel redeems through", async () => {
-    await grant(600);
+    await grant(1100);
     const results = await Promise.allSettled([
       redeemPrize(user.id, "skin:roast"),
       redeemPrize(user.id, "skin:roast"),

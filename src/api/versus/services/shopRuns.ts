@@ -14,7 +14,7 @@ const shopRuns = async (householdId: number, manager?: EntityManager) => {
   return lists
     .filter((list) => (list.boughtFoods as FoodEntity[]).length > 0 && list.createdAt && list.endedAt)
     .map((list) => {
-      const start = list.createdAt!.getTime();
+      const start = (list.startedAt ?? list.createdAt!).getTime();
       return {
         id: list.id,
         userId: list.user!.id,

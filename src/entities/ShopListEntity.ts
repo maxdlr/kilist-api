@@ -27,6 +27,9 @@ export default class ShopListEntity extends AbstractEntity {
   @JoinTable()
   startFoods!: FoodEntity[] | number[];
 
+  @Column({ type: "datetime", nullable: true })
+  startedAt?: Date | null;
+
   @Column({ nullable: true })
   endedAt?: Date;
 
