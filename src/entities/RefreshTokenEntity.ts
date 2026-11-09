@@ -3,7 +3,7 @@ import { AbstractEntity } from "./AbstractEntity";
 
 @Entity({ name: "refreshToken" })
 export default class RefreshTokenEntity extends AbstractEntity {
-  @Column({ nullable: false })
+  @Column({ type: "varchar", length: 2048, nullable: false })
   token!: string;
 
   @Column({ nullable: false })

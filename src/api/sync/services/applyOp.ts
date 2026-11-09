@@ -12,12 +12,15 @@ import updateShopList from "@/api/shop-list/services/updateShopList";
 import completeSwipeDay from "@/api/swipe-list/services/completeSwipeDay";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import answerRace from "@/api/versus/services/answerRace";
+import getOrCreateRace from "@/api/versus/services/getOrCreateRace";
 import FoodEntity from "@/entities/FoodEntity";
 import UserEntity, { SKIN_PATTERN } from "@/entities/UserEntity";
 import { parseTzOffset } from "@/helpers/localDay";
 import { isLang } from "@/i18n";
 import { EntityManager, IsNull } from "typeorm";
 import { MAX_REWARD_AGE_MS, SyncOpInput } from "../helpers";
+
+const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 const raceFallback = (error: unknown) =>
   isApiError(error) && (error.status === 404 || error.code === "race.notInRace");
@@ -63,7 +66,15 @@ const applyOp = async (
 
     case "race.answer": {
       const foodId = resolve(payload.foodId);
-      const raceId = Number(payload.raceId);
+      let raceId = Number(payload.raceId);
+      if (raceId < 0 && DAY_PATTERN.test(String(payload.day))) {
+        const deck = (Array.isArray(payload.foodIds) ? payload.foodIds : [])
+          .map(Number)
+          .filter((id: number) => id > 0 || ids[String(id)] !== undefined)
+          .map(resolve);
+        const race = await getOrCreateRace(householdId, payload.day, m, deck);
+        raceId = race?.id ?? raceId;
+      }
       if (raceId > 0) {
         try {
           await answerRace(

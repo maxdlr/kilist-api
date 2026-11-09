@@ -10,6 +10,7 @@ import createUser from "@/api/users/services/createUser";
 import getOrCreateRace from "@/api/versus/services/getOrCreateRace";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
+import RaceEntity from "@/entities/RaceEntity";
 import RaceRunEntity from "@/entities/RaceRunEntity";
 import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
@@ -289,12 +290,90 @@ describe("offline races", () => {
     expect(run.answers).toEqual([{ foodId: milk.id, answer: "out", ms: 900 }]);
   });
 
-  it("keeps a ghost race's answers as swipes without ranking them", async () => {
+  const ghost = (food: FoodEntity, deck: FoodEntity[], day = "2026-01-02") =>
+    op("race.answer", {
+      raceId: -1,
+      day,
+      foodIds: deck.map((entry) => entry.id),
+      foodId: food.id,
+      answer: "out",
+      ms: 900,
+    });
+
+  it("turns an offline deck into the day's real race, and finishes the run", async () => {
+    await sync([ghost(milk, [milk, eggs]), ghost(eggs, [milk, eggs])]);
+
+    const race = await AppDataSource.manager.findOneByOrFail(RaceEntity, { day: "2026-01-02" });
+    expect(race.foodIds.sort()).toEqual([milk.id, eggs.id].sort());
+    const run = await AppDataSource.manager.findOneByOrFail(RaceRunEntity, { race: { id: race.id } });
+    expect(run.totalMs).toBe(1800);
+    expect(run.finishedAt).toBeTruthy();
+    expect(await ticketBalance(user.id)).toBe(25);
+  });
+
+  it("keeps offline answers as swipes when a housemate's race has other foods", async () => {
+    const tea = await FoodRepository.save({
+      name: "Tea",
+      inStockScore: 0.5,
+      household: user.household,
+      lists: [list],
+    });
+    await AppDataSource.manager.save(RaceEntity, {
+      household: { id: user.household.id },
+      day: "2026-01-02",
+      foodIds: [tea.id],
+    });
+
+    const result = await sync([ghost(milk, [milk, eggs])]);
+
+    expect(result.acks[0].status).toBe("applied");
+    expect(await AppDataSource.manager.count(RaceRunEntity)).toBe(0);
+    expect(await historiesOf(milk)).toHaveLength(1);
+    expect(await ticketBalance(user.id)).toBe(10);
+  });
+
+  it("joins a housemate's race when the foods match", async () => {
+    const race = await AppDataSource.manager.save(RaceEntity, {
+      household: { id: user.household.id },
+      day: "2026-01-02",
+      foodIds: [milk.id, eggs.id],
+    });
+
+    await sync([ghost(milk, [milk, eggs])]);
+
+    const run = await AppDataSource.manager.findOneByOrFail(RaceRunEntity, { race: { id: race.id } });
+    expect(run.answers).toHaveLength(1);
+  });
+
+  it("ignores a forged deck from another household", async () => {
+    const stranger = await createUser({
+      username: "stranger",
+      email: "stranger@example.com",
+      password: "Str0ng!Passw0rd",
+      householdChoice: "create",
+    });
+    const theirs = await FoodRepository.save({ name: "Theirs", household: stranger.household });
+
+    await sync([
+      op("race.answer", {
+        raceId: -1,
+        day: "2026-01-03",
+        foodIds: [theirs.id, milk.id],
+        foodId: milk.id,
+        answer: "out",
+        ms: 900,
+      }),
+    ]);
+
+    const race = await AppDataSource.manager.findOneByOrFail(RaceEntity, { day: "2026-01-03" });
+    expect(race.foodIds).toEqual([milk.id]);
+  });
+
+  it("still keeps the swipe when an old client sends no deck", async () => {
     await sync([op("race.answer", { raceId: -1, foodId: milk.id, answer: "out", ms: 900 })]);
 
     expect(await AppDataSource.manager.count(RaceRunEntity)).toBe(0);
     expect(await historiesOf(milk)).toHaveLength(1);
-    expect(await ticketBalance(user.id)).toBe(10);
   });
 });
 
@@ -348,7 +427,11 @@ describe("pulling the household", () => {
 
 describe("refresh tokens on a bad connection", () => {
   const issue = async () => {
-    const token = deliverJwtToken({ id: user.id }, "15d", process.env.JWT_REFRESH_SECRET);
+    const token = deliverJwtToken(
+      { id: user.id, email: `${"long-address".repeat(10)}@example.com`, username: user.username },
+      "15d",
+      process.env.JWT_REFRESH_SECRET,
+    );
     await createRefreshToken(token, user.id);
     return token;
   };
