@@ -1,3 +1,4 @@
+import importGuestData from "@/api/sync/services/importGuestData";
 import createUser from "@/api/users/services/createUser";
 import doTransaction from "@/utils/doTransaction";
 import { Request, Response } from "express";
@@ -8,6 +9,10 @@ const signUp = async ({ body }: Request, res: Response) => {
 
   await doTransaction(async (m) => {
     const user = await createUser(body, m);
+
+    if (body.guest) {
+      await importGuestData(user, body.guest, m, { withPreferences: true });
+    }
 
     const cookiePayload: any = {
       id: user.id,

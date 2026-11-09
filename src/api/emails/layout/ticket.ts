@@ -106,7 +106,7 @@ ${lead ? `<p style="margin:0 0 16px;font-family:${t.leadFont};font-size:${t.lead
 ${paragraphs.map((value, index) => paragraph(value, index === 0 ? 17 : 15, t)).join("\n")}
 ${button ? buttonOf(button, t) : ""}
 ${closing ? paragraph(closing, 15, t) : ""}
-<p style="margin:0;font-family:${t.bodyFont};font-size:13px;line-height:1.5;color:${t.footerInk};">${escapeHtml(footer)}${footerLink ? ` <a href="${escapeHtml(footerLink.url)}" style="color:${t.footerInk};">${escapeHtml(footerLink.label)}</a>` : ""}</p>
+<p style="margin:0;font-family:${t.bodyFont};font-size:13px;line-height:1.5;color:${t.footerInk};">${escapeHtml(footer).replace(/[^\s@]+@[^\s@]+\.[a-z]{2,}/gi, (address) => `<a href="mailto:${address}" style="color:${t.footerInk};text-decoration:none;">${address}</a>`)}${footerLink ? ` <a href="${escapeHtml(footerLink.url)}" style="color:${t.footerInk};">${escapeHtml(footerLink.label)}</a>` : ""}</p>
 </td></tr>
 </table>
 </td></tr>

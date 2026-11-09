@@ -31,6 +31,7 @@ import newJoinCode from "../controllers/households/newJoinCode";
 import readFood from "../controllers/foods/readFood";
 import readHousehold from "../controllers/households/readHousehold";
 import readList from "../controllers/lists/readList";
+import readInstallStats from "../controllers/stats/readInstallStats";
 import readStats from "../controllers/stats/readStats";
 import readUser from "../controllers/users/readUser";
 import removeListFood from "../controllers/lists/removeListFood";
@@ -51,6 +52,7 @@ router.get("/jobs", ...admin, [browseJobs]);
 router.post("/jobs/:id/run", ...admin, [runJob]);
 
 router.get("/stats", ...admin, [readStats]);
+router.get("/installs", ...admin, [readInstallStats]);
 router.get("/actions", ...admin, [browseActions]);
 
 router.get("/users", ...admin, [browseUsers]);

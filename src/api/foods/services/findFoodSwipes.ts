@@ -1,7 +1,10 @@
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager, IsNull, LessThan, Not } from "typeorm";
+import { EntityManager, IsNull, Not } from "typeorm";
 import findAllFoods from "./findAllFoods";
+
+const SWIPE_BELOW = 0.75;
+const STALE_DAYS = 7;
 
 const findFoodSwipes = async (
   householdId: number,
@@ -25,7 +28,6 @@ const findFoodSwipes = async (
       where: {
         household: { id: householdId },
         lists: { id: Not(IsNull()) },
-        inStockScore: LessThan(0.75),
       },
 
       order: { inStockScore: "DESC" },
@@ -55,7 +57,18 @@ const findFoodSwipes = async (
     return latestFoodHistory.createdAt < new Date(Date.now() - 24 * 3600000);
   });
 
-  return eligibleFoods.slice(0, take);
+  const lastActivity = (food: (typeof foods)[number]) =>
+    Math.max(
+      food.lastBoughtAt?.getTime() ?? 0,
+      ...(food.foodHistories ?? []).map((history) => history.createdAt?.getTime() ?? 0),
+    );
+  const staleBefore = Date.now() - STALE_DAYS * 24 * 3600000;
+  const low = eligibleFoods.filter((food) => food.inStockScore < SWIPE_BELOW);
+  const stale = eligibleFoods
+    .filter((food) => food.inStockScore >= SWIPE_BELOW && lastActivity(food) < staleBefore)
+    .sort((a, b) => lastActivity(a) - lastActivity(b));
+
+  return [...low, ...stale].slice(0, take);
 };
 
 export default findFoodSwipes;

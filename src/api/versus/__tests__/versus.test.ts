@@ -265,7 +265,7 @@ describe("versus shop", () => {
 
 describe("versus race creation", () => {
   it("returns no race when nothing needs checking", async () => {
-    await FoodRepository.update({ household: { id: me.household.id } }, { inStockScore: 1 });
+    await FoodRepository.update({ household: { id: me.household.id } }, { inStockScore: 1, lastBoughtAt: new Date() });
 
     const view = await raceView(me, 0);
 

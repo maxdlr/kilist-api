@@ -42,6 +42,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 /**
  * 4 - Body Parser
  */
+app.use(["/api/signup", "/api/sync/import"], express.json({ limit: "5mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

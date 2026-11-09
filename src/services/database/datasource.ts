@@ -18,6 +18,7 @@ import EmailLogEntity from "@/entities/EmailLogEntity";
 import RaceEntity from "@/entities/RaceEntity";
 import RaceRunEntity from "@/entities/RaceRunEntity";
 import SyncOpEntity from "@/entities/SyncOpEntity";
+import InstallStatEntity from "@/entities/InstallStatEntity";
 
 export const AppDataSource = new DataSource({
   type: "mariadb",
@@ -51,6 +52,7 @@ export const AppDataSource = new DataSource({
     RaceEntity,
     RaceRunEntity,
     SyncOpEntity,
+    InstallStatEntity,
   ],
   migrations: [__dirname + "/../../migrations/**/*.{ts,js}"],
   subscribers: [],
