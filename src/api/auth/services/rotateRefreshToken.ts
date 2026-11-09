@@ -3,6 +3,7 @@ import checkRefreshToken from "./checkRefreshToken";
 import deliverJwtToken from "./deliverJwtToken";
 import RefreshTokenRepository from "@/repositories/RefreshTokenRepository";
 import findManager from "@/utils/findManager";
+import { randomUUID } from "crypto";
 import { EntityManager } from "typeorm";
 
 const refreshSecret = process.env.JWT_REFRESH_SECRET;
@@ -22,6 +23,13 @@ const rotateRefreshToken = async (
   const { decoded: jwtPayload, refreshToken: refreshTokenDocument }: any =
     await checkRefreshToken(token, m);
 
+  if (refreshTokenDocument.rotatedTo) {
+    await m.update(RefreshTokenEntity, refreshTokenDocument.rotatedTo, {
+      revokedOn: new Date(),
+      revokedReason: reason,
+    });
+  }
+
   // 1. Revoke old token
   refreshTokenDocument.revokedReason = reason;
   refreshTokenDocument.revokedOn = new Date();
@@ -33,6 +41,7 @@ const rotateRefreshToken = async (
   const payload = { ...jwtPayload };
   delete payload.iat;
   delete payload.exp;
+  payload.jti = randomUUID();
 
   // 3. Compute remaining lifetime (do NOT extend expiry)
   const expireOn = refreshTokenDocument.expireOn;

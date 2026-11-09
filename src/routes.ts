@@ -12,6 +12,7 @@ import prizesRoutes from "./api/prizes/routes/index";
 import adminRoutes from "./api/admin/routes/index";
 import versusRoutes from "./api/versus/routes/index";
 import emailRoutes from "./api/emails/routes/index";
+import syncRoutes from "./api/sync/routes/index";
 import getMe from "./api/auth/controllers/getMe";
 import editMyLanguage from "./api/auth/controllers/editMyLanguage";
 import editMySkin from "./api/auth/controllers/editMySkin";
@@ -58,6 +59,8 @@ router.use("/prizes", prizesRoutes);
 router.use("/admin", adminRoutes);
 
 router.use("/versus", versusRoutes);
+
+router.use("/sync", syncRoutes);
 
 if (process.env.NODE_ENV !== "production") {
   router.use("/emails", emailRoutes);

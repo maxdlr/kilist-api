@@ -7,11 +7,14 @@ const snoozeFood = async (
   food: FoodEntity,
   manager?: EntityManager,
   hours = 24,
+  at: Date = new Date(),
 ) => {
   const m = findManager(FoodRepository, manager);
 
-  // Snooze for 24 hours
-  food.snoozedUntil = new Date(Date.now() + hours * 3600000);
+  const until = new Date(at.getTime() + hours * 3600000);
+  if (!food.snoozedUntil || until > new Date(food.snoozedUntil)) {
+    food.snoozedUntil = until;
+  }
 
   return await m.save(food);
 };

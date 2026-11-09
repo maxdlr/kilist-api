@@ -13,10 +13,15 @@ const checkRefreshToken = async (rawToken: string, manager?: EntityManager) => {
     throw ApiError(500, "Refresh secret is required");
   }
 
-  const decoded = jwt.verify(token, refreshSecret) as JwtPayload;
+  let decoded: JwtPayload;
+  try {
+    decoded = jwt.verify(token, refreshSecret) as JwtPayload;
+  } catch {
+    throw Unauthorized();
+  }
 
   if (!decoded.id) {
-    throw ApiError("Refresh token failed verification");
+    throw Unauthorized();
   }
 
   const refreshToken = await m.findOneBy(RefreshTokenEntity, {
@@ -25,11 +30,21 @@ const checkRefreshToken = async (rawToken: string, manager?: EntityManager) => {
   });
 
   if (!refreshToken) {
-    throw ApiError("Refresh token not found");
+    throw Unauthorized();
   }
 
-  if (refreshToken.revokedOn || refreshToken?.isExpired) {
-    throw ApiError("Refresh token has been revoked");
+  if (refreshToken.isExpired) {
+    throw Unauthorized();
+  }
+
+  if (refreshToken.revokedOn) {
+    const successor =
+      refreshToken.revokedReason === "token-replaced" && refreshToken.rotatedTo
+        ? await m.findOneBy(RefreshTokenEntity, { id: refreshToken.rotatedTo })
+        : null;
+    if (!successor || successor.revokedOn) {
+      throw Unauthorized();
+    }
   }
 
   return { refreshToken, decoded };

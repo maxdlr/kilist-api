@@ -1,6 +1,6 @@
 import inTransaction from "@/helpers/inTransaction";
 import TicketEntryEntity, { TicketReason } from "@/entities/TicketEntryEntity";
-import { EntityManager, MoreThanOrEqual } from "typeorm";
+import { Between, EntityManager } from "typeorm";
 import {
   PAID_SWIPES_PER_DAY,
   SPEED_BONUS_TICKETS,
@@ -13,16 +13,23 @@ import ticketBalance from "./ticketBalance";
 
 const PAY_WINDOW_MS = 24 * 3600000;
 
-const awardSwipe = (userId: number, foodId: number, manager?: EntityManager) =>
+const awardSwipe = (
+  userId: number,
+  foodId: number,
+  manager?: EntityManager,
+  at: Date = new Date(),
+) =>
   inTransaction(manager, async (m) => {
     await lockUser(userId, m);
 
-    const now = new Date();
     const recentSwipes = await m.find(TicketEntryEntity, {
       where: {
         user: { id: userId },
         reason: TicketReason.SWIPE,
-        createdAt: MoreThanOrEqual(new Date(now.getTime() - PAY_WINDOW_MS)),
+        createdAt: Between(
+          new Date(at.getTime() - PAY_WINDOW_MS),
+          new Date(at.getTime() + PAY_WINDOW_MS),
+        ),
       },
       order: { createdAt: "DESC", id: "DESC" },
     });
@@ -33,10 +40,12 @@ const awardSwipe = (userId: number, foodId: number, manager?: EntityManager) =>
       return { earned: 0, bonus: 0, balance };
     }
 
-    const previous = recentSwipes[0]?.createdAt;
+    const previous = recentSwipes.find(
+      (entry) => entry.createdAt && entry.createdAt <= at,
+    )?.createdAt;
     const isFast =
       previous !== undefined &&
-      now.getTime() - previous.getTime() < SPEED_WINDOW_MS;
+      at.getTime() - previous.getTime() < SPEED_WINDOW_MS;
     const bonus = isFast ? SPEED_BONUS_TICKETS : 0;
 
     await m.save(TicketEntryEntity, [
@@ -45,7 +54,7 @@ const awardSwipe = (userId: number, foodId: number, manager?: EntityManager) =>
         amount: SWIPE_TICKETS,
         reason: TicketReason.SWIPE,
         foodId,
-        createdAt: now,
+        createdAt: at,
       },
       ...(isFast
         ? [
@@ -54,7 +63,7 @@ const awardSwipe = (userId: number, foodId: number, manager?: EntityManager) =>
               amount: SPEED_BONUS_TICKETS,
               reason: TicketReason.SPEED,
               foodId,
-              createdAt: now,
+              createdAt: at,
             },
           ]
         : []),

@@ -1,16 +1,20 @@
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager } from "typeorm";
+import { EntityManager, LessThanOrEqual } from "typeorm";
 import findAllFoodHistories from "./findAllFoodHistories";
 import updateFoodInStockScore from "@/api/foods/services/updateFoodInStockScore";
 
-const resetFoodHistories = async (foodId: number, manager?: EntityManager) => {
+const resetFoodHistories = async (
+  foodId: number,
+  manager?: EntityManager,
+  at?: Date,
+) => {
   const m = findManager(FoodHistoryRepository, manager);
 
   const foodHistories = await findAllFoodHistories(
     {
-      where: { food: { id: foodId } },
+      where: { food: { id: foodId }, ...(at && { createdAt: LessThanOrEqual(at) }) },
     },
     m,
   );

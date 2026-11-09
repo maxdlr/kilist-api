@@ -2,12 +2,13 @@ import findAllFoods from "@/api/foods/services/findAllFoods";
 import ShopListEntity from "@/entities/ShopListEntity";
 import ShopListRepository from "@/repositories/ShopListRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager, IsNull, LessThan, Not, Or } from "typeorm";
+import { EntityManager, In, IsNull, LessThan, Not, Or } from "typeorm";
 
 const createShopList = async (
   householdId: number,
   manager?: EntityManager,
   userId?: number,
+  { extraFoodIds = [], at }: { extraFoodIds?: number[]; at?: Date } = {},
 ) => {
   const m = findManager(ShopListRepository, manager);
 
@@ -23,6 +24,17 @@ const createShopList = async (
     m,
   );
 
+  const known = new Set(foods.map((food) => food.id));
+  const missingIds = extraFoodIds.filter((id) => !known.has(id));
+  if (missingIds.length > 0) {
+    foods.push(
+      ...(await findAllFoods(
+        { where: { id: In(missingIds), household: { id: householdId } } },
+        m,
+      )),
+    );
+  }
+
   if (foods.length === 0) {
     return null;
   }
@@ -33,6 +45,7 @@ const createShopList = async (
   shopList.household = { id: householdId } as ShopListEntity["household"];
   shopList.user = userId ? ({ id: userId } as ShopListEntity["user"]) : null;
   shopList.buyLog = [];
+  if (at) shopList.createdAt = at;
 
   const createdShopList = await m.save(ShopListEntity, shopList);
 

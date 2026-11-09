@@ -4,8 +4,8 @@ import FoodEntity from "@/entities/FoodEntity";
 import RaceEntity from "@/entities/RaceEntity";
 import RaceRunEntity, { RaceAnswer, RaceRunAnswer } from "@/entities/RaceRunEntity";
 import UserEntity from "@/entities/UserEntity";
-import doTransaction from "@/utils/doTransaction";
-import { In, Not } from "typeorm";
+import inTransaction from "@/helpers/inTransaction";
+import { EntityManager, In, Not } from "typeorm";
 import { isDuplicate, verdictOf } from "../helpers";
 
 const MAX_ANSWER_MS = 120000;
@@ -21,6 +21,11 @@ const answerRace = async (
   user: UserEntity,
   raceId: number,
   input: { foodId: unknown; answer: unknown; ms: unknown },
+  {
+    at,
+    manager,
+    withReward = true,
+  }: { at?: Date; manager?: EntityManager; withReward?: boolean } = {},
 ) => {
   const foodId = Number(input.foodId);
   const answer = input.answer as RaceAnswer;
@@ -29,7 +34,7 @@ const answerRace = async (
   const ms = Math.min(MAX_ANSWER_MS, Math.max(0, Math.round(Number(input.ms) || 0)));
   const householdId = user.household.id;
 
-  const outcome = await doTransaction(async (m) => {
+  const outcome = await inTransaction(manager, async (m) => {
     const race = await m.findOne(RaceEntity, {
       where: { id: raceId, household: { id: householdId } },
     });
@@ -61,14 +66,14 @@ const answerRace = async (
     const fresh = !run.answers.some((entry) => entry.foodId === foodId);
     if (fresh) {
       run.answers = [...run.answers, { foodId, answer, ms }];
-      await createFoodHistory({ foodId, isInStock: toHistoryStock(answer), userId: user.id }, m);
+      await createFoodHistory({ foodId, isInStock: toHistoryStock(answer), userId: user.id, at }, m);
 
       const stillThere = await m.count(FoodEntity, {
         where: { id: In(race.foodIds), household: { id: householdId } },
       });
       if (run.answers.length >= stillThere) {
         run.totalMs = totalOf(run.answers);
-        run.finishedAt = new Date();
+        run.finishedAt = at ?? new Date();
       }
       await m.save(RaceRunEntity, run);
     }
@@ -101,8 +106,8 @@ const answerRace = async (
     };
   });
 
-  const reward = outcome.fresh
-    ? await awardSwipe(user.id, foodId).catch((error) => {
+  const reward = outcome.fresh && withReward
+    ? await awardSwipe(user.id, foodId, manager, at).catch((error) => {
         console.error("Failed to award race tickets", error);
         return { earned: 0, bonus: 0, balance: null };
       })

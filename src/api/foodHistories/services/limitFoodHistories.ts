@@ -12,6 +12,7 @@ const limitFoodHistories = async (foodId: number, manager?: EntityManager) => {
   const allFoodHistories = await findAllFoodHistories(
     {
       where: { food: { id: foodId } },
+      order: { createdAt: "ASC", id: "ASC" },
     },
     m,
   );

@@ -41,6 +41,12 @@ export default class FoodEntity extends AbstractEntity {
   @Column({ nullable: true })
   snoozedUntil!: Date;
 
+  @Column({ type: "datetime", precision: 6, nullable: true })
+  lastBoughtAt?: Date | null;
+
+  @Column({ type: "datetime", precision: 6, nullable: true })
+  editedAt?: Date | null;
+
   @ManyToOne(() => HouseholdEntity, {
     nullable: false,
     onDelete: "CASCADE",
