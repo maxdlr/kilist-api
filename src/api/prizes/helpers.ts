@@ -3,8 +3,9 @@ import { PREMIUM_FOR_EVERYONE, PRIZES } from "./catalog";
 
 export const userRef = (userId: number) => ({ id: userId }) as UserEntity;
 
-export const buildCounter = (balance: number, owned: Set<string>, isAdmin = false) => ({
+export const buildCounter = (balance: number, owned: Set<string>, isAdmin = false, reserved = 0) => ({
   balance,
+  reserved: Math.min(balance, reserved),
   premium: PREMIUM_FOR_EVERYONE,
   prizes: PRIZES.map((prize) => {
     const isOwned = prize.price === 0 || owned.has(prize.id);

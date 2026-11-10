@@ -6,6 +6,7 @@ import { findPrize } from "../catalog";
 import { buildCounter, userRef } from "../helpers";
 import findOwnedPrizeIds from "./findOwnedPrizeIds";
 import lockUser from "./lockUser";
+import reservedTickets from "./reservedTickets";
 import ticketBalance from "./ticketBalance";
 
 const redeemPrize = (userId: number, prizeId: string, manager?: EntityManager) =>
@@ -21,7 +22,9 @@ const redeemPrize = (userId: number, prizeId: string, manager?: EntityManager) =
     }
 
     const balance = await ticketBalance(userId, m);
-    if (balance < prize.price) {
+    const reserved = await reservedTickets(userId, m);
+    const funds = prize.accountOnly ? balance - reserved : balance;
+    if (funds < prize.price) {
       throw UserError(402, "prizes.notEnough");
     }
 
@@ -33,7 +36,12 @@ const redeemPrize = (userId: number, prizeId: string, manager?: EntityManager) =
       prizeId: prize.id,
     });
 
-    return buildCounter(balance - prize.price, new Set(owned).add(prize.id));
+    return buildCounter(
+      balance - prize.price,
+      new Set(owned).add(prize.id),
+      false,
+      prize.accountOnly ? reserved : Math.max(0, reserved - prize.price),
+    );
   });
 
 export default redeemPrize;

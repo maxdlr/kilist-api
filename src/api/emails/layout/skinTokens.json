@@ -1,0 +1,65 @@
+{
+  "arcade": {
+    "colors": {
+      "ground": "#6A3FC8",
+      "onGround": "#FFFFFF",
+      "accent": "#FFFFFF",
+      "muted": "#D9CCF5",
+      "raised": "#5530A8",
+      "paper": "#FFFFFF",
+      "onPaper": "#0B2E59",
+      "alert": "#FF8E8E",
+      "onAlert": "#0B2E59"
+    },
+    "primary": {
+      "fill": "#FFD84D",
+      "ink": "#0B2E59",
+      "line": "#0B2E59"
+    },
+    "panelRadius": 30,
+    "radius": 22,
+    "border": 3
+  },
+  "versus": {
+    "colors": {
+      "ground": "#16122E",
+      "onGround": "#FFFFFF",
+      "accent": "#FFFFFF",
+      "muted": "#B7B0D9",
+      "raised": "#221C44",
+      "paper": "#FFFFFF",
+      "onPaper": "#16122E",
+      "alert": "#FF8E8E",
+      "onAlert": "#16122E"
+    },
+    "primary": {
+      "fill": "#FFD23F",
+      "ink": "#16122E",
+      "line": "#FFD23F"
+    },
+    "panelRadius": 28,
+    "radius": 18,
+    "border": 2
+  },
+  "roast": {
+    "colors": {
+      "ground": "#0A0A0A",
+      "onGround": "#FFFFFF",
+      "accent": "#D7FF3E",
+      "muted": "#B0B0B0",
+      "raised": "#2E2E2E",
+      "paper": "#FFFFFF",
+      "onPaper": "#0A0A0A",
+      "alert": "#FF4D1F",
+      "onAlert": "#0A0A0A"
+    },
+    "primary": {
+      "fill": "#2F5BFF",
+      "ink": "#FFFFFF",
+      "line": "#2F5BFF"
+    },
+    "panelRadius": 0,
+    "radius": 0,
+    "border": 3
+  }
+}

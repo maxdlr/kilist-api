@@ -247,3 +247,50 @@ describe("prizes", () => {
     expect(await skinAccess(user.id, "nope")).toBe("unknown");
   });
 });
+
+describe("tickets brought from guest mode", () => {
+  const importTickets = (amount: number) =>
+    TicketEntryRepository.save({ user, amount, reason: TicketReason.IMPORT } as TicketEntryEntity);
+
+  it("can't buy Versus with tickets earned as a guest", async () => {
+    await importTickets(1500);
+
+    await expect(redeemPrize(user.id, "skin:versus")).rejects.toMatchObject({ status: 402 });
+    const counter = await prizeCounter(user.id);
+    expect(counter).toMatchObject({ balance: 1500, reserved: 1500 });
+  });
+
+  it("can buy Roast with them, and only account tickets count for Versus", async () => {
+    await importTickets(1500);
+    const afterRoast = await redeemPrize(user.id, "skin:roast");
+    expect(afterRoast).toMatchObject({ balance: 500, reserved: 500 });
+
+    await grant(800);
+    await expect(redeemPrize(user.id, "skin:versus")).rejects.toMatchObject({ status: 402 });
+
+    await grant(200);
+    const afterVersus = await redeemPrize(user.id, "skin:versus");
+    expect(afterVersus).toMatchObject({ balance: 500, reserved: 500 });
+    expect(await prizeCounter(user.id)).toMatchObject({ balance: 500, reserved: 500 });
+  });
+
+  it("spends account tickets on Roast only once guest tickets run out", async () => {
+    await importTickets(300);
+    await grant(1000);
+
+    expect(await redeemPrize(user.id, "skin:roast")).toMatchObject({ balance: 300, reserved: 0 });
+  });
+
+  it("never unlocks Versus from a guest upload", async () => {
+    const { default: importGuestData } = await import("@/api/sync/services/importGuestData");
+    const doTransaction = (await import("@/utils/doTransaction")).default;
+    await doTransaction((m) =>
+      importGuestData(user, { importId: "versus-1", balance: 3000, ownedPrizes: ["skin:roast", "skin:versus"] } as any, m),
+    );
+
+    const counter = await prizeCounter(user.id);
+    expect(counter.prizes.find((prize) => prize.id === "skin:roast")?.owned).toBe(true);
+    expect(counter.prizes.find((prize) => prize.id === "skin:versus")?.owned).toBe(false);
+    expect(counter).toMatchObject({ balance: 3000, reserved: 3000 });
+  });
+});

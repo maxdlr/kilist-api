@@ -5,6 +5,22 @@ const MESSAGES = {
     en: "Something went wrong. Try again.",
     fr: "Un problème est survenu. Réessaie.",
   },
+  "code.invalid": {
+    en: "That code isn't right. Check it and try again.",
+    fr: "Ce code n'est pas bon. Vérifie-le et réessaie.",
+  },
+  "code.expired": {
+    en: "That code has expired. Ask for a new one.",
+    fr: "Ce code a expiré. Demandes-en un nouveau.",
+  },
+  "code.tooManyAttempts": {
+    en: "Too many tries. Ask for a new code.",
+    fr: "Trop d'essais. Demande un nouveau code.",
+  },
+  "notifications.invalid": {
+    en: "That notification choice isn't available.",
+    fr: "Ce choix de notification n'est pas disponible.",
+  },
   "auth.badCredentials": {
     en: "Wrong email or password.",
     fr: "E-mail ou mot de passe incorrect.",

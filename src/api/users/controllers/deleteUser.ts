@@ -1,4 +1,8 @@
 import clearAuthCookies from "@/api/auth/services/clearAuthCookies";
+import notifyHousehold from "@/api/notifications/services/notifyHousehold";
+import notifyUser from "@/api/notifications/services/notifyUser";
+import findHouseholdMembers from "@/api/households/services/findHouseholdMembers";
+import findUser from "../services/findUser";
 import { Request, Response } from "express";
 import removeUser from "../../users/services/removeUser";
 
@@ -27,7 +31,20 @@ const deleteUser = async (
     throw UserError(400, "account.adminUndeletable");
   }
 
+  const target = await findUser({ id: targetId });
+  const householdId = target.household.id;
+  const lastInHousehold = (await findHouseholdMembers(householdId)).length <= 1;
+
   await removeUser({ id: targetId });
+
+  await notifyUser(target, "accountDeleted", {
+    name: target.username,
+    email: target.email,
+    lastInHousehold,
+  });
+  if (!lastInHousehold) {
+    await notifyHousehold("memberLeft", householdId, target).catch(() => 0);
+  }
 
   if (isSelf) {
     await clearAuthCookies(res);

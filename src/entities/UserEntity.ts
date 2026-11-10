@@ -42,6 +42,12 @@ export default class UserEntity extends AbstractEntity {
   @Column({ type: "varchar", nullable: true, default: null, length: 8 })
   deviceLanguage!: string | null;
 
+  @Column({ type: "datetime", nullable: true, default: null })
+  emailConfirmedAt?: Date | null;
+
+  @Column({ type: "simple-json", nullable: true })
+  notifications?: Record<string, string> | null;
+
   set password(value: string) {
     this._password = bcrypt.hashSync(value, 10);
   }

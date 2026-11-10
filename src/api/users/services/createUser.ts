@@ -77,7 +77,10 @@ const createUser = async (
   const existingUser = await findUser({ username: user.username }, false, manager).catch(
     () => {},
   );
-  if (existingUser) {
+  const existingEmail = user.email
+    ? await findUser({ email: user.email }, false, manager).catch(() => {})
+    : undefined;
+  if (existingUser || existingEmail) {
     throw UserError(400, "auth.userExists");
   }
 

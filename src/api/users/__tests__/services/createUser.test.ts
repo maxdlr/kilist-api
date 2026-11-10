@@ -94,6 +94,15 @@ describe("createUser", () => {
     expect(householdCountAfter).toBe(householdCountBefore);
   });
 
+  it("refuses an email already used, with the user-facing code", async () => {
+    const input = validUserInput();
+    await createUser({ ...input, householdChoice: "create" });
+
+    await expect(
+      createUser({ ...validUserInput(), email: input.email, householdChoice: "create" }),
+    ).rejects.toMatchObject({ code: "auth.userExists" });
+  });
+
   it("multiple users can join the same household via its joinCode", async () => {
     const first = await createUser({
       ...validUserInput(),

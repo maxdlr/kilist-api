@@ -1,4 +1,5 @@
 import switchHouseholdService from "@/api/households/services/switchHousehold";
+import notifyHousehold from "@/api/notifications/services/notifyHousehold";
 import { Request, Response } from "express";
 
 /**
@@ -15,7 +16,13 @@ const switchHousehold = async (
     throw Unauthorized("user");
   }
 
+  const previousId = user.household.id;
   const household = await switchHouseholdService(user.id, body);
+
+  await notifyHousehold("memberLeft", previousId, user).catch(() => 0);
+  if (body?.householdChoice === "join") {
+    await notifyHousehold("memberJoined", household.id, user).catch(() => 0);
+  }
 
   return res.status(200).send({
     id: household.id,

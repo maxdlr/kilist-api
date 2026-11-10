@@ -1,4 +1,5 @@
 import { PRIZES } from "@/api/prizes/catalog";
+import { findEvent } from "@/api/notifications/catalog";
 import updateFoodInStockScore from "@/api/foods/services/updateFoodInStockScore";
 import limitFoodHistories from "@/api/foodHistories/services/limitFoodHistories";
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
@@ -61,6 +62,7 @@ export type GuestData = {
   recentSwipes?: { foodId: number | null; at: string }[];
   skin?: string;
   language?: string | null;
+  notifications?: Record<string, unknown> | null;
 };
 
 const normalize = (name: string) => name.trim().toLowerCase();
@@ -257,13 +259,13 @@ const importGuestData = async (
   const owned = await m.find(UnlockEntity, { where: { user: userRef } });
   const prizes = new Set(listOf(data.ownedPrizes, "prizes"));
   for (const prize of PRIZES) {
-    if (!prizes.has(prize.id) || prize.price === 0) continue;
+    if (!prizes.has(prize.id) || prize.price === 0 || prize.accountOnly) continue;
     if (owned.some((unlock) => unlock.prizeId === prize.id)) continue;
     await m.save(UnlockEntity, { user: userRef, prizeId: prize.id, source: "points" } as UnlockEntity);
   }
 
   if (withPreferences) {
-    const columns: { skin?: string; language?: string | null } = {};
+    const columns: { skin?: string; language?: string | null; notifications?: Record<string, string> } = {};
     if (
       typeof data.skin === "string" &&
       SKIN_PATTERN.test(data.skin) &&
@@ -272,6 +274,12 @@ const importGuestData = async (
       columns.skin = data.skin;
     }
     if (data.language === null || isLang(data.language)) columns.language = data.language ?? null;
+    const notifications = Object.fromEntries(
+      Object.entries(data.notifications && typeof data.notifications === "object" ? data.notifications : {}).filter(
+        ([id, choice]) => choice === "none" || (choice === "push" && findEvent(id)?.channels.includes("push")),
+      ),
+    ) as Record<string, string>;
+    if (Object.keys(notifications).length > 0) columns.notifications = notifications;
     if (Object.keys(columns).length > 0) await updateUserColumns(user.id, columns, m);
   }
 

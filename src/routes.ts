@@ -24,6 +24,13 @@ import getRefreshToken from "./api/auth/controllers/getRefreshToken";
 import logOut from "./api/auth/controllers/logOut";
 import signUp from "./api/auth/controllers/signup";
 import getHealth from "./api/health/getHeath";
+import forgotPassword from "./api/auth/controllers/forgotPassword";
+import resetPassword from "./api/auth/controllers/resetPassword";
+import sendEmailCode from "./api/auth/controllers/sendEmailCode";
+import confirmEmail from "./api/auth/controllers/confirmEmail";
+import codeLimit from "./middlewares/codeLimit";
+import postPushToken from "./api/push/controllers/postPushToken";
+import deletePushToken from "./api/push/controllers/deletePushToken";
 
 const router = Router();
 
@@ -35,10 +42,16 @@ router.post("/login", logIn);
 router.post("/signup", signUp);
 router.post("/logout", authenticate, logOut);
 router.post("/refresh", getRefreshToken);
+router.post("/password/forgot", codeLimit, forgotPassword);
+router.post("/password/reset", codeLimit, resetPassword);
 
 router.get("/me", authenticate, getMe);
 router.put("/me/skin", authenticate, editMySkin);
 router.put("/me/language", authenticate, editMyLanguage);
+router.post("/me/email/code", codeLimit, authenticate, sendEmailCode);
+router.post("/me/email/confirm", codeLimit, authenticate, confirmEmail);
+router.post("/me/push-token", authenticate, postPushToken);
+router.delete("/me/push-token", authenticate, deletePushToken);
 
 router.use("/users", userRoutes);
 

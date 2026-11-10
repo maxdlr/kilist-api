@@ -5,7 +5,7 @@ import { EntityManager } from "typeorm";
 
 const updateUserColumns = async (
   id: number,
-  columns: Partial<Pick<UserEntity, "skin" | "language" | "deviceLanguage" | "type" | "username" | "email" | "household">>,
+  columns: Partial<Pick<UserEntity, "skin" | "language" | "deviceLanguage" | "type" | "username" | "email" | "household" | "emailConfirmedAt" | "notifications">>,
   manager?: EntityManager,
 ) => {
   const m = findManager(UserRepository, manager);

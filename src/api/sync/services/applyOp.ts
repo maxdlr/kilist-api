@@ -12,6 +12,7 @@ import updateShopList from "@/api/shop-list/services/updateShopList";
 import completeSwipeDay from "@/api/swipe-list/services/completeSwipeDay";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import answerRace from "@/api/versus/services/answerRace";
+import { choicesFor, findEvent } from "@/api/notifications/catalog";
 import getOrCreateRace from "@/api/versus/services/getOrCreateRace";
 import FoodEntity from "@/entities/FoodEntity";
 import UserEntity, { SKIN_PATTERN } from "@/entities/UserEntity";
@@ -209,6 +210,16 @@ const applyOp = async (
         throw ApiError("language must be a supported language code or null");
       }
       await updateUserColumns(user.id, { language }, m);
+      return null;
+    }
+
+    case "me.notifications": {
+      const event = findEvent(payload.event);
+      if (!event || !choicesFor(event).includes(payload.choice)) {
+        throw UserError(400, "notifications.invalid");
+      }
+      const current = await m.findOne(UserEntity, { where: { id: user.id }, select: { id: true, notifications: true } });
+      await updateUserColumns(user.id, { notifications: { ...(current?.notifications ?? {}), [event.id]: payload.choice } }, m);
       return null;
     }
 

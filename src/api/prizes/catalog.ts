@@ -3,6 +3,7 @@ export type Prize = {
   kind: "skin";
   skin: string;
   price: number;
+  accountOnly?: boolean;
 };
 
 export const PREMIUM_FOR_EVERYONE = false;
@@ -15,7 +16,7 @@ export const PAID_SWIPES_PER_DAY = 10;
 export const PRIZES: Prize[] = [
   { id: "skin:arcade", kind: "skin", skin: "arcade", price: 0 },
   { id: "skin:roast", kind: "skin", skin: "roast", price: 1000 },
-  { id: "skin:versus", kind: "skin", skin: "versus", price: 1000 },
+  { id: "skin:versus", kind: "skin", skin: "versus", price: 1000, accountOnly: true },
   { id: "skin:calm", kind: "skin", skin: "calm", price: 0 },
 ];
 
