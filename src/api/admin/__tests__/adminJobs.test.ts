@@ -1,6 +1,6 @@
 import createUser from "@/api/users/services/createUser";
 import adminRoutes from "@/api/admin/routes/index";
-import UserEntity from "@/entities/UserEntity";
+import UserEntity, { DEFAULT_SKIN } from "@/entities/UserEntity";
 import AdminJobRunRepository from "@/repositories/AdminJobRunRepository";
 import UserRepository from "@/repositories/UserRepository";
 import serviceErrorHandler from "@/services/serviceErrorHandlers";
@@ -55,7 +55,7 @@ beforeAll(async () => {
 afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
 
 beforeEach(async () => {
-  admin = await makeUser("boss", "arcade");
+  admin = await makeUser("boss", DEFAULT_SKIN);
   await UserRepository.update(admin.id, { type: "admin" });
 });
 
@@ -74,7 +74,7 @@ describe("admin jobs", () => {
 
     await runAdminJob("switch-to-default-skin", false, admin.id);
 
-    expect(await skinOf(user)).toBe("arcade");
+    expect(await skinOf(user)).toBe(DEFAULT_SKIN);
   });
 
   it("logs every run", async () => {

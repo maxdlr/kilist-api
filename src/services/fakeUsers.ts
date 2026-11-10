@@ -35,7 +35,7 @@ const HOUSEHOLDS: { name: string; members: string[] }[] = [
 
 const NO_ICON = ["Sopalin", "Pesto", "Tofu", "Liquide vaisselle", "Kombucha"];
 const ICON_NAMES = Object.values(FOOD_ICON_ALIASES).map((aliases) => aliases[0]!.charAt(0).toUpperCase() + aliases[0]!.slice(1));
-const SKINS = ["arcade", "arcade", "arcade", "calm", "calm", "roast", "versus"];
+const SKINS = ["calm", "calm", "calm", "arcade", "arcade", "roast", "versus"];
 
 const pick = <T>(list: T[]) => list[faker.number.int({ min: 0, max: list.length - 1 })]!;
 const chance = (probability: number) => Math.random() < probability;
@@ -119,7 +119,7 @@ export const makeFakeUsers = async (m: EntityManager) => {
         household,
         language: pick([null, null, "fr", "fr", "fr", "en"]),
         deviceLanguage: pick(["fr", "fr", "fr", "en", null]),
-        skin: "arcade",
+        skin: "calm",
         createdAt: joined,
       });
       user.password = PASSWORD;

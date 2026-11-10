@@ -4,7 +4,7 @@ import { Column, Entity, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import HouseholdEntity from "./HouseholdEntity";
 
-export const DEFAULT_SKIN = "arcade";
+export const DEFAULT_SKIN = "calm";
 export const SKIN_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
 
 @Entity({ name: "users" })

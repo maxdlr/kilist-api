@@ -7,7 +7,7 @@ import FoodEntity from "@/entities/FoodEntity";
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import ListEntity from "@/entities/ListEntity";
 import UnlockEntity from "@/entities/UnlockEntity";
-import UserEntity from "@/entities/UserEntity";
+import UserEntity, { DEFAULT_SKIN } from "@/entities/UserEntity";
 import { AppDataSource } from "@/services/database/datasource";
 import serviceErrorHandler from "@/services/serviceErrorHandlers";
 import wrapRoutesHandlers from "@/services/wrapRoutesHandlers";
@@ -93,7 +93,7 @@ describe("admin users", () => {
 
     await m().update(UserEntity, camille.id, { skin: "roast" });
     await call("DELETE", `/users/${camille.id}/unlocks/skin:roast`);
-    expect((await fresh(camille)).skin).toBe("arcade");
+    expect((await fresh(camille)).skin).toBe(DEFAULT_SKIN);
   });
 
   it("gives points but never below zero", async () => {
