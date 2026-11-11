@@ -15,7 +15,7 @@ const readShopList = async ({ params, user }: Request, res: Response) => {
   }
 
   const shopList = await doTransaction(async (m) => {
-    let shopList = await findShopList(
+    const shopList = await findShopList(
       {
         id: shopListId,
         household: { id: householdId },
@@ -35,7 +35,7 @@ const readShopList = async ({ params, user }: Request, res: Response) => {
     }
 
     if (shopList.startFoods.length === shopList.boughtFoods.length) {
-      shopList = await updateShopList(
+      await updateShopList(
         {
           id: shopListId,
           status: ShopListStatus.COMPLETED,
