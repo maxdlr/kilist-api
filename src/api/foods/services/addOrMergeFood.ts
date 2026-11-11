@@ -3,6 +3,7 @@ import findList from "@/api/lists/services/findList";
 import FoodEntity from "@/entities/FoodEntity";
 import ListEntity from "@/entities/ListEntity";
 import { EntityManager } from "typeorm";
+import { productChanges, ScannedProduct } from "../helpers";
 import createFood from "./createFood";
 
 const ONBOARDING_IN_STOCK_SCORE = 0.5;
@@ -12,7 +13,7 @@ const normalize = (name: string) => name.trim().toLowerCase();
 const addOrMergeFood = async (
   householdId: number,
   listId: number,
-  data: { name: string; description?: string; fromOnboarding?: boolean },
+  data: { name: string; description?: string; fromOnboarding?: boolean; product?: ScannedProduct | null },
   m: EntityManager,
 ): Promise<FoodEntity> => {
   if (!data.name) {
@@ -31,10 +32,15 @@ const addOrMergeFood = async (
       list.foods = [...list.foods, twin];
       await m.save(ListEntity, list);
     }
+    const changes = productChanges(twin, data.product);
+    if (Object.keys(changes).length > 0) {
+      await m.update(FoodEntity, twin.id, changes);
+      Object.assign(twin, changes);
+    }
     return twin;
   }
 
-  return createFood(
+  const created = await createFood(
     householdId,
     listId,
     {
@@ -47,6 +53,13 @@ const addOrMergeFood = async (
     },
     m,
   );
+  const changes = productChanges(created, data.product);
+  if (Object.keys(changes).length > 0) {
+    await m.update(FoodEntity, created.id, changes);
+    Object.assign(created, changes);
+  }
+
+  return created;
 };
 
 export default addOrMergeFood;

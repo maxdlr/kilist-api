@@ -161,6 +161,7 @@ const applyOp = async (
           name: payload.name,
           description: payload.description,
           fromOnboarding: payload.fromOnboarding,
+          product: payload.product,
         },
         m,
       );

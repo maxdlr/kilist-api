@@ -22,6 +22,12 @@ export default class FoodEntity extends AbstractEntity {
   @Column({ type: "varchar", nullable: true })
   icon?: string | null;
 
+  @Column({ type: "simple-json", nullable: true })
+  barcodes?: string[] | null;
+
+  @Column({ type: "varchar", length: 40, nullable: true })
+  quantity?: string | null;
+
   @Column({ type: "float", default: 1 })
   inStockScore!: number;
 

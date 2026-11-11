@@ -6,6 +6,7 @@ import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
 import skinAccess from "@/api/prizes/services/skinAccess";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import { cleanProfiles } from "@/api/food-bank/profiles";
+import { isBarcode, MAX_BARCODES, productChanges, QUANTITY_LENGTH } from "@/api/foods/helpers";
 import { MAX_DECLINED, suggestionKey } from "@/api/households/helpers";
 import FoodEntity from "@/entities/FoodEntity";
 import HouseholdEntity from "@/entities/HouseholdEntity";
@@ -36,6 +37,8 @@ type GuestFood = {
   description?: string;
   icon?: string | null;
   imageUrl?: string | null;
+  barcodes?: string[];
+  quantity?: string | null;
   inStockScore: number;
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;
@@ -71,6 +74,8 @@ export type GuestData = {
 };
 
 const normalize = (name: string) => name.trim().toLowerCase();
+
+const scanned = (guest: GuestFood) => (Array.isArray(guest.barcodes) ? guest.barcodes.filter(isBarcode) : []);
 
 const listOf = <T>(value: T[] | undefined, label: string): T[] => {
   if (value === undefined) return [];
@@ -138,6 +143,8 @@ const importGuestData = async (
       if (snoozed && (!twin.snoozedUntil || snoozed > new Date(twin.snoozedUntil))) {
         update.snoozedUntil = snoozed;
       }
+      for (const barcode of scanned(guest)) Object.assign(twin, productChanges(twin, { barcode }));
+      Object.assign(update, productChanges(twin, { quantity: guest.quantity }), { barcodes: twin.barcodes ?? null });
       if (Object.keys(update).length > 0) await m.update(FoodEntity, twin.id, update);
       for (const history of histories) {
         await createFoodHistory(
@@ -156,6 +163,8 @@ const importGuestData = async (
       name,
       description: String(guest.description ?? "").slice(0, DESCRIPTION_LENGTH),
       icon: guest.icon ?? null,
+      barcodes: scanned(guest).slice(-MAX_BARCODES),
+      quantity: typeof guest.quantity === "string" ? guest.quantity.slice(0, QUANTITY_LENGTH) : null,
       inStockScore: Number.isFinite(guest.inStockScore) ? guest.inStockScore : 1,
       household,
       lastBoughtAt: bought,

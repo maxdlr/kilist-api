@@ -257,6 +257,15 @@ describe("foods created offline", () => {
     expect(await FoodRepository.countBy({ name: "Oat milk" })).toBe(1);
   });
 
+  it("keeps the scanned product on a new food and on an existing one", async () => {
+    const product = { barcode: "3017620422003", quantity: "750 g", icon: "pasta" };
+    await sync([op("food.create", { tempId: -6, name: "Spread", listId: list.id, product })]);
+    await sync([op("food.create", { tempId: -7, name: "spread", listId: list.id, product: { barcode: "8076800195057", icon: "rice" } })]);
+
+    const food = await FoodRepository.findOneByOrFail({ name: "Spread" });
+    expect(food).toMatchObject({ barcodes: ["3017620422003", "8076800195057"], quantity: "750 g", icon: "pasta" });
+  });
+
   it("merges a food two housemates added under the same name", async () => {
     const result = await sync([op("food.create", { tempId: -5, name: " MILK ", listId: list.id })]);
 

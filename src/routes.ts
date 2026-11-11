@@ -14,6 +14,7 @@ import versusRoutes from "./api/versus/routes/index";
 import emailRoutes from "./api/emails/routes/index";
 import syncRoutes from "./api/sync/routes/index";
 import catalogRoutes from "./api/catalog/routes/index";
+import productRoutes from "./api/products/routes/index";
 import installStatsRoutes from "./api/installStats/routes/index";
 import getMe from "./api/auth/controllers/getMe";
 import editMyLanguage from "./api/auth/controllers/editMyLanguage";
@@ -36,6 +37,7 @@ const router = Router();
 
 router.get("/health", getHealth);
 router.use("/catalog", catalogRoutes);
+router.use("/products", productRoutes);
 router.use("/stats", installStatsRoutes);
 
 router.post("/login", logIn);

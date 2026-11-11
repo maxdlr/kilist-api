@@ -37,6 +37,8 @@ const fuse = new Fuse([...iconByAlias.keys()], {
   threshold: FUZZY_THRESHOLD,
 });
 
+export const exactFoodIcon = (name: string): string | undefined => iconByAlias.get(normalize(name));
+
 const findFoodIcon = (name: string): string | undefined => {
   const normalized = normalize(name);
   if (!normalized) return undefined;

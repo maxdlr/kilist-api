@@ -1,10 +1,10 @@
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager, IsNull, Not } from "typeorm";
+import { staleDaysFor } from "../helpers";
 import findAllFoods from "./findAllFoods";
 
 const SWIPE_BELOW = 0.75;
-const STALE_DAYS = 7;
 
 const findFoodSwipes = async (
   householdId: number,
@@ -62,10 +62,12 @@ const findFoodSwipes = async (
       food.lastBoughtAt?.getTime() ?? 0,
       ...(food.foodHistories ?? []).map((history) => history.createdAt?.getTime() ?? 0),
     );
-  const staleBefore = Date.now() - STALE_DAYS * 24 * 3600000;
+  const now = Date.now();
+  const isStale = (food: (typeof foods)[number]) =>
+    lastActivity(food) < now - staleDaysFor(food.quantity) * 24 * 3600000;
   const low = eligibleFoods.filter((food) => food.inStockScore < SWIPE_BELOW);
   const stale = eligibleFoods
-    .filter((food) => food.inStockScore >= SWIPE_BELOW && lastActivity(food) < staleBefore)
+    .filter((food) => food.inStockScore >= SWIPE_BELOW && isStale(food))
     .sort((a, b) => lastActivity(a) - lastActivity(b));
 
   return [...low, ...stale].slice(0, take);

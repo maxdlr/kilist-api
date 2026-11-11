@@ -17,6 +17,18 @@ const MESSAGES = {
     en: "Too many tries. Ask for a new code.",
     fr: "Trop d'essais. Demande un nouveau code.",
   },
+  "product.badCode": {
+    en: "That barcode can't be read. Type the name instead.",
+    fr: "Ce code-barres est illisible. Tape plutôt le nom.",
+  },
+  "product.notFound": {
+    en: "We don't know that product. Type its name instead.",
+    fr: "On ne connaît pas ce produit. Tape plutôt son nom.",
+  },
+  "product.unavailable": {
+    en: "The product lookup isn't answering. Type the name instead.",
+    fr: "La recherche de produit ne répond pas. Tape plutôt le nom.",
+  },
   "notifications.invalid": {
     en: "That notification choice isn't available.",
     fr: "Ce choix de notification n'est pas disponible.",
