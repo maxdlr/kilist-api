@@ -1,4 +1,5 @@
 import createHousehold from "@/api/households/services/createHousehold";
+import removeHouseholdIfEmpty from "@/api/households/services/removeHouseholdIfEmpty";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import UserEntity from "@/entities/UserEntity";
@@ -21,7 +22,8 @@ const moveAdminUser = (admin: UserEntity, id: number, rawJoinCode: unknown, mana
     await updateUserColumns(id, { household: { id: household.id } as HouseholdEntity }, m);
     await logAction(admin, "user", id, `Moved ${user.username} from ${user.household.name ?? `household ${user.household.id}`} to ${household.name ?? `household ${household.id}`}`, m);
     await logAction(admin, "household", household.id, `Moved ${user.username} in`, m);
-    await logAction(admin, "household", user.household.id, `Moved ${user.username} out`, m);
+    const emptied = await removeHouseholdIfEmpty(user.household.id, m);
+    await logAction(admin, "household", user.household.id, `Moved ${user.username} out${emptied ? ", deleted the empty household" : ""}`, m);
     return { householdId: household.id };
   });
 

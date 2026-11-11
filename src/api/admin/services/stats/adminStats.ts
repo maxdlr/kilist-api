@@ -37,8 +37,9 @@ const adminStats = async (days: number, manager?: EntityManager) => {
 
   const [
     users,
-    households,
+    everyHousehold,
     foodsPerHousehold,
+    foodsEverPerHousehold,
     answerSpans,
     tripSpans,
     raceSpans,
@@ -55,8 +56,9 @@ const adminStats = async (days: number, manager?: EntityManager) => {
     foodTotal,
   ] = await Promise.all([
     q("SELECT id, createdAt, language, deviceLanguage, skin, householdId FROM users"),
-    q("SELECT id, createdAt FROM households"),
+    q("SELECT id, createdAt, deletedAt FROM households"),
     q("SELECT householdId, COUNT(*) AS total FROM foods WHERE deletedAt IS NULL GROUP BY householdId"),
+    q("SELECT householdId, COUNT(*) AS total FROM foods GROUP BY householdId"),
     q("SELECT userId, MIN(createdAt) AS first, MAX(createdAt) AS last FROM food_histories WHERE userId IS NOT NULL GROUP BY userId"),
     q("SELECT userId, MIN(createdAt) AS first, MAX(createdAt) AS last FROM `shop-list` WHERE userId IS NOT NULL GROUP BY userId"),
     q("SELECT userId, MAX(createdAt) AS last FROM race_runs GROUP BY userId"),
@@ -102,10 +104,13 @@ const adminStats = async (days: number, manager?: EntityManager) => {
   const memberCount = new Map<number, number>();
   for (const user of users) memberCount.set(num(user.householdId), (memberCount.get(num(user.householdId)) ?? 0) + 1);
   const foodCount = new Map(foodsPerHousehold.map((row) => [num(row.householdId), num(row.total)]));
+  const foodEverCount = new Map(foodsEverPerHousehold.map((row) => [num(row.householdId), num(row.total)]));
+  const households = everyHousehold.filter((home) => !home.deletedAt);
+  const deletedHouseholds = everyHousehold.filter((home) => home.deletedAt && date(home.deletedAt)! >= since);
 
   const created = (row: Row) => date(row.createdAt)!;
   const newUsers = users.filter((user) => created(user) >= since);
-  const newHouseholds = households.filter((home) => created(home) >= since);
+  const newHouseholds = everyHousehold.filter((home) => created(home) >= since);
   const olderThan = (row: Row, ms: number) => now - created(row).getTime() >= ms;
 
   const signups = Array.from({ length: 30 }, (_, index) => {
@@ -171,6 +176,7 @@ const adminStats = async (days: number, manager?: EntityManager) => {
       newUsers: newUsers.length,
       households: households.length,
       newHouseholds: newHouseholds.length,
+      deletedHouseholds: deletedHouseholds.length,
       foods: num(foodTotal[0]?.total),
       peoplePerHousehold: households.length ? Math.round((users.length / households.length) * 10) / 10 : null,
       soloHouseholds: [...memberCount.values()].filter((count) => count === 1).length,
@@ -185,7 +191,7 @@ const adminStats = async (days: number, manager?: EntityManager) => {
       },
     },
     firstDays: {
-      pickedFive: { rate: rate(newHouseholds.filter((home) => (foodCount.get(num(home.id)) ?? 0) >= 5).length, newHouseholds.length), cohort: newHouseholds.length },
+      pickedFive: { rate: rate(newHouseholds.filter((home) => (foodEverCount.get(num(home.id)) ?? 0) >= 5).length, newHouseholds.length), cohort: newHouseholds.length },
       firstGame: { rate: rate(cohort24.filter((user) => within(firstAnswer, user, DAY)).length, cohort24.length), cohort: cohort24.length },
       firstTrip: { rate: rate(cohort7.filter((user) => within(firstTrip, user, 7 * DAY)).length, cohort7.length), cohort: cohort7.length },
       retention: { day1: retention(1), day7: retention(7), day30: retention(30) },

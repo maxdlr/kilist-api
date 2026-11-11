@@ -1,4 +1,5 @@
 import createHousehold from "@/api/households/services/createHousehold";
+import removeHouseholdIfEmpty from "@/api/households/services/removeHouseholdIfEmpty";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import HouseholdEntity from "@/entities/HouseholdEntity";
 import UserEntity from "@/entities/UserEntity";
@@ -16,7 +17,8 @@ const removeHouseholdMember = (admin: UserEntity, id: number, userId: number, ma
 
     const fresh = await createHousehold(user.username, m);
     await updateUserColumns(userId, { household: { id: fresh.id } as HouseholdEntity }, m);
-    await logAction(admin, "household", id, `Removed ${user.username}`, m);
+    const emptied = await removeHouseholdIfEmpty(id, m);
+    await logAction(admin, "household", id, `Removed ${user.username}${emptied ? ", deleted the empty household" : ""}`, m);
     await logAction(admin, "user", userId, `Removed from ${householdLabel(household)}, moved to a new household`, m);
     return { householdId: fresh.id };
   });

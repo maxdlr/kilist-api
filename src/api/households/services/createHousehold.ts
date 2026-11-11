@@ -4,7 +4,6 @@ import HouseholdRepository from "@/repositories/HouseholdRepository";
 import findManager from "@/utils/findManager";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { EntityManager } from "typeorm";
-import findHousehold from "./findHousehold";
 
 // Retry a few times on the (very unlikely) chance of a joinCode collision
 // rather than widening the code or adding complexity up front.
@@ -25,7 +24,7 @@ const createHousehold = async (
 
   let joinCode = generateJoinCode();
   for (let attempt = 0; attempt < MAX_JOIN_CODE_ATTEMPTS; attempt++) {
-    const existing = await findHousehold({ joinCode }, m);
+    const existing = await m.findOne(HouseholdEntity, { where: { joinCode }, withDeleted: true });
     if (!existing) break;
     joinCode = generateJoinCode();
   }

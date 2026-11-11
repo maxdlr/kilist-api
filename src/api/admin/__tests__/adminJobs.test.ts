@@ -1,4 +1,9 @@
+import createFood from "@/api/foods/services/createFood";
+import createHousehold from "@/api/households/services/createHousehold";
 import createUser from "@/api/users/services/createUser";
+import FoodRepository from "@/repositories/FoodRepository";
+import HouseholdRepository from "@/repositories/HouseholdRepository";
+import ListRepository from "@/repositories/ListRepository";
 import adminRoutes from "@/api/admin/routes/index";
 import UserEntity, { DEFAULT_SKIN } from "@/entities/UserEntity";
 import AdminJobRunRepository from "@/repositories/AdminJobRunRepository";
@@ -75,6 +80,27 @@ describe("admin jobs", () => {
     await runAdminJob("switch-to-default-skin", false, admin.id);
 
     expect(await skinOf(user)).toBe(DEFAULT_SKIN);
+  });
+
+  it("deletes households with no member and their foods", async () => {
+    const user = await makeUser("rosie", "roast");
+    const empty = await createHousehold("Nobody home");
+    const emptyList = await ListRepository.findOneByOrFail({ household: { id: empty.id } });
+    await createFood(empty.id, emptyList.id, { name: "Ghost bread" });
+
+    const dry = await runAdminJob("delete-orphans", true, admin.id);
+    expect(dry).toMatchObject({ affected: 2, dryRun: true });
+    expect(await HouseholdRepository.countBy({ id: empty.id })).toBe(1);
+
+    await runAdminJob("delete-orphans", false, admin.id);
+
+    expect(await HouseholdRepository.countBy({ id: empty.id })).toBe(0);
+    expect(await FoodRepository.countBy({ name: "Ghost bread" })).toBe(0);
+    expect(await FoodRepository.count({ where: { name: "Ghost bread" }, withDeleted: true })).toBe(1);
+    expect(await HouseholdRepository.count({ where: { id: empty.id }, withDeleted: true })).toBe(1);
+    expect(await runAdminJob("delete-orphans", true, admin.id)).toMatchObject({ affected: 0 });
+    expect(await HouseholdRepository.countBy({ id: user.household.id })).toBe(1);
+    expect(await HouseholdRepository.countBy({ id: admin.household.id })).toBe(1);
   });
 
   it("logs every run", async () => {

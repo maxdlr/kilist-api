@@ -1,5 +1,4 @@
-import HouseholdEntity from "@/entities/HouseholdEntity";
-import ListEntity from "@/entities/ListEntity";
+import removeHouseholdIfEmpty from "@/api/households/services/removeHouseholdIfEmpty";
 import RefreshTokenEntity from "@/entities/RefreshTokenEntity";
 import UserEntity from "@/entities/UserEntity";
 import inTransaction from "@/helpers/inTransaction";
@@ -16,24 +15,7 @@ const removeUser = async (
   await inTransaction(manager, async (m) => {
     await m.delete(RefreshTokenEntity, { userId: user.id });
     await m.delete(UserEntity, user.id);
-
-    const remainingMembers = await m.countBy(UserEntity, {
-      household: { id: householdId },
-    });
-    if (remainingMembers === 0) {
-      const lists = await m.find(ListEntity, {
-        where: { household: { id: householdId } },
-        select: { id: true },
-      });
-      if (lists.length > 0) {
-        await m.delete(
-          ListEntity,
-          lists.map((list) => list.id),
-        );
-      }
-
-      await m.delete(HouseholdEntity, householdId);
-    }
+    await removeHouseholdIfEmpty(householdId, m);
   });
 };
 

@@ -4,6 +4,7 @@ import inTransaction from "@/helpers/inTransaction";
 import { EntityManager } from "typeorm";
 import createHousehold from "./createHousehold";
 import findHousehold from "./findHousehold";
+import removeHouseholdIfEmpty from "./removeHouseholdIfEmpty";
 
 export type HouseholdChoice =
   | { householdChoice: "join"; joinCode: string }
@@ -49,8 +50,7 @@ const resolveHousehold = async (
 /**
  * Moves an existing user to a different household - either by joining an
  * existing household via its join code, or by creating a new one. The user's
- * previous household is left untouched (it may become empty; empty households
- * are not deleted for now).
+ * previous household is soft-deleted when they were its last member.
  *
  * @param userId - The user to move
  * @param choice - Whether to join an existing household or create a new one
@@ -87,8 +87,10 @@ const switchHousehold = async (
       throw UserError(400, "household.alreadyMember");
     }
 
+    const previousId = user.household?.id;
     user.household = household;
     await m.save(UserEntity, user);
+    if (previousId) await removeHouseholdIfEmpty(previousId, m);
 
     return household;
   });

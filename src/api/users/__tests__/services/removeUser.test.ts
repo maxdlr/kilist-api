@@ -67,7 +67,7 @@ describe("removeUser", () => {
     expect(await RefreshTokenRepository.countBy({ userId: other.id })).toBe(1);
   });
 
-  it("deletes the household and all its data with its last member", async () => {
+  it("soft-deletes the household and its foods with its last member", async () => {
     const user = await makeOwner("leaving");
     const other = await makeOwner("staying");
     await stockHousehold(user.household.id);
@@ -78,11 +78,12 @@ describe("removeUser", () => {
     expect(
       await HouseholdRepository.findOneBy({ id: user.household.id }),
     ).toBeNull();
-    expect(await ListRepository.count()).toBe(1);
+    expect(
+      await HouseholdRepository.count({ where: { id: user.household.id }, withDeleted: true }),
+    ).toBe(1);
     expect(await FoodRepository.count()).toBe(1);
-    expect(await FoodHistoryRepository.count()).toBe(1);
-    expect(await FrequencyRepository.count()).toBe(1);
-    expect(await ShopListRepository.count()).toBe(1);
+    expect(await FoodRepository.count({ withDeleted: true })).toBe(2);
+    expect(await FoodHistoryRepository.count()).toBe(2);
   });
 
   it("keeps a household that still has members", async () => {

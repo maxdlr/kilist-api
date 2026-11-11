@@ -75,7 +75,7 @@ describe("switchHousehold", () => {
     expect(reloaded?.household.id).toBe(result.id);
   });
 
-  it("leaves the previous household intact (not deleted) after switching", async () => {
+  it("deletes the previous household when its last member leaves", async () => {
     const user = await makeUser();
     const originalHouseholdId = user.household.id;
 
@@ -84,10 +84,19 @@ describe("switchHousehold", () => {
       householdName: "Somewhere Else",
     });
 
-    const previous = await HouseholdRepository.findOne({
-      where: { id: originalHouseholdId },
-    });
-    expect(previous).not.toBeNull();
+    expect(await HouseholdRepository.findOne({ where: { id: originalHouseholdId } })).toBeNull();
+    const kept = await HouseholdRepository.findOne({ where: { id: originalHouseholdId }, withDeleted: true });
+    expect(kept?.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it("keeps the previous household while a housemate is still in it", async () => {
+    const user = await makeUser();
+    const housemate = await makeUser();
+    await switchHousehold(housemate.id, { householdChoice: "join", joinCode: user.household.joinCode });
+
+    await switchHousehold(user.id, { householdChoice: "create" });
+
+    expect(await HouseholdRepository.findOne({ where: { id: user.household.id } })).not.toBeNull();
   });
 
   it("refuses to join a household before the email is confirmed", async () => {
