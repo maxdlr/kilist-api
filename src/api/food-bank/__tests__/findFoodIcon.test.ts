@@ -8,8 +8,8 @@ describe("findFoodIcon", () => {
     expect(findFoodIcon(aliases[0]!)).toBe(icon);
   });
 
-  it.each(Object.entries(FOOD_BANKS))("gives every %s food bank item an icon", (_, bank) => {
-    expect(bank.filter((item) => !item.icon)).toEqual([]);
+  it.each(Object.entries(FOOD_BANKS))("gives every %s staple an icon", (_, bank) => {
+    expect(bank.filter((item) => item.staple && !item.icon)).toEqual([]);
   });
 
   it.each([

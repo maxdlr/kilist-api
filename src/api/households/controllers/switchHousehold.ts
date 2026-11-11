@@ -1,6 +1,7 @@
 import switchHouseholdService from "@/api/households/services/switchHousehold";
 import notifyHousehold from "@/api/notifications/services/notifyHousehold";
 import { Request, Response } from "express";
+import { visibleJoinCode } from "../helpers";
 
 /**
  * Moves the authenticated user to a different household - either joining an
@@ -27,7 +28,7 @@ const switchHousehold = async (
   return res.status(200).send({
     id: household.id,
     name: household.name,
-    joinCode: household.joinCode,
+    joinCode: visibleJoinCode(user, household),
   });
 };
 

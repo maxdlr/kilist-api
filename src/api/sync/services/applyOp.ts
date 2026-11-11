@@ -3,6 +3,9 @@ import applySwipe from "@/api/foods/services/applySwipe";
 import editFood from "@/api/foods/services/editFood";
 import findFood from "@/api/foods/services/findFood";
 import removeFoodsFromList from "@/api/lists/services/removeFoodsFromList";
+import declineSuggestion from "@/api/households/services/declineSuggestion";
+import setEaterProfiles from "@/api/households/services/setEaterProfiles";
+import discardShopList from "@/api/shop-list/services/discardShopList";
 import skinAccess from "@/api/prizes/services/skinAccess";
 import applyShopAction from "@/api/shop-list/services/applyShopAction";
 import closeShopListIfDone from "@/api/shop-list/services/closeShopListIfDone";
@@ -144,7 +147,9 @@ const applyOp = async (
     case "shop.cancel": {
       const id = resolve(payload.shopListId);
       const list = await findShopList({ id, household: { id: householdId } }, m);
-      if (list && !list.endedAt) await updateShopList({ id, endedAt: at }, m);
+      if (!list || list.endedAt) return null;
+      if (payload.discard === true) await discardShopList(id, m);
+      else await updateShopList({ id, endedAt: at }, m);
       return null;
     }
 
@@ -159,6 +164,12 @@ const applyOp = async (
         },
         m,
       );
+      if (payload.needed === true) {
+        await applySwipe(
+          { userId: user.id, householdId, foodId: food.id, isInStock: false, at, withReward: false },
+          m,
+        );
+      }
       return { [String(payload.tempId)]: food.id };
     }
 
@@ -222,6 +233,14 @@ const applyOp = async (
       await updateUserColumns(user.id, { notifications: { ...(current?.notifications ?? {}), [event.id]: payload.choice } }, m);
       return null;
     }
+
+    case "household.profiles":
+      await setEaterProfiles(householdId, payload.profiles, m);
+      return null;
+
+    case "suggestion.decline":
+      await declineSuggestion(householdId, payload.name, at, m);
+      return null;
 
     default:
       throw ApiError(`Unknown sync operation ${op.type}`);

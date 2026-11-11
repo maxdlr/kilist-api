@@ -45,6 +45,10 @@ const MESSAGES = {
     en: "No household uses this code.",
     fr: "Aucun foyer n'utilise ce code.",
   },
+  "email.unconfirmed": {
+    en: "Confirm your email first.",
+    fr: "Confirme d'abord ton e-mail.",
+  },
   "household.alreadyMember": {
     en: "You're already in this household.",
     fr: "Tu fais déjà partie de ce foyer.",

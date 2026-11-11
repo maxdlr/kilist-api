@@ -73,7 +73,7 @@ export const FOOD_ICON_ALIASES: Record<string, string[]> = {
   "pizza": ["pizza"],
   "plum": ["plum", "prune"],
   "pomegranate": ["pomegranate", "grenade"],
-  "porridge": ["porridge", "oat", "oatmeal", "flocons d'avoine", "avoine"],
+  "porridge": ["porridge", "cereal", "oat", "oatmeal", "céréales", "flocons d'avoine", "avoine"],
   "prawn": ["prawn", "shrimp", "crevette"],
   "pretzel": ["pretzel"],
   "quesadilla": ["quesadilla"],

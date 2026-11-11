@@ -5,7 +5,10 @@ import limitFoodHistories from "@/api/foodHistories/services/limitFoodHistories"
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
 import skinAccess from "@/api/prizes/services/skinAccess";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
+import { cleanProfiles } from "@/api/food-bank/profiles";
+import { MAX_DECLINED, suggestionKey } from "@/api/households/helpers";
 import FoodEntity from "@/entities/FoodEntity";
+import HouseholdEntity from "@/entities/HouseholdEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import FrequencyEntity from "@/entities/FrequencyEntity";
 import ListEntity from "@/entities/ListEntity";
@@ -63,6 +66,8 @@ export type GuestData = {
   skin?: string;
   language?: string | null;
   notifications?: Record<string, unknown> | null;
+  eaterProfiles?: string[];
+  declinedSuggestions?: Record<string, { at: string; count: number }>;
 };
 
 const normalize = (name: string) => name.trim().toLowerCase();
@@ -281,6 +286,28 @@ const importGuestData = async (
     ) as Record<string, string>;
     if (Object.keys(notifications).length > 0) columns.notifications = notifications;
     if (Object.keys(columns).length > 0) await updateUserColumns(user.id, columns, m);
+  }
+
+  const current = await m.findOne(HouseholdEntity, { where: { id: householdId } });
+  if (current) {
+    const profiles = cleanProfiles(data.eaterProfiles);
+    const declined = { ...(current.declinedSuggestions ?? {}) };
+    const incoming =
+      data.declinedSuggestions && typeof data.declinedSuggestions === "object" ? data.declinedSuggestions : {};
+    for (const [name, entry] of Object.entries(incoming).slice(0, MAX_DECLINED)) {
+      const count = Math.max(1, Math.floor(Number(entry?.count) || 1));
+      const key = suggestionKey(name);
+      if (!key || Number.isNaN(Date.parse(String(entry?.at))) || declined[key]) continue;
+      declined[key] = { at: when(entry.at).toISOString(), count };
+    }
+    await m.update(HouseholdEntity, householdId, {
+      ...(!current.eaterProfiles?.length && profiles.length > 0 && { eaterProfiles: profiles }),
+      declinedSuggestions: Object.fromEntries(
+        Object.entries(declined)
+          .sort(([, a], [, b]) => Date.parse(b.at) - Date.parse(a.at))
+          .slice(0, MAX_DECLINED),
+      ),
+    });
   }
 
   await m.save(SyncOpEntity, {

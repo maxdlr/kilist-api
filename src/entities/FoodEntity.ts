@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsOptional, IsUrl } from "class-validator";
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
-import FoodCategoryEntity from "./FoodCategory";
 import FoodHistoryEntity from "./FoodHistoryEntity";
 import HouseholdEntity from "./HouseholdEntity";
 import ListEntity from "./ListEntity";
@@ -28,12 +27,6 @@ export default class FoodEntity extends AbstractEntity {
 
   @OneToMany(() => FoodHistoryEntity, (foodHistory) => foodHistory.food)
   foodHistories!: FoodHistoryEntity[];
-
-  @ManyToMany(() => FoodCategoryEntity, {
-    nullable: true,
-  })
-  @JoinTable()
-  categories!: FoodCategoryEntity[];
 
   @Column({ default: "", length: 2000 })
   description?: string;

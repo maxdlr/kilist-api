@@ -3,7 +3,6 @@ import { DataSource } from "typeorm";
 import FoodEntity from "@/entities/FoodEntity";
 import UserEntity from "@/entities/UserEntity";
 import RefreshTokenEntity from "@/entities/RefreshTokenEntity";
-import FoodCategoryEntity from "@/entities/FoodCategory";
 import ListEntity from "@/entities/ListEntity";
 import FrequencyEntity from "@/entities/FrequencyEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
@@ -40,7 +39,6 @@ export const AppDataSource = new DataSource({
     UserEntity,
     RefreshTokenEntity,
     FoodHistoryEntity,
-    FoodCategoryEntity,
     ListEntity,
     FrequencyEntity,
     ShopListEntity,

@@ -1,3 +1,4 @@
+import { hideJoinCode } from "@/api/households/helpers";
 import findUser from "@/api/users/services/findUser";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import { isLang } from "@/i18n";
@@ -19,7 +20,7 @@ const editMyLanguage = async ({ body, user }: Request, res: Response) => {
     return findUser({ id: user.id }, false, m);
   });
 
-  return res.status(200).send(updated);
+  return res.status(200).send(hideJoinCode(updated));
 };
 
 export default editMyLanguage;

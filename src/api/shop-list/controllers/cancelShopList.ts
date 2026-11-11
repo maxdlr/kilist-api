@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
+import discardShopList from "../services/discardShopList";
 import findShopList from "../services/findShopList";
 import updateShopList from "../services/updateShopList";
 import doTransaction from "@/utils/doTransaction";
 
-const cancelShopList = async ({ params, user }: Request, res: Response) => {
+const cancelShopList = async ({ params, user, body }: Request, res: Response) => {
   if (!params.id) {
     throw ApiError("ShopList id is required");
   }
@@ -17,17 +18,21 @@ const cancelShopList = async ({ params, user }: Request, res: Response) => {
       m,
     );
 
-    if (!shopList) {
+    if (!shopList || shopList.endedAt) {
       return res.status(200).end();
     }
 
-    await updateShopList(
-      {
-        id: Number(params.id),
-        endedAt: new Date(),
-      },
-      m,
-    );
+    if (body?.discard === true) {
+      await discardShopList(Number(params.id), m);
+    } else {
+      await updateShopList(
+        {
+          id: Number(params.id),
+          endedAt: new Date(),
+        },
+        m,
+      );
+    }
     return res.status(200).end();
   });
 };

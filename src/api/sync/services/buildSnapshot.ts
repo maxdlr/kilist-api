@@ -1,4 +1,5 @@
 import buildDashboard from "@/api/dashboard/services/buildDashboard";
+import { hideJoinCode, visibleJoinCode } from "@/api/households/helpers";
 import findHouseholdMembers from "@/api/households/services/findHouseholdMembers";
 import findList from "@/api/lists/services/findList";
 import prizeCounter from "@/api/prizes/services/prizeCounter";
@@ -92,11 +93,13 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
   });
 
   return {
-    user,
+    user: hideJoinCode(user),
     household: {
       id: authUser.household.id,
       name: authUser.household.name,
-      joinCode: authUser.household.joinCode,
+      joinCode: visibleJoinCode(user, authUser.household),
+      eaterProfiles: user.household.eaterProfiles ?? [],
+      declinedSuggestions: user.household.declinedSuggestions ?? {},
       members: members.map((member) => ({
         id: member.id,
         username: member.username,

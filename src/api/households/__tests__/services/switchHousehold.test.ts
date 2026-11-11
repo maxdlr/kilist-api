@@ -7,14 +7,16 @@ import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "vitest";
 import switchHousehold from "../../services/switchHousehold";
 
-const makeUser = async () => {
-  return await createUser({
+const makeUser = async (confirmed = true) => {
+  const user = await createUser({
     username: faker.internet.displayName(),
     email: faker.internet.email(),
     password: "Str0ng!Passw0rd",
     householdChoice: "create",
     householdName: "Origin Household",
   });
+  if (confirmed) await UserRepository.update(user.id, { emailConfirmedAt: new Date() });
+  return user;
 };
 
 describe("switchHousehold", () => {
@@ -86,6 +88,26 @@ describe("switchHousehold", () => {
       where: { id: originalHouseholdId },
     });
     expect(previous).not.toBeNull();
+  });
+
+  it("refuses to join a household before the email is confirmed", async () => {
+    const user = await makeUser(false);
+    const target = await HouseholdRepository.save({
+      name: "Target Household",
+      joinCode: generateJoinCode(),
+    });
+
+    await expect(
+      switchHousehold(user.id, { householdChoice: "join", joinCode: target.joinCode }),
+    ).rejects.toMatchObject({ status: 403, code: "email.unconfirmed" });
+  });
+
+  it("lets an unconfirmed user create a new household", async () => {
+    const user = await makeUser(false);
+
+    const result = await switchHousehold(user.id, { householdChoice: "create" });
+
+    expect(result.id).not.toBe(user.household.id);
   });
 
   it("rejects joining with an unknown join code", async () => {

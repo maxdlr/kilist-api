@@ -1,7 +1,6 @@
 import findFoodIcon from "@/api/food-bank/findFoodIcon";
 import { FOOD_ICON_ALIASES } from "@/api/food-bank/foodIconAliases";
 import calculateInStockScore from "@/api/foodHistories/services/calculateInStockScore";
-import FoodCategoryEntity from "@/entities/FoodCategory";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import FrequencyEntity from "@/entities/FrequencyEntity";
@@ -67,24 +66,6 @@ const makeLists = async (
   return manager.save(ListEntity, lists);
 };
 
-const makeFoodCategories = async (
-  manager: EntityManager,
-  household: HouseholdEntity,
-  count: number = 10,
-): Promise<FoodCategoryEntity[]> => {
-  const categories = manager.create(
-    FoodCategoryEntity,
-    Array.from({ length: count }).map(() => {
-      const category = new FoodCategoryEntity();
-      category.name = faker.word.noun();
-      category.description = faker.lorem.sentence();
-      category.household = household;
-      return category;
-    }),
-  );
-  return await manager.save(categories);
-};
-
 const makeFoods = async (
   manager: EntityManager,
   household: HouseholdEntity,
@@ -92,7 +73,6 @@ const makeFoods = async (
   // foodHistories: () => Promise<FoodHistoryEntity[]>,
   count: number = 20,
 ): Promise<FoodEntity[]> => {
-  const categories = await manager.getRepository(FoodCategoryEntity).find();
   // const histories = await foodHistories();
 
   const names = faker.helpers
@@ -107,7 +87,6 @@ const makeFoods = async (
       food.name = name;
       food.icon = findFoodIcon(name) ?? null;
       food.inStockScore = 1;
-      food.categories = categories;
       food.description = faker.food.description();
       food.household = household;
       return food;
@@ -173,18 +152,12 @@ export const loadFixtures = async (): Promise<void> => {
 
   await ListRepository.manager.transaction(async (manager) => {
     await manager.createQueryBuilder().delete().from(ListEntity).execute();
-    await manager
-      .createQueryBuilder()
-      .delete()
-      .from(FoodCategoryEntity)
-      .execute();
     await manager.createQueryBuilder().delete().from(FoodEntity).execute();
     await manager.createQueryBuilder().delete().from(UserEntity).execute();
     await manager.createQueryBuilder().delete().from(HouseholdEntity).execute();
 
     const household = await ensureHousehold(manager);
 
-    await makeFoodCategories(manager, household, randomInt(1, 3));
     await makeFoods(manager, household, randomInt(20, 400));
     await makeFoodHistories(manager);
     await makeFrequencies(manager, household, randomInt(50, 1000));

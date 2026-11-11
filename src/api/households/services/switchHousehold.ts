@@ -77,6 +77,10 @@ const switchHousehold = async (
       throw Missing("Cannot find user");
     }
 
+    if (choice.householdChoice === "join" && !user.emailConfirmedAt) {
+      throw UserError(403, "email.unconfirmed");
+    }
+
     const household = await resolveHousehold(choice, m);
 
     if (user.household?.id === household.id) {

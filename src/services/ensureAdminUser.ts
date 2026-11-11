@@ -20,6 +20,7 @@ const createAdmin = async (
   admin.password = password;
   admin.description = "Creator of this platform";
   admin.type = "admin";
+  admin.emailConfirmedAt = new Date();
   admin.household = household ?? (await createHousehold(ADMIN_USERNAME, m));
 
   console.log(`Admin account "${ADMIN_USERNAME}" created`);

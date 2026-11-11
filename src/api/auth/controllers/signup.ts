@@ -1,4 +1,4 @@
-import notifyHousehold from "@/api/notifications/services/notifyHousehold";
+import findHousehold from "@/api/households/services/findHousehold";
 import importGuestData from "@/api/sync/services/importGuestData";
 import sendVerificationEmail from "@/api/verification/services/sendVerificationEmail";
 import createUser from "@/api/users/services/createUser";
@@ -8,9 +8,17 @@ import setAuthCookies from "../services/setAuthCookie";
 
 const signUp = async ({ body }: Request, res: Response) => {
   const { email, username } = body;
+  const wantsToJoin = body?.householdChoice === "join";
 
   const user = await doTransaction(async (m) => {
-    const user = await createUser(body, m);
+    if (wantsToJoin && !(await findHousehold({ joinCode: String(body.joinCode ?? "") }, m))) {
+      throw UserError(404, "household.codeNotFound");
+    }
+
+    const user = await createUser(
+      wantsToJoin ? { ...body, householdChoice: "create", householdName: undefined } : body,
+      m,
+    );
 
     if (body.guest) {
       await importGuestData(user, body.guest, m, { withPreferences: true });
@@ -26,13 +34,10 @@ const signUp = async ({ body }: Request, res: Response) => {
     return user;
   });
 
-  await sendVerificationEmail(user, "confirm").catch((error) =>
+  sendVerificationEmail(user, "confirm").catch((error) =>
     console.error("Failed to send the confirmation code", error?.message ?? error),
   );
-  if (body.householdChoice === "join") {
-    await notifyHousehold("memberJoined", user.household.id, user).catch(() => 0);
-  }
 
-  return res.status(202).send();
+  return res.status(202).send({ joinPending: wantsToJoin });
 };
 export default signUp;

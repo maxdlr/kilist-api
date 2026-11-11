@@ -465,3 +465,60 @@ describe("refresh tokens on a bad connection", () => {
     await expect(checkRefreshToken("garbage")).rejects.toMatchObject({ status: 401 });
   });
 });
+
+describe("inventory without maintenance", () => {
+  it("adds a food as needed without paying tickets", async () => {
+    const result = await sync([op("food.create", { tempId: -5, name: "Oat milk", listId: list.id, needed: true })]);
+
+    const created = await FoodRepository.findOneByOrFail({ id: result.ids["-5"] });
+    expect(created.inStockScore).toBe(0);
+    expect(await ticketBalance(user.id)).toBe(0);
+  });
+
+  it("marks an existing food as needed when it is added again", async () => {
+    await FoodRepository.update(milk.id, { inStockScore: 1 });
+
+    const result = await sync([op("food.create", { tempId: -6, name: "milk", listId: list.id, needed: true })]);
+
+    expect(result.ids["-6"]).toBe(milk.id);
+    expect(await scoreOf(milk)).toBe(0);
+  });
+
+  it("removes a discarded shop so it is never counted", async () => {
+    const start = op("shop.start", { tempId: -7, foodIds: [milk.id, eggs.id] }, minutesAgo(3));
+    const buy = op("shop.buy", { shopListId: -7, foodId: milk.id }, minutesAgo(2));
+    const cancel = op("shop.cancel", { shopListId: -7, discard: true }, minutesAgo(1));
+
+    const result = await sync([start, buy, cancel]);
+
+    expect(await findShopList({ id: result.ids["-7"] })).toBeNull();
+    expect(result.snapshot.dashboard.shopLists.total).toBe(0);
+    expect(await scoreOf(milk)).toBe(1);
+  });
+
+  it("stores the household's eater profiles, ignoring unknown ones", async () => {
+    const result = await sync([op("household.profiles", { profiles: ["meat", "cat", "nonsense", "meat"] })]);
+
+    expect(result.snapshot.household.eaterProfiles).toEqual(["meat", "cat"]);
+  });
+
+  it("counts each time a suggestion is declined", async () => {
+    await sync([op("suggestion.decline", { name: " Oat Milk " }, minutesAgo(5))]);
+    const result = await sync([op("suggestion.decline", { name: "oat milk" }, minutesAgo(1))]);
+
+    expect(result.snapshot.household.declinedSuggestions["oat milk"].count).toBe(2);
+  });
+});
+
+describe("join codes", () => {
+  it("hides the join code until the email is confirmed", async () => {
+    const before = await sync([]);
+    await AppDataSource.manager.update(UserEntity, user.id, { emailConfirmedAt: new Date() });
+    user = await AppDataSource.manager.findOneOrFail(UserEntity, { where: { id: user.id }, relations: ["household"] });
+    const after = await sync([]);
+
+    expect(before.snapshot.household.joinCode).toBe("");
+    expect(before.snapshot.user.household.joinCode).toBe("");
+    expect(after.snapshot.household.joinCode).toBe(user.household.joinCode);
+  });
+});
