@@ -1,9 +1,8 @@
 const en = {
   passwordReset: {
     subject: (code: string) => `Your Kilist reset code: ${code}`,
-    preheader: (minutes: number) => `Tear off your ticket. It is good for ${minutes} minutes.`,
-    stub: "ADMIT ONE",
-    title: (name: string) => `Take a ticket, ${name}`,
+    preheader: (minutes: number) => `Your code is good for ${minutes} minutes.`,
+    title: (name: string) => `Here is your code, ${name}`,
     note: (minutes: number) => `Valid for ${minutes} minutes, one use only`,
     body: "Enter this code in the app to choose a new password.",
     notYou: "Didn't ask for this? Ignore this email. Your password stays the same.",
@@ -11,23 +10,21 @@ const en = {
       `Sent to ${email} because someone asked to reset the password on this Kilist account.`,
   },
   signupConfirm: {
-    subject: (code: string) => `Welcome to Kilist! Your code: ${code}`,
-    preheader: "One code and you can start playing.",
-    stub: "WELCOME",
-    title: (name: string) => `Welcome to the arcade, ${name}`,
+    subject: (code: string) => `Welcome to Kilist. Your code: ${code}`,
+    preheader: "One code and you are ready to start.",
+    title: (name: string) => `Welcome, ${name}`,
     note: (minutes: number) => `Valid for ${minutes} minutes, one use only`,
-    body: "Enter this code in the app to confirm your email and start playing.",
+    body: "Enter this code in the app to confirm your email and get started.",
     notYou: "Didn't sign up? Ignore this email. Your address won't be confirmed.",
     footer: (email: string) =>
       `Sent to ${email} because this address was used to create a Kilist account.`,
   },
   memberJoined: {
     subject: (member: string) => `${member} joined your household on Kilist`,
-    preheader: "Player 2 has entered the game.",
-    stub: "NEW PLAYER",
+    preheader: "You now share the same foods and shopping list.",
     title: (member: string) => `${member} joined your household`,
     note: (household: string, players: number) =>
-      `${household} · ${players} ${players === 1 ? "player" : "players"}`,
+      `${household} · ${players} ${players === 1 ? "member" : "members"}`,
     body: "You now share the same foods and shopping list.",
     button: "Open Kilist",
     notYou: (member: string, support: string) => `Don't know ${member}? Write to ${support}.`,
@@ -36,12 +33,11 @@ const en = {
   },
   accountDeleted: {
     subject: "Your Kilist account is deleted",
-    preheader: "Your account, tickets and skins are gone.",
-    stub: "VOID",
+    preheader: "Your account, points and looks are gone.",
     title: "Your account is deleted",
-    hero: "GAME OVER",
-    note: (name: string) => `Thanks for playing, ${name}`,
-    body: "Your account, tickets and unlocked skins are gone. This can't be undone.",
+    hero: "Goodbye",
+    note: (name: string) => `Thanks for using Kilist, ${name}`,
+    body: "Your account, points and unlocked looks are gone. This can't be undone.",
     lastInHousehold: "You were the last one in your household, so its foods were deleted too.",
     notYou: (support: string) => `Didn't do this? Write to ${support} right away.`,
     footer: (email: string) =>
@@ -49,7 +45,6 @@ const en = {
   },
   releaseUpdate: {
     preheader: "See what changed in the latest version.",
-    stub: "NEW",
     title: "New in Kilist",
     button: "Update Kilist",
     footer: (email: string) => `Sent to ${email} because you have a Kilist account.`,
@@ -58,10 +53,9 @@ const en = {
   memberLeft: {
     subject: (member: string) => `${member} left your household on Kilist`,
     preheader: "Your foods and shopping list stay as they are.",
-    stub: "PLAYER LEFT",
     title: (member: string) => `${member} left your household`,
     note: (household: string, players: number) =>
-      `${household} · ${players} ${players === 1 ? "player" : "players"}`,
+      `${household} · ${players} ${players === 1 ? "member" : "members"}`,
     body: "Your foods and shopping list stay as they are. You can invite someone else from the app anytime.",
     button: "Open Kilist",
     footer: (email: string, household: string) =>
@@ -69,18 +63,17 @@ const en = {
   },
   purchaseConfirm: {
     subject: (skin: string) => `Your Kilist purchase: ${skin}`,
-    preheader: "Thanks! Your new skin is ready to wear.",
-    stub: "PAID",
+    preheader: "Thank you. Your new look is ready.",
     title: (name: string) => `Thanks for your purchase, ${name}`,
     rows: {
       item: "Item",
-      itemValue: (skin: string) => `${skin} skin`,
+      itemValue: (skin: string) => `${skin} look`,
       price: "Price",
       date: "Date",
       order: "Order",
     },
-    body: "Your new skin is ready in the app.",
-    button: (skin: string) => `Wear ${skin}`,
+    body: "Your new look is ready in the app.",
+    button: (skin: string) => `Use ${skin}`,
     store: (store: string) =>
       `${store} handles the payment and refunds, and sends its own receipt.`,
     footer: (email: string) =>

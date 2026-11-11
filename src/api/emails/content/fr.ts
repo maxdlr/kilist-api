@@ -3,9 +3,8 @@ import type { EmailContent } from "./en";
 const fr: EmailContent = {
   passwordReset: {
     subject: (code: string) => `Ton code Kilist : ${code}`,
-    preheader: (minutes: number) => `Détache ton ticket. Il est valable ${minutes} minutes.`,
-    stub: "ENTRÉE UNIQUE",
-    title: (name: string) => `Prends un ticket, ${name}`,
+    preheader: (minutes: number) => `Ton code est valable ${minutes} minutes.`,
+    title: (name: string) => `Voici ton code, ${name}`,
     note: (minutes: number) => `Valable ${minutes} minutes, une seule fois`,
     body: "Saisis ce code dans l'appli pour choisir un nouveau mot de passe.",
     notYou: "Ce n'est pas toi ? Ignore cet e-mail. Ton mot de passe ne change pas.",
@@ -13,23 +12,21 @@ const fr: EmailContent = {
       `Envoyé à ${email} parce que quelqu'un a demandé à réinitialiser le mot de passe de ce compte Kilist.`,
   },
   signupConfirm: {
-    subject: (code: string) => `Bienvenue sur Kilist ! Ton code : ${code}`,
-    preheader: "Un code et tu peux commencer à jouer.",
-    stub: "BIENVENUE",
-    title: (name: string) => `Bienvenue dans la salle, ${name}`,
+    subject: (code: string) => `Bienvenue sur Kilist. Ton code : ${code}`,
+    preheader: "Un code et tu peux commencer.",
+    title: (name: string) => `Bienvenue, ${name}`,
     note: (minutes: number) => `Valable ${minutes} minutes, une seule fois`,
-    body: "Saisis ce code dans l'appli pour confirmer ton e-mail et commencer à jouer.",
+    body: "Saisis ce code dans l'appli pour confirmer ton e-mail et commencer.",
     notYou: "Ce n'est pas toi ? Ignore cet e-mail. Ton adresse ne sera pas confirmée.",
     footer: (email: string) =>
       `Envoyé à ${email} parce que cette adresse a servi à créer un compte Kilist.`,
   },
   memberJoined: {
     subject: (member: string) => `${member} a rejoint ton foyer sur Kilist`,
-    preheader: "Un nouveau joueur entre dans la partie.",
-    stub: "NOUVEAU JOUEUR",
+    preheader: "Vous partagez maintenant les mêmes aliments et la même liste de courses.",
     title: (member: string) => `${member} a rejoint ton foyer`,
     note: (household: string, players: number) =>
-      `${household} · ${players} ${players <= 1 ? "joueur" : "joueurs"}`,
+      `${household} · ${players} ${players <= 1 ? "membre" : "membres"}`,
     body: "Vous partagez maintenant les mêmes aliments et la même liste de courses.",
     button: "Ouvrir Kilist",
     notYou: (member: string, support: string) => `Tu ne connais pas ${member} ? Écris à ${support}.`,
@@ -38,12 +35,11 @@ const fr: EmailContent = {
   },
   accountDeleted: {
     subject: "Ton compte Kilist est supprimé",
-    preheader: "Ton compte, tes tickets et tes styles ont disparu.",
-    stub: "ANNULÉ",
+    preheader: "Ton compte, tes points et tes styles ont disparu.",
     title: "Ton compte est supprimé",
-    hero: "GAME OVER",
-    note: (name: string) => `Merci d'avoir joué, ${name}`,
-    body: "Ton compte, tes tickets et tes styles débloqués ont disparu. Impossible de revenir en arrière.",
+    hero: "Au revoir",
+    note: (name: string) => `Merci d'avoir utilisé Kilist, ${name}`,
+    body: "Ton compte, tes points et tes styles débloqués ont disparu. Impossible de revenir en arrière.",
     lastInHousehold: "Tu étais la dernière personne de ton foyer, donc ses aliments ont aussi été supprimés.",
     notYou: (support: string) => `Ce n'est pas toi ? Écris vite à ${support}.`,
     footer: (email: string) =>
@@ -51,7 +47,6 @@ const fr: EmailContent = {
   },
   releaseUpdate: {
     preheader: "Découvre ce qui change dans la dernière version.",
-    stub: "NOUVEAU",
     title: "Nouveau sur Kilist",
     button: "Mettre à jour Kilist",
     footer: (email: string) => `Envoyé à ${email} parce que tu as un compte Kilist.`,
@@ -60,10 +55,9 @@ const fr: EmailContent = {
   memberLeft: {
     subject: (member: string) => `${member} a quitté ton foyer sur Kilist`,
     preheader: "Tes aliments et ta liste de courses ne changent pas.",
-    stub: "JOUEUR PARTI",
     title: (member: string) => `${member} a quitté ton foyer`,
     note: (household: string, players: number) =>
-      `${household} · ${players} ${players <= 1 ? "joueur" : "joueurs"}`,
+      `${household} · ${players} ${players <= 1 ? "membre" : "membres"}`,
     body: "Tes aliments et ta liste de courses ne changent pas. Tu peux inviter quelqu'un d'autre depuis l'appli quand tu veux.",
     button: "Ouvrir Kilist",
     footer: (email: string, household: string) =>
@@ -71,8 +65,7 @@ const fr: EmailContent = {
   },
   purchaseConfirm: {
     subject: (skin: string) => `Ton achat Kilist : ${skin}`,
-    preheader: "Merci ! Ton nouveau style est prêt.",
-    stub: "PAYÉ",
+    preheader: "Merci. Ton nouveau style est prêt.",
     title: (name: string) => `Merci pour ton achat, ${name}`,
     rows: {
       item: "Article",
@@ -82,7 +75,7 @@ const fr: EmailContent = {
       order: "Commande",
     },
     body: "Ton nouveau style est prêt dans l'appli.",
-    button: (skin: string) => `Porter ${skin}`,
+    button: (skin: string) => `Utiliser ${skin}`,
     store: (store: string) =>
       `${store} gère le paiement et les remboursements, et t'envoie son propre reçu.`,
     footer: (email: string) =>

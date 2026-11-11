@@ -7,7 +7,7 @@ export type EmailParts = {
   theme: EmailTheme;
   subject: string;
   preheader: string;
-  stub: string;
+  stub?: string;
   title: string;
   hero: EmailBlock;
   note?: string;
@@ -26,11 +26,16 @@ const DESKTOP_WIDTH = 640;
 const DESKTOP_BREAKPOINT = 600;
 const SIDE_STUB_WIDTH = 72;
 
-const stylesOf = (t: EmailTheme) => `
+const stylesOf = (t: EmailTheme, stubbed: boolean) => `
   body { margin: 0; padding: 0; background: ${t.ground}; -webkit-text-size-adjust: 100%; }
   table { border-collapse: separate; }
   a { color: inherit; }
   @media only screen and (min-width: ${DESKTOP_BREAKPOINT}px) {
+    .k-code { font-size: 64px !important; }
+    .k-skin { font-size: 88px !important; }${stubbed ? stubStylesOf(t) : ""}
+  }`;
+
+const stubStylesOf = (t: EmailTheme) => `
     .k-ticket { max-width: ${DESKTOP_WIDTH}px !important; }
     .k-stub-row { display: none !important; }
     .k-stub-side { display: table-cell !important; width: ${SIDE_STUB_WIDTH}px !important; max-height: none !important; overflow: visible !important; }
@@ -39,10 +44,7 @@ const stylesOf = (t: EmailTheme) => `
       border-right: ${t.dashWidth}px dashed ${t.dash} !important;
       border-top: ${t.frameWidth}px solid ${t.frame} !important;
       border-bottom: ${t.frameBottomWidth}px solid ${t.frame} !important;
-    }
-    .k-code { font-size: 64px !important; }
-    .k-skin { font-size: 88px !important; }
-  }`;
+    }`;
 
 const sideStub = (stub: string, side: "left" | "right", t: EmailTheme) => {
   const edge = `border-${side}:${t.frameWidth}px solid ${t.frame};border-top:${t.frameWidth}px solid ${t.frame};border-bottom:${t.frameBottomWidth}px solid ${t.frame};`;
@@ -63,11 +65,17 @@ const stubRow = (stub: string, position: "top" | "bottom", t: EmailTheme) => {
   return `<tr class="k-stub-row"><td colspan="3" aria-hidden="true" align="center" height="64" style="height:64px;background:${t.ticket};border-left:${t.frameWidth}px solid ${t.frame};border-right:${t.frameWidth}px solid ${t.frame};${bottom}font-family:${t.monoFont};font-size:15px;font-weight:700;letter-spacing:4px;color:${t.stubInk};">${escapeHtml(stub)}</td></tr>`;
 };
 
+const stubbedEdges = (t: EmailTheme) =>
+  `border-left:${t.frameWidth}px solid ${t.frame};border-right:${t.frameWidth}px solid ${t.frame};border-top:${t.dashWidth}px dashed ${t.dash};border-bottom:${t.dashWidth}px dashed ${t.dash};`;
+
+const plainEdges = (t: EmailTheme) =>
+  `border:${t.frameWidth}px solid ${t.frame};border-bottom-width:${t.frameBottomWidth}px;border-radius:${t.radius}px;`;
+
 const paragraph = (value: string, size: number, t: EmailTheme) =>
   `<p style="margin:0 0 16px;font-family:${t.bodyFont};font-size:${size}px;line-height:1.5;color:${t.pageInk};">${escapeHtml(value)}</p>`;
 
 const buttonOf = (button: NonNullable<EmailParts["button"]>, t: EmailTheme) =>
-  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;"><tr><td align="center" style="background:${t.buttonFill};border:3px solid ${t.buttonEdge};border-bottom-width:8px;border-radius:${t.buttonRadius}px;"><a href="${escapeHtml(button.url)}" style="display:block;padding:18px 24px;font-family:${t.bodyFont};font-size:20px;line-height:1.2;font-weight:800;color:${t.buttonInk};text-decoration:none;">${escapeHtml(button.label)}</a></td></tr></table>`;
+  `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;"><tr><td align="center" style="background:${t.buttonFill};border:${t.buttonBorder}px solid ${t.buttonEdge};border-bottom-width:${t.buttonBottom}px;border-radius:${t.buttonRadius}px;"><a href="${escapeHtml(button.url)}" style="display:block;padding:${t.buttonPadding}px 24px;font-family:${t.bodyFont};font-size:${t.buttonSize}px;line-height:1.2;font-weight:${t.strongWeight};color:${t.buttonInk};text-decoration:none;">${escapeHtml(button.label)}</a></td></tr></table>`;
 
 export const renderTicket = (parts: EmailParts, lang: Lang): RenderedEmail => {
   const { theme: t, stub, title, hero, note, lead, paragraphs = [], button, closing, footer, footerLink } = parts;
@@ -80,29 +88,29 @@ export const renderTicket = (parts: EmailParts, lang: Lang): RenderedEmail => {
 <meta name="color-scheme" content="light only">
 <title>${escapeHtml(parts.subject)}</title>
 <link rel="stylesheet" href="${t.fontUrl}">
-<style>${stylesOf(t)}</style>
+<style>${stylesOf(t, Boolean(stub))}</style>
 </head>
 <body>
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(parts.preheader)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${t.ground};">
 <tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" class="k-ticket" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:${MOBILE_WIDTH}px;">
-${stubRow(stub, "top", t)}
+${stub ? stubRow(stub, "top", t) : ""}
 <tr>
-${sideStub(stub, "left", t)}
-<td class="k-main" align="center" style="background:${t.ticket};border-left:${t.frameWidth}px solid ${t.frame};border-right:${t.frameWidth}px solid ${t.frame};border-top:${t.dashWidth}px dashed ${t.dash};border-bottom:${t.dashWidth}px dashed ${t.dash};padding:32px 24px;">
-${t.logo ? `<div style="font-family:${t.displayFont};font-size:36px;line-height:1;font-weight:700;color:${t.ink};padding-bottom:18px;">${escapeHtml(t.logo)}</div>` : ""}
-<h1 style="margin:0 0 18px;font-family:${t.bodyFont};font-size:26px;line-height:1.15;font-weight:800;color:${t.ink};">${escapeHtml(title)}</h1>
+${stub ? sideStub(stub, "left", t) : ""}
+<td class="k-main" align="center" style="background:${t.ticket};${stub ? stubbedEdges(t) : plainEdges(t)}padding:32px 24px;">
+${t.logo ? `<div style="font-family:${t.displayFont};font-size:${t.logoSize}px;line-height:1;font-weight:${t.strongWeight};color:${t.ink};padding-bottom:18px;">${escapeHtml(t.logo)}</div>` : ""}
+<h1 style="margin:0 0 18px;font-family:${t.bodyFont};font-size:${t.titleSize}px;line-height:1.15;font-weight:${t.strongWeight};color:${t.ink};">${escapeHtml(title)}</h1>
 ${hero.html}
-${note ? `<div style="padding-top:18px;font-family:${t.bodyFont};font-size:15px;line-height:1.4;font-weight:700;color:${t.ink};">${escapeHtml(note)}</div>` : ""}
+${note ? `<div style="padding-top:18px;font-family:${t.bodyFont};font-size:15px;line-height:1.4;font-weight:${t.noteWeight};color:${t.noteInk};">${escapeHtml(note)}</div>` : ""}
 </td>
-${sideStub(stub, "right", t)}
+${stub ? sideStub(stub, "right", t) : ""}
 </tr>
-${stubRow(stub, "bottom", t)}
+${stub ? stubRow(stub, "bottom", t) : ""}
 </table>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:${MOBILE_WIDTH}px;">
 <tr><td align="center" style="padding-top:28px;">
-${lead ? `<p style="margin:0 0 16px;font-family:${t.leadFont};font-size:${t.leadSize}px;line-height:1.2;font-weight:700;color:#FFFFFF;">${escapeHtml(lead)}</p>` : ""}
+${lead ? `<p style="margin:0 0 16px;font-family:${t.leadFont};font-size:${t.leadSize}px;line-height:1.2;font-weight:700;color:${t.leadInk};">${escapeHtml(lead)}</p>` : ""}
 ${paragraphs.map((value, index) => paragraph(value, index === 0 ? 17 : 15, t)).join("\n")}
 ${button ? buttonOf(button, t) : ""}
 ${closing ? paragraph(closing, 15, t) : ""}

@@ -3,7 +3,7 @@ import en, { EmailContent } from "./content/en";
 import fr from "./content/fr";
 import { EmailSettings } from "./helpers";
 import { codeBlock, numberedBlock, playersBlock, rowsBlock, skinNameBlock, wordBlock } from "./layout/blocks";
-import { arcadeTheme as arcade, roastTheme, versusTheme } from "./layout/themes";
+import { calmTheme as calm, roastTheme, versusTheme } from "./layout/themes";
 import { EmailParts, renderTicket } from "./layout/ticket";
 
 const CONTENT: Record<Lang, EmailContent> = { en, fr };
@@ -50,36 +50,33 @@ const buttonTo = (label: string, url: string | null) => (url ? { label, url } : 
 
 const TEMPLATES: { [K in EmailId]: Template<K> } = {
   passwordReset: (copy, vars) => ({
-    theme: arcade,
+    theme: calm,
     subject: copy.subject(vars.code),
     preheader: copy.preheader(vars.minutes),
-    stub: copy.stub,
     title: copy.title(vars.name),
-    hero: codeBlock(vars.code, arcade),
+    hero: codeBlock(vars.code, calm),
     note: copy.note(vars.minutes),
     paragraphs: [copy.body, copy.notYou],
     footer: copy.footer(vars.email),
   }),
 
   signupConfirm: (copy, vars) => ({
-    theme: arcade,
+    theme: calm,
     subject: copy.subject(vars.code),
     preheader: copy.preheader,
-    stub: copy.stub,
     title: copy.title(vars.name),
-    hero: codeBlock(vars.code, arcade),
+    hero: codeBlock(vars.code, calm),
     note: copy.note(vars.minutes),
     paragraphs: [copy.body, copy.notYou],
     footer: copy.footer(vars.email),
   }),
 
   memberJoined: (copy, vars, settings) => ({
-    theme: arcade,
+    theme: calm,
     subject: copy.subject(vars.member),
     preheader: copy.preheader,
-    stub: copy.stub,
     title: copy.title(vars.member),
-    hero: playersBlock(vars.name, vars.member, arcade),
+    hero: playersBlock(vars.name, vars.member, calm),
     note: copy.note(vars.household, vars.players),
     paragraphs: [copy.body],
     button: buttonTo(copy.button, settings.appUrl),
@@ -88,12 +85,11 @@ const TEMPLATES: { [K in EmailId]: Template<K> } = {
   }),
 
   accountDeleted: (copy, vars, settings) => ({
-    theme: arcade,
+    theme: calm,
     subject: copy.subject,
     preheader: copy.preheader,
-    stub: copy.stub,
     title: copy.title,
-    hero: wordBlock(copy.hero, arcade),
+    hero: wordBlock(copy.hero, calm),
     note: copy.note(vars.name),
     paragraphs: [
       copy.body,
@@ -104,24 +100,22 @@ const TEMPLATES: { [K in EmailId]: Template<K> } = {
   }),
 
   releaseUpdate: (copy, vars, settings) => ({
-    theme: arcade,
+    theme: calm,
     subject: vars.subject,
     preheader: copy.preheader,
-    stub: copy.stub,
     title: `${copy.title} · ${vars.version}`,
-    hero: numberedBlock(vars.items, arcade),
+    hero: numberedBlock(vars.items, calm),
     button: buttonTo(copy.button, settings.appUrl),
     footer: copy.footer(vars.email),
     footerLink: { label: copy.unsubscribe, url: vars.unsubscribeUrl },
   }),
 
   memberLeft: (copy, vars, settings) => ({
-    theme: arcade,
+    theme: calm,
     subject: copy.subject(vars.member),
     preheader: copy.preheader,
-    stub: copy.stub,
     title: copy.title(vars.member),
-    hero: playersBlock(vars.name, null, arcade),
+    hero: playersBlock(vars.name, null, calm),
     note: copy.note(vars.household, vars.players),
     paragraphs: [copy.body],
     button: buttonTo(copy.button, settings.appUrl),
@@ -129,10 +123,9 @@ const TEMPLATES: { [K in EmailId]: Template<K> } = {
   }),
 
   purchaseConfirm: (copy, vars, settings) => ({
-    theme: arcade,
+    theme: calm,
     subject: copy.subject(vars.skin),
     preheader: copy.preheader,
-    stub: copy.stub,
     title: copy.title(vars.name),
     hero: rowsBlock(
       [
@@ -141,7 +134,7 @@ const TEMPLATES: { [K in EmailId]: Template<K> } = {
         { label: copy.rows.date, value: vars.date },
         { label: copy.rows.order, value: vars.orderId },
       ],
-      arcade,
+      calm,
     ),
     paragraphs: [copy.body],
     button: buttonTo(copy.button(vars.skin), settings.appUrl),

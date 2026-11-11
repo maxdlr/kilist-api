@@ -1,24 +1,25 @@
 {
-  "arcade": {
+  "calm": {
     "colors": {
-      "ground": "#6A3FC8",
-      "onGround": "#FFFFFF",
-      "accent": "#FFFFFF",
-      "muted": "#D9CCF5",
-      "raised": "#5530A8",
+      "ground": "#F6F4EF",
+      "onGround": "#23221F",
+      "accent": "#23221F",
+      "muted": "#5F5D57",
+      "raised": "#EFECE5",
       "paper": "#FFFFFF",
-      "onPaper": "#0B2E59",
-      "alert": "#FF8E8E",
-      "onAlert": "#0B2E59"
+      "onPaper": "#23221F",
+      "alert": "#23221F",
+      "onAlert": "#F6F4EF"
     },
     "primary": {
-      "fill": "#FFD84D",
-      "ink": "#0B2E59",
-      "line": "#0B2E59"
+      "fill": "#23221F",
+      "ink": "#F6F4EF",
+      "line": "#23221F"
     },
-    "panelRadius": 30,
-    "radius": 22,
-    "border": 3
+    "panelLine": "#E4E0D7",
+    "panelRadius": 20,
+    "radius": 14,
+    "border": 1
   },
   "versus": {
     "colors": {
@@ -37,6 +38,7 @@
       "ink": "#16122E",
       "line": "#FFD23F"
     },
+    "panelLine": "#221C44",
     "panelRadius": 28,
     "radius": 18,
     "border": 2
@@ -58,6 +60,7 @@
       "ink": "#FFFFFF",
       "line": "#2F5BFF"
     },
+    "panelLine": "#D7FF3E",
     "panelRadius": 0,
     "radius": 0,
     "border": 3

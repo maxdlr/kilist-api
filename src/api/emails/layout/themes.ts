@@ -28,37 +28,87 @@ export type EmailTheme = {
   leadSize: number;
   fontUrl: string;
   logo: string | null;
+  logoSize: number;
+  titleSize: number;
+  strongWeight: number;
+  noteInk: string;
+  noteWeight: number;
+  leadInk: string;
+  buttonSize: number;
+  buttonPadding: number;
+  buttonBorder: number;
+  buttonBottom: number;
+  stroke: number;
+  avatarFill: string;
+  rule: string;
+  ruleWidth: number;
+  item: { fill: string; line: string; border: number; bottom: number; radius: number };
 };
 
-const arcade = tokens.arcade;
+const calm = tokens.calm;
 const versus = tokens.versus;
 const roast = tokens.roast;
 
-export const arcadeTheme: EmailTheme = {
-  ground: arcade.colors.ground,
-  pageInk: arcade.colors.onGround,
-  footerInk: arcade.colors.onGround,
-  ticket: arcade.primary.fill,
-  ink: arcade.colors.onPaper,
-  stubInk: arcade.colors.onPaper,
-  accent: arcade.colors.ground,
-  dash: arcade.colors.onPaper,
-  dashWidth: 4,
-  frame: arcade.colors.onPaper,
-  frameWidth: 4,
-  frameBottomWidth: 12,
-  radius: arcade.radius,
-  buttonFill: arcade.primary.fill,
-  buttonInk: arcade.primary.ink,
-  buttonEdge: arcade.primary.line,
-  buttonRadius: arcade.radius - 2,
-  bodyFont: SYSTEM_FONT,
-  monoFont: MONO_FONT,
-  displayFont: `'Madimi One', Arial, sans-serif`,
-  leadFont: SYSTEM_FONT,
-  leadSize: 18,
-  fontUrl: "https://fonts.googleapis.com/css2?family=Madimi+One&display=swap",
-  logo: "kilist",
+const INTER_FONT = `Inter, ${SYSTEM_FONT}`;
+
+const loud = (ink: string) => ({
+  logoSize: 36,
+  titleSize: 26,
+  strongWeight: 800,
+  noteInk: ink,
+  noteWeight: 700,
+  leadInk: "#FFFFFF",
+  buttonSize: 20,
+  buttonPadding: 18,
+  buttonBorder: 3,
+  buttonBottom: 8,
+  stroke: 4,
+  avatarFill: "#FFFFFF",
+  rule: ink,
+  ruleWidth: 2,
+  item: { fill: "#FFFFFF", line: ink, border: 3, bottom: 6, radius: 14 },
+});
+
+export const calmTheme: EmailTheme = {
+  ground: calm.colors.ground,
+  pageInk: calm.colors.onGround,
+  footerInk: calm.colors.muted,
+  ticket: calm.colors.paper,
+  ink: calm.colors.onPaper,
+  stubInk: calm.colors.muted,
+  accent: calm.colors.onPaper,
+  dash: calm.panelLine,
+  dashWidth: calm.border,
+  frame: calm.panelLine,
+  frameWidth: calm.border,
+  frameBottomWidth: calm.border,
+  radius: calm.panelRadius,
+  buttonFill: calm.primary.fill,
+  buttonInk: calm.primary.ink,
+  buttonEdge: calm.primary.line,
+  buttonRadius: calm.radius,
+  bodyFont: INTER_FONT,
+  monoFont: INTER_FONT,
+  displayFont: INTER_FONT,
+  leadFont: INTER_FONT,
+  leadSize: 17,
+  fontUrl: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap",
+  logo: "Kilist",
+  logoSize: 18,
+  titleSize: 24,
+  strongWeight: 600,
+  noteInk: calm.colors.muted,
+  noteWeight: 400,
+  leadInk: calm.colors.onGround,
+  buttonSize: 16,
+  buttonPadding: 16,
+  buttonBorder: calm.border,
+  buttonBottom: calm.border,
+  stroke: calm.border,
+  avatarFill: calm.colors.raised,
+  rule: calm.panelLine,
+  ruleWidth: calm.border,
+  item: { fill: calm.colors.raised, line: calm.colors.raised, border: calm.border, bottom: calm.border, radius: calm.radius },
 };
 
 export const versusTheme: EmailTheme = {
@@ -86,6 +136,7 @@ export const versusTheme: EmailTheme = {
   leadSize: 21,
   fontUrl: "https://fonts.googleapis.com/css2?family=Bungee&display=swap",
   logo: null,
+  ...loud(versus.colors.onGround),
 };
 
 export const roastTheme: EmailTheme = {
@@ -113,4 +164,5 @@ export const roastTheme: EmailTheme = {
   leadSize: 36,
   fontUrl: "https://fonts.googleapis.com/css2?family=Anton&display=swap",
   logo: null,
+  ...loud(roast.colors.onPaper),
 };

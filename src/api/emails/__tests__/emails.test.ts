@@ -52,7 +52,7 @@ describe("rendering", () => {
 
   it("uses the chosen language", () => {
     expect(render("passwordReset", "fr").text).toContain("Valable 15 minutes");
-    expect(en.passwordReset.stub).not.toBe(fr.passwordReset.stub);
+    expect(en.accountDeleted.hero).not.toBe(fr.accountDeleted.hero);
   });
 
   it("escapes values coming from users", () => {
@@ -83,6 +83,12 @@ describe("rendering", () => {
     expect(
       renderEmail("accountDeleted", { ...PREVIEWS.accountDeleted, lastInHousehold: false }, "en", settings).text,
     ).not.toContain(line);
+  });
+
+  it("dresses every other email in Calm", () => {
+    for (const id of IDS.filter((id) => id !== "skinUnlock")) {
+      expect(render(id).html).toContain("background:#F6F4EF");
+    }
   });
 
   it("dresses the skin unlock in the unlocked skin", () => {
