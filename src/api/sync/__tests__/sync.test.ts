@@ -76,6 +76,18 @@ describe("replaying operations", () => {
     expect(await ticketBalance(user.id)).toBe(10);
   });
 
+  it("lets a same-day replay replace the earlier answer without paying again", async () => {
+    await sync([op("swipe", { foodId: milk.id, isInStock: false }, minutesAgo(60))]);
+    await sync([op("swipe", { foodId: milk.id, isInStock: true, replay: true }, minutesAgo(5))]);
+    await sync([op("swipe", { foodId: eggs.id, isInStock: true, replay: true }, minutesAgo(4))]);
+
+    const histories = await historiesOf(milk);
+    expect(histories).toHaveLength(1);
+    expect(histories[0]!.isInStock).toBe(true);
+    expect(await scoreOf(milk)).toBe(1);
+    expect(await ticketBalance(user.id)).toBe(10);
+  });
+
   it("rejects a bad operation without blocking the ones behind it", async () => {
     const bad = op("swipe", { foodId: 999999, isInStock: false });
     const good = op("swipe", { foodId: milk.id, isInStock: false });

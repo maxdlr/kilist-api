@@ -1,6 +1,8 @@
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
 import awardSwipe from "@/api/prizes/services/awardSwipe";
-import { EntityManager } from "typeorm";
+import { RULES } from "@/api/catalog/rules";
+import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
+import { Between, EntityManager } from "typeorm";
 import findFood from "./findFood";
 
 const applySwipe = async (
@@ -11,7 +13,9 @@ const applySwipe = async (
     isInStock,
     at,
     withReward,
+    replay = false,
   }: {
+    replay?: boolean;
     userId: number;
     householdId: number;
     foodId: number;
@@ -30,8 +34,17 @@ const applySwipe = async (
     throw Missing(`Food with id ${foodId} not found`);
   }
 
+  if (replay) {
+    const since = new Date(at.getTime() - RULES.swipe.restHours * 3600000);
+    await m.delete(FoodHistoryEntity, {
+      food: { id: foodId },
+      user: { id: userId },
+      createdAt: Between(since, at),
+    });
+  }
+
   await createFoodHistory({ foodId, isInStock, userId, at }, m);
-  if (withReward) {
+  if (withReward && !replay) {
     await awardSwipe(userId, foodId, m, at);
   }
 };

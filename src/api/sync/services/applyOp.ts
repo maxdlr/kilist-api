@@ -59,6 +59,7 @@ const applyOp = async (
           isInStock: payload.isInStock,
           at,
           withReward,
+          replay: payload.replay === true,
         },
         m,
       );

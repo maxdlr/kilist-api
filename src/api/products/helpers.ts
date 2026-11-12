@@ -79,6 +79,10 @@ const listOf = (value: unknown) =>
 
 const RULES: [ProfileId, { allergens?: RegExp; categories?: RegExp; ingredients?: RegExp }][] = [
   ["gluten", { allergens: /^en:gluten$/ }],
+  ["egg", { allergens: /^en:eggs$/, categories: /^en:(eggs|chicken-eggs)$/ }],
+  ["peanut", { allergens: /^en:peanuts$/, categories: /^en:(peanuts|peanut-butters)$/ }],
+  ["nuts", { allergens: /^en:nuts$/, categories: /^en:(nuts|nuts-and-their-products)$/ }],
+  ["soy", { allergens: /^en:soybeans$/, categories: /^en:(tofu|soy-milks|soy-based-drinks)$/ }],
   ["dairy", { allergens: /^en:milk$/, categories: /^en:(dairies|milks|cheeses|yogurts|butters|creams)$/ }],
   ["fish", { allergens: /^en:fish$/, categories: /^en:(fishes|canned-fishes|fish-preparations|smoked-fishes)$/ }],
   [
