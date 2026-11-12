@@ -1,13 +1,14 @@
+import { RULES } from "@/api/catalog/rules";
 import FoodEntity from "@/entities/FoodEntity";
 import { FOOD_ICON_ALIASES } from "@/api/food-bank/foodIconAliases";
 
 export type ScannedProduct = { barcode?: unknown; icon?: unknown; quantity?: unknown };
 
-export const MAX_BARCODES = 20;
-export const QUANTITY_LENGTH = 40;
-export const STALE_DAYS = 7;
-export const BIG_PACK_STALE_DAYS = 10;
-const BIG_PACK = 1000;
+export const MAX_BARCODES = RULES.products.maxBarcodes;
+export const QUANTITY_LENGTH = RULES.products.quantityLength;
+export const STALE_DAYS = RULES.swipe.staleDays;
+export const BIG_PACK_STALE_DAYS = RULES.swipe.bigPackStaleDays;
+const BIG_PACK = RULES.swipe.bigPackSize;
 
 const UNITS: Record<string, number> = { kg: 1000, g: 1, l: 1000, cl: 10, ml: 1 };
 const AMOUNT = "(\\d+(?:[.,]\\d+)?)";

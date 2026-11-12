@@ -1,3 +1,4 @@
+import { RULES } from "@/api/catalog/rules";
 import inTransaction from "@/helpers/inTransaction";
 import TicketEntryEntity, { TicketReason } from "@/entities/TicketEntryEntity";
 import { Between, EntityManager } from "typeorm";
@@ -11,7 +12,7 @@ import { userRef } from "../helpers";
 import lockUser from "./lockUser";
 import ticketBalance from "./ticketBalance";
 
-const PAY_WINDOW_MS = 24 * 3600000;
+const PAY_WINDOW_MS = RULES.tickets.payWindowHours * 3600000;
 
 const awardSwipe = (
   userId: number,

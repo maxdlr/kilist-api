@@ -1,3 +1,4 @@
+import { RULES } from "@/api/catalog/rules";
 import findFoodSwipes from "@/api/foods/services/findFoodSwipes";
 import FoodEntity from "@/entities/FoodEntity";
 import RaceEntity from "@/entities/RaceEntity";
@@ -6,7 +7,7 @@ import findManager from "@/utils/findManager";
 import { EntityManager, In } from "typeorm";
 import { isDuplicate } from "../helpers";
 
-const RACE_SIZE = 10;
+const RACE_SIZE = RULES.swipe.deckSize;
 
 const getOrCreateRace = async (
   householdId: number,

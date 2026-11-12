@@ -1,3 +1,4 @@
+import { RULES } from "@/api/catalog/rules";
 import findFoodSwipes from "@/api/foods/services/findFoodSwipes";
 import SwipeListEntity from "@/entities/SwipeListEntity";
 import SwipeListRepository from "@/repositories/SwipeListRepository";
@@ -13,7 +14,7 @@ const createSwipeList = async (
   const startFoods = await findFoodSwipes(
     householdId,
     {
-      take: 10,
+      take: RULES.swipe.deckSize,
     },
     m,
   );

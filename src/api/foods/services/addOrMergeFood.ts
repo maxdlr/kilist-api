@@ -1,4 +1,6 @@
+import { RULES } from "@/api/catalog/rules";
 import findFoodIcon from "@/api/food-bank/findFoodIcon";
+import { foodKeyOf } from "@/api/food-bank/foodBank";
 import findList from "@/api/lists/services/findList";
 import FoodEntity from "@/entities/FoodEntity";
 import ListEntity from "@/entities/ListEntity";
@@ -6,9 +8,7 @@ import { EntityManager } from "typeorm";
 import { productChanges, ScannedProduct } from "../helpers";
 import createFood from "./createFood";
 
-const ONBOARDING_IN_STOCK_SCORE = 0.5;
-
-const normalize = (name: string) => name.trim().toLowerCase();
+const ONBOARDING_IN_STOCK_SCORE = RULES.swipe.onboardingScore;
 
 const addOrMergeFood = async (
   householdId: number,
@@ -24,7 +24,7 @@ const addOrMergeFood = async (
     where: { household: { id: householdId } },
     order: { id: "ASC" },
   });
-  const twin = foods.find((food) => normalize(food.name) === normalize(data.name));
+  const twin = foods.find((food) => foodKeyOf(food.name) === foodKeyOf(data.name));
 
   if (twin) {
     const list = await findList({ id: listId, household: { id: householdId } }, m);

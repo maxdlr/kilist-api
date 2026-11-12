@@ -1,1 +1,3 @@
-export const SAME_TRIP_MS = 30 * 60 * 1000;
+import { RULES } from "@/api/catalog/rules";
+
+export const SAME_TRIP_MS = RULES.shop.sameTripMinutes * 60 * 1000;

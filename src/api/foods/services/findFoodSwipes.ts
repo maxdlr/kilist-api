@@ -1,10 +1,11 @@
+import { RULES } from "@/api/catalog/rules";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager, IsNull, Not } from "typeorm";
 import { staleDaysFor } from "../helpers";
 import findAllFoods from "./findAllFoods";
 
-const SWIPE_BELOW = 0.75;
+const SWIPE_BELOW = RULES.swipe.eligibleBelow;
 
 const findFoodSwipes = async (
   householdId: number,
@@ -54,7 +55,7 @@ const findFoodSwipes = async (
       return true;
     }
 
-    return latestFoodHistory.createdAt < new Date(Date.now() - 24 * 3600000);
+    return latestFoodHistory.createdAt < new Date(Date.now() - RULES.swipe.restHours * 3600000);
   });
 
   const lastActivity = (food: (typeof foods)[number]) =>

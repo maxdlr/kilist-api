@@ -1,10 +1,11 @@
+import { RULES } from "@/api/catalog/rules";
 import FoodHistoryRepository from "@/repositories/FoodHistoryRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager } from "typeorm";
 import findAllFoodHistories from "./findAllFoodHistories";
 import removeFoodHistories from "./removeFoodHistories";
 
-const LIMIT = 8;
+const LIMIT = RULES.swipe.historyLimit;
 
 const limitFoodHistories = async (foodId: number, manager?: EntityManager) => {
   const m = findManager(FoodHistoryRepository, manager);

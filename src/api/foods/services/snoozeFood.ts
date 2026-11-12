@@ -1,3 +1,4 @@
+import { RULES } from "@/api/catalog/rules";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
@@ -6,7 +7,7 @@ import { EntityManager } from "typeorm";
 const snoozeFood = async (
   food: FoodEntity,
   manager?: EntityManager,
-  hours = 24,
+  hours = RULES.shop.snoozeHours,
   at: Date = new Date(),
 ) => {
   const m = findManager(FoodRepository, manager);

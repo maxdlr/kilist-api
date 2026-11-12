@@ -5,6 +5,7 @@ import limitFoodHistories from "@/api/foodHistories/services/limitFoodHistories"
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
 import skinAccess from "@/api/prizes/services/skinAccess";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
+import { foodKeyOf } from "@/api/food-bank/foodBank";
 import { cleanProfiles } from "@/api/food-bank/profiles";
 import { isBarcode, MAX_BARCODES, productChanges, QUANTITY_LENGTH } from "@/api/foods/helpers";
 import { MAX_DECLINED, suggestionKey } from "@/api/households/helpers";
@@ -73,8 +74,6 @@ export type GuestData = {
   declinedSuggestions?: Record<string, { at: string; count: number }>;
 };
 
-const normalize = (name: string) => name.trim().toLowerCase();
-
 const scanned = (guest: GuestFood) => (Array.isArray(guest.barcodes) ? guest.barcodes.filter(isBarcode) : []);
 
 const listOf = <T>(value: T[] | undefined, label: string): T[] => {
@@ -122,7 +121,7 @@ const importGuestData = async (
     relations: { foods: true },
   });
   const existing = await m.find(FoodEntity, { where: { household } });
-  const byName = new Map(existing.map((food) => [normalize(food.name), food]));
+  const byName = new Map(existing.map((food) => [foodKeyOf(food.name), food]));
   const idMap = new Map<number, number>();
 
   for (const guest of listOf(data.foods, "foods")) {
@@ -131,7 +130,7 @@ const importGuestData = async (
     const histories = listOf(guest.histories, "histories");
     const bought = guest.lastBoughtAt ? when(guest.lastBoughtAt) : null;
     const snoozed = guest.snoozedUntil ? new Date(guest.snoozedUntil) : null;
-    const twin = byName.get(normalize(name));
+    const twin = byName.get(foodKeyOf(name));
 
     if (twin) {
       idMap.set(guest.id, twin.id);
@@ -171,7 +170,7 @@ const importGuestData = async (
       ...(snoozed && { snoozedUntil: snoozed }),
     } as Partial<FoodEntity>);
     idMap.set(guest.id, created.id);
-    byName.set(normalize(name), created as FoodEntity);
+    byName.set(foodKeyOf(name), created as FoodEntity);
     if (guest.onList) list.foods.push(created as FoodEntity);
     if (histories.length > 0) {
       await m.save(

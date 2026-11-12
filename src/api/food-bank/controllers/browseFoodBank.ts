@@ -1,4 +1,4 @@
-import { FOOD_BANKS } from "@/api/food-bank/foodBank";
+import { FOOD_BANKS, foodKeyOf } from "@/api/food-bank/foodBank";
 import { langOf } from "@/i18n";
 import findList from "@/api/lists/services/findList";
 import { Request, Response } from "express";
@@ -25,11 +25,11 @@ const browseFoodBank = async (
   }).catch(() => null);
 
   const existingNames = new Set(
-    (mainList?.foods ?? []).map((food) => food.name.trim().toLowerCase()),
+    (mainList?.foods ?? []).map((food) => foodKeyOf(food.name)),
   );
 
   const suggestions = FOOD_BANKS[langOf(req)].filter(
-    (item) => !existingNames.has(item.name.trim().toLowerCase()),
+    (item) => !existingNames.has(item.key),
   );
 
   return res.status(200).send(suggestions);

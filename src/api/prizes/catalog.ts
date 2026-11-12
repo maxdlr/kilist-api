@@ -1,3 +1,5 @@
+import { RULES } from "@/api/catalog/rules";
+
 export type Prize = {
   id: string;
   kind: "skin";
@@ -8,10 +10,10 @@ export type Prize = {
 
 export const PREMIUM_FOR_EVERYONE = false;
 
-export const SWIPE_TICKETS = 10;
-export const SPEED_BONUS_TICKETS = 5;
-export const SPEED_WINDOW_MS = 2000;
-export const PAID_SWIPES_PER_DAY = 10;
+export const SWIPE_TICKETS = RULES.tickets.perSwipe;
+export const SPEED_BONUS_TICKETS = RULES.tickets.speedBonus;
+export const SPEED_WINDOW_MS = RULES.tickets.speedWindowMs;
+export const PAID_SWIPES_PER_DAY = RULES.tickets.paidSwipesPerDay;
 
 export const PRIZES: Prize[] = [
   { id: "skin:calm", kind: "skin", skin: "calm", price: 0 },

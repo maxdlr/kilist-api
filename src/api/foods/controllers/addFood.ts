@@ -1,8 +1,9 @@
+import { RULES } from "@/api/catalog/rules";
 import { Request, Response } from "express";
 import findFoodIcon from "@/api/food-bank/findFoodIcon";
 import createFood from "../services/createFood";
 
-const ONBOARDING_IN_STOCK_SCORE = 0.5;
+const ONBOARDING_IN_STOCK_SCORE = RULES.swipe.onboardingScore;
 
 const addFood = async ({ body, user }: Request, res: Response) => {
   const { name, description, listId, fromOnboarding } = body;
