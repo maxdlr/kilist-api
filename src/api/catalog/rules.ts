@@ -24,6 +24,7 @@ export const RULES = {
   shop: {
     snoozeHours: 24,
     sameTripMinutes: 30,
+    suggestBelow: 0.625,
   },
   products: {
     maxBarcodes: 20,

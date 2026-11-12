@@ -103,6 +103,26 @@ describe("learning the order of the store", () => {
     expect(await act(second, butter)).toEqual([]);
   });
 
+  it("suggests a needed food that was not on this list, and adds it", async () => {
+    const first = await trip();
+    await act(first, butter);
+    await act(first, cheese);
+
+    await restock();
+    await FoodRepository.update({ id: cheese.id }, { inStockScore: 1 });
+    const second = await trip();
+
+    await FoodRepository.update({ id: cheese.id }, { inStockScore: 0.75 });
+    expect(await act(second, milk, "snooze")).toEqual([]);
+    expect(await act(second, butter)).toEqual([]);
+
+    await FoodRepository.update({ id: cheese.id }, { inStockScore: 0.5 });
+    expect(await act(second, butter)).toEqual([cheese.id]);
+
+    const list = await ShopListRepository.findOneOrFail({ where: { id: second }, relations: { startFoods: true } });
+    expect(list.startFoods.map((food) => (food as FoodEntity).id)).toContain(cheese.id);
+  });
+
   it("records whether the suggested food was bought next", async () => {
     const first = await trip();
     await act(first, butter);

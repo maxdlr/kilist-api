@@ -1,9 +1,10 @@
-import findAllFrequencies from "@/api/frequencies/services/findAllFrequencies";
+import { RULES } from "@/api/catalog/rules";
 import findShopList from "@/api/shop-list/services/findShopList";
 import FoodEntity from "@/entities/FoodEntity";
+import FrequencyEntity from "@/entities/FrequencyEntity";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
-import { EntityManager, In, IsNull, LessThan, Not, Or } from "typeorm";
+import { EntityManager } from "typeorm";
 
 const getMostLikelyNextFoods = async (
   foodId: number,
@@ -18,57 +19,31 @@ const getMostLikelyNextFoods = async (
   }
 
   const shopList = await findShopList({ id: shopListId }, m);
+  const bought = new Set((shopList?.boughtFoods ?? []).map((food) => (food as FoodEntity).id));
+  const started = new Set((shopList?.startFoods ?? []).map((food) => (food as FoodEntity).id));
 
-  let availableFoodIds: number[] = [];
-
-  if (shopList) {
-    const boughtFoodIds: number[] =
-      shopList.boughtFoods.map((f) => (f as FoodEntity).id) || [];
-    const startFoodIds: number[] =
-      shopList.startFoods.map((f) => (f as FoodEntity).id) || [];
-
-    availableFoodIds = startFoodIds.filter(
-      (id) => !boughtFoodIds.includes(id) && id !== foodId,
-    );
-
-    if (availableFoodIds.length === 0) {
-      return [];
-    }
-  }
-
-  const frequencies = await findAllFrequencies(
-    {
-      where: {
-        food: { id: foodId },
-        nextBoughtFood: {
-          ...(availableFoodIds.length > 0 ? { id: In(availableFoodIds) } : {}),
-          inStockScore: Not(1),
-          snoozedUntil: Or(IsNull(), LessThan(new Date())),
-        },
-      },
-    },
-    m,
-  );
-
-  if (frequencies.length === 0) {
-    return [];
-  }
-
-  const frequencyMap: Record<number, number> = {};
-
-  frequencies.forEach((frequency) => {
-    const nextFoodId: number = frequency.nextBoughtFood as number;
-    if (nextFoodId) {
-      frequencyMap[nextFoodId] = (frequencyMap[nextFoodId] || 0) + 1;
-    }
+  const frequencies = await m.find(FrequencyEntity, {
+    where: { food: { id: foodId } },
+    relations: { nextBoughtFood: { lists: true } },
   });
 
-  const mostLikelyNextFoodIds = Object.keys(frequencyMap)
-    .map(Number)
-    .sort((a, b) => (frequencyMap[b] ?? 0) - (frequencyMap[a] ?? 0))
-    .slice(0, count);
+  const now = Date.now();
+  const canSuggest = (next: FoodEntity) => {
+    if (next.id === foodId || bought.has(next.id)) return false;
+    if (next.snoozedUntil && new Date(next.snoozedUntil).getTime() >= now) return false;
+    if (!shopList || started.has(next.id)) return next.inStockScore !== 1;
+    return (next.lists ?? []).length > 0 && next.inStockScore < RULES.shop.suggestBelow;
+  };
 
-  return mostLikelyNextFoodIds;
+  const counts = new Map<number, number>();
+  for (const frequency of frequencies) {
+    const next = frequency.nextBoughtFood as FoodEntity | null;
+    if (next && canSuggest(next)) counts.set(next.id, (counts.get(next.id) ?? 0) + 1);
+  }
+
+  return [...counts.keys()]
+    .sort((a, b) => counts.get(b)! - counts.get(a)! || a - b)
+    .slice(0, count);
 };
 
 export default getMostLikelyNextFoods;

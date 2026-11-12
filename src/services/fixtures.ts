@@ -9,7 +9,7 @@ import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
 import ListRepository from "@/repositories/ListRepository";
 import ensureAdminUser from "@/services/ensureAdminUser";
-import { makeFakeUsers } from "@/services/fakeUsers";
+import { makeFakeUsers, makeShoppingRoute } from "@/services/fakeUsers";
 import generateJoinCode from "@/utils/generateJoinCode";
 import { randomElement } from "@/helpers/random";
 import { faker } from "@faker-js/faker";
@@ -161,6 +161,7 @@ export const loadFixtures = async (): Promise<void> => {
     await makeFoods(manager, household, randomInt(20, 400));
     await makeFoodHistories(manager);
     await makeFrequencies(manager, household, randomInt(50, 1000));
+    await makeShoppingRoute(manager, household, await manager.getRepository(FoodEntity).find());
 
     const foodsWithHistories = await manager.getRepository(FoodEntity).find({
       relations: ["foodHistories"],

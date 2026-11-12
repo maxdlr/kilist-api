@@ -55,6 +55,22 @@ const makeFoods = async (m: EntityManager, household: HouseholdEntity, list: Lis
   return foods;
 };
 
+const ROUTE_REACH = 4;
+
+export const makeShoppingRoute = async (m: EntityManager, household: HouseholdEntity, foods: FoodEntity[]) => {
+  if (foods.length < 2) return;
+  const route = faker.helpers.shuffle(foods);
+  const rows = route.flatMap((food, index) =>
+    Array.from({ length: Math.min(ROUTE_REACH, route.length - 1) }).flatMap((_, step) => {
+      const next = route[(index + step + 1) % route.length]!;
+      return Array.from({ length: ROUTE_REACH - step }).map(() =>
+        m.create(FrequencyEntity, { food, nextBoughtFood: next, household }),
+      );
+    }),
+  );
+  await m.save(FrequencyEntity, rows, { chunk: 200 });
+};
+
 const makeActivity = async (m: EntityManager, user: UserEntity, joined: Date, foods: FoodEntity[], household: HouseholdEntity) => {
   if (!chance(0.8) || !foods.length) return 0;
 
@@ -110,6 +126,7 @@ export const makeFakeUsers = async (m: EntityManager) => {
     const household = await createHousehold(home.name === "Household" ? undefined : home.name, m);
     const list = await m.findOneOrFail(ListEntity, { where: { household: { id: household.id }, isMain: true } });
     const foods = chance(0.9) ? await makeFoods(m, household, list) : [];
+    await makeShoppingRoute(m, household, foods);
 
     for (const name of home.members) {
       const joined = between(Date.now() - 60 * DAY, Date.now() - 2 * 60 * 60 * 1000);

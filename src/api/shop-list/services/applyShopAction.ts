@@ -42,13 +42,14 @@ const applyShopAction = async (
     throw ApiError(`ShopList with id ${shopListId} not found`);
   }
 
+  let startFoods = (shopList.startFoods as FoodEntity[]) || [];
+
   if (action === "snooze") {
     food = await snoozeFood(food, m, undefined, at);
   }
 
   if (action === "buy") {
     const boughtFood = (shopList.boughtFoods as FoodEntity[]) || [];
-    const startFoods = (shopList.startFoods as FoodEntity[]) || [];
 
     if (!boughtFood.map((f) => f.id).includes(food.id)) {
       boughtFood.push(food);
@@ -86,6 +87,7 @@ const applyShopAction = async (
       },
       m,
     );
+    if (!startFoods.some((f) => f.id === food!.id)) startFoods = [...startFoods, food];
     await updateFrequencies({ previousFoodId, currentFoodId: foodId }, m);
     await resetFoodHistories(foodId, m, at);
     if (!food.lastBoughtAt || at > food.lastBoughtAt) {
@@ -97,9 +99,13 @@ const applyShopAction = async (
 
   const suggested = mostLikelyNextFoodIds?.[0];
   if (suggested) {
+    const offList = startFoods.some((f) => f.id === suggested)
+      ? null
+      : await findFood({ id: suggested, household: { id: householdId } }, m);
     await updateShopList(
       {
         id: shopListId,
+        ...(offList && { startFoods: [...startFoods, offList] }),
         suggestionLog: [...(shopList.suggestionLog ?? []), { foodId: suggested, taken: false }],
       },
       m,
