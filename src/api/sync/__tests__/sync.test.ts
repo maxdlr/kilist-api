@@ -223,6 +223,7 @@ describe("buying and late swipes", () => {
 
     const after = await FoodRepository.findOneByOrFail({ id: milk.id });
     expect(after.lastBoughtAt).toEqual(recent.lastBoughtAt);
+    expect(after.boughtDates).toHaveLength(1);
   });
 
   it("combines purchases from two offline runs into the open list", async () => {

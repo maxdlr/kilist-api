@@ -7,7 +7,7 @@ import skinAccess from "@/api/prizes/services/skinAccess";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import { foodKeyOf } from "@/api/food-bank/foodBank";
 import { cleanProfiles } from "@/api/food-bank/profiles";
-import { isBarcode, MAX_BARCODES, productChanges, QUANTITY_LENGTH } from "@/api/foods/helpers";
+import { addBoughtDates, isBarcode, MAX_BARCODES, productChanges, QUANTITY_LENGTH } from "@/api/foods/helpers";
 import { MAX_DECLINED, suggestionKey } from "@/api/households/helpers";
 import FoodEntity from "@/entities/FoodEntity";
 import HouseholdEntity from "@/entities/HouseholdEntity";
@@ -43,6 +43,7 @@ type GuestFood = {
   inStockScore: number;
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;
+  boughtDates?: string[];
   onList: boolean;
   histories?: { isInStock: boolean | null; at: string }[];
 };
@@ -124,11 +125,23 @@ const importGuestData = async (
   const byName = new Map(existing.map((food) => [foodKeyOf(food.name), food]));
   const idMap = new Map<number, number>();
 
+  const runDates = new Map<number, Date[]>();
+  for (const run of listOf(data.runs, "runs")) {
+    for (const entry of listOf(run.buyLog, "buy log")) {
+      runDates.set(entry.foodId, [...(runDates.get(entry.foodId) ?? []), when(entry.at)]);
+    }
+  }
+
   for (const guest of listOf(data.foods, "foods")) {
     const name = String(guest?.name ?? "").trim().slice(0, NAME_LENGTH);
     if (!name || !Number.isInteger(guest.id)) continue;
     const histories = listOf(guest.histories, "histories");
     const bought = guest.lastBoughtAt ? when(guest.lastBoughtAt) : null;
+    const purchases = [
+      ...listOf(guest.boughtDates, "bought dates").map(when),
+      ...(runDates.get(guest.id) ?? []),
+      ...(bought ? [bought] : []),
+    ];
     const snoozed = guest.snoozedUntil ? new Date(guest.snoozedUntil) : null;
     const twin = byName.get(foodKeyOf(name));
 
@@ -139,6 +152,7 @@ const importGuestData = async (
       }
       const update: Partial<FoodEntity> = {};
       if (bought && (!twin.lastBoughtAt || bought > twin.lastBoughtAt)) update.lastBoughtAt = bought;
+      if (purchases.length > 0) update.boughtDates = addBoughtDates(twin.boughtDates, purchases);
       if (snoozed && (!twin.snoozedUntil || snoozed > new Date(twin.snoozedUntil))) {
         update.snoozedUntil = snoozed;
       }
@@ -167,6 +181,7 @@ const importGuestData = async (
       inStockScore: Number.isFinite(guest.inStockScore) ? guest.inStockScore : 1,
       household,
       lastBoughtAt: bought,
+      boughtDates: addBoughtDates([], purchases),
       ...(snoozed && { snoozedUntil: snoozed }),
     } as Partial<FoodEntity>);
     idMap.set(guest.id, created.id);

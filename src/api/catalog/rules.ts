@@ -14,6 +14,13 @@ export const RULES = {
     historyLimit: 8,
     onboardingScore: 0.5,
   },
+  rhythm: {
+    minPurchases: 3,
+    keep: 8,
+    share: 0.5,
+    minDays: 2,
+    sameBuyHours: 12,
+  },
   tickets: {
     perSwipe: 10,
     speedBonus: 5,

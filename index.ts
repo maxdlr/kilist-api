@@ -25,6 +25,7 @@ import parseQuery from "@/middlewares/parseQuery";
 const app = express();
 const port =
   process.env.NODE_ENV === "test" ? 0 : process.env.BACK_PORT || 8080;
+if (process.env.TRUST_PROXY) app.set("trust proxy", Number(process.env.TRUST_PROXY));
 
 /**
  * 2 - Cors

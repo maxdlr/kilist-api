@@ -24,6 +24,37 @@ export const packSize = (quantity?: string | null): number | null => {
 export const staleDaysFor = (quantity?: string | null) =>
   (packSize(quantity) ?? 0) >= BIG_PACK ? BIG_PACK_STALE_DAYS : STALE_DAYS;
 
+const RHYTHM = RULES.rhythm;
+const HOUR_MS = 3600000;
+
+export const addBoughtDates = (dates: string[] | null | undefined, added: (Date | string)[]) => {
+  const sorted = [...(dates ?? []), ...added]
+    .map((date) => new Date(date).getTime())
+    .filter((time) => Number.isFinite(time))
+    .sort((a, b) => a - b);
+  const kept: number[] = [];
+  for (const time of sorted) {
+    const previous = kept[kept.length - 1];
+    if (previous !== undefined && time - previous < RHYTHM.sameBuyHours * HOUR_MS) continue;
+    kept.push(time);
+  }
+  return kept.slice(-RHYTHM.keep).map((time) => new Date(time).toISOString());
+};
+
+export const buyGapDays = (dates?: string[] | null) => {
+  const times = (dates ?? []).map((date) => Date.parse(date)).sort((a, b) => a - b);
+  if (times.length < RHYTHM.minPurchases) return null;
+  const gaps = times.slice(1).map((time, index) => time - times[index]!).sort((a, b) => a - b);
+  const middle = Math.floor(gaps.length / 2);
+  const median = gaps.length % 2 ? gaps[middle]! : (gaps[middle - 1]! + gaps[middle]!) / 2;
+  return median / (24 * HOUR_MS);
+};
+
+export const waitDaysFor = (food: Pick<FoodEntity, "quantity" | "boughtDates">) => {
+  const gap = buyGapDays(food.boughtDates);
+  return gap === null ? staleDaysFor(food.quantity) : Math.max(RHYTHM.minDays, gap * RHYTHM.share);
+};
+
 export const isBarcode = (value: unknown): value is string =>
   typeof value === "string" && /^\d{8,14}$/.test(value);
 

@@ -2,7 +2,7 @@ import { RULES } from "@/api/catalog/rules";
 import FoodRepository from "@/repositories/FoodRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager, IsNull, Not } from "typeorm";
-import { staleDaysFor } from "../helpers";
+import { waitDaysFor } from "../helpers";
 import findAllFoods from "./findAllFoods";
 
 const SWIPE_BELOW = RULES.swipe.eligibleBelow;
@@ -65,7 +65,7 @@ const findFoodSwipes = async (
     );
   const now = Date.now();
   const isStale = (food: (typeof foods)[number]) =>
-    lastActivity(food) < now - staleDaysFor(food.quantity) * 24 * 3600000;
+    lastActivity(food) < now - waitDaysFor(food) * 24 * 3600000;
   const low = eligibleFoods.filter((food) => food.inStockScore < SWIPE_BELOW);
   const stale = eligibleFoods
     .filter((food) => food.inStockScore >= SWIPE_BELOW && isStale(food))

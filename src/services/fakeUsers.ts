@@ -1,5 +1,6 @@
 import findFoodIcon from "@/api/food-bank/findFoodIcon";
 import { FOOD_ICON_ALIASES } from "@/api/food-bank/foodIconAliases";
+import { addBoughtDates } from "@/api/foods/helpers";
 import calculateInStockScore from "@/api/foodHistories/services/calculateInStockScore";
 import createHousehold from "@/api/households/services/createHousehold";
 import FoodEntity from "@/entities/FoodEntity";
@@ -112,6 +113,10 @@ const makeActivity = async (m: EntityManager, user: UserEntity, joined: Date, fo
       endedAt: new Date(new Date(buyLog.at(-1)!.at).getTime() + MINUTE),
       createdAt: start,
     });
+    for (const food of bought) {
+      food.boughtDates = addBoughtDates(food.boughtDates, [start]);
+      await m.update(FoodEntity, food.id, { boughtDates: food.boughtDates });
+    }
     bought.slice(1).forEach((food, index) => frequencies.push(m.create(FrequencyEntity, { food: bought[index]!, nextBoughtFood: food, household })));
   }
   if (frequencies.length) await m.save(FrequencyEntity, frequencies);

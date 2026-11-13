@@ -43,6 +43,9 @@ export default class FoodEntity extends AbstractEntity {
   @Column({ type: "datetime", precision: 6, nullable: true })
   lastBoughtAt?: Date | null;
 
+  @Column({ type: "simple-json", nullable: true })
+  boughtDates?: string[] | null;
+
   @Column({ type: "datetime", precision: 6, nullable: true })
   editedAt?: Date | null;
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { isBarcode, packSize, productChanges, staleDaysFor } from "@/api/foods/helpers";
+import { addBoughtDates, buyGapDays, isBarcode, packSize, productChanges, staleDaysFor, waitDaysFor } from "@/api/foods/helpers";
 import { basicName, dietTags, productIcon, productQuantity } from "../helpers";
 import lookupProduct from "../services/lookupProduct";
 
@@ -108,6 +108,21 @@ describe("what a product tells us", () => {
     expect(staleDaysFor("2 kg")).toBe(10);
     expect(staleDaysFor("250 g")).toBe(7);
     expect(staleDaysFor(null)).toBe(7);
+  });
+
+  it("learns how long to wait from past purchases", () => {
+    const now = Date.now();
+    const daysAgo = (days: number) => new Date(now - days * 24 * 3600000).toISOString();
+    expect(buyGapDays([daysAgo(16), daysAgo(10), daysAgo(4)])).toBe(6);
+    expect(buyGapDays([daysAgo(100), daysAgo(12), daysAgo(6), daysAgo(0)])).toBe(6);
+    expect(buyGapDays([daysAgo(10), daysAgo(4)])).toBeNull();
+    expect(waitDaysFor({ quantity: null, boughtDates: [daysAgo(16), daysAgo(10), daysAgo(4)] })).toBe(3);
+    expect(waitDaysFor({ quantity: null, boughtDates: [daysAgo(140), daysAgo(80), daysAgo(20)] })).toBe(30);
+    expect(waitDaysFor({ quantity: null, boughtDates: [daysAgo(2), daysAgo(1), daysAgo(0)] })).toBe(2);
+    expect(waitDaysFor({ quantity: "2 kg", boughtDates: [daysAgo(4)] })).toBe(10);
+    expect(addBoughtDates([daysAgo(6)], [new Date(Date.parse(daysAgo(6)) + 3600000)])).toHaveLength(1);
+    const many = addBoughtDates(null, Array.from({ length: 12 }, (_, index) => daysAgo(index)));
+    expect(many).toHaveLength(8);
   });
 
   it("attaches a scanned product to a food", () => {

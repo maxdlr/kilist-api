@@ -1,5 +1,6 @@
 import resetFoodHistories from "@/api/foodHistories/services/resetFoodHistories";
 import findAllFoods from "@/api/foods/services/findAllFoods";
+import { addBoughtDates } from "@/api/foods/helpers";
 import findFood from "@/api/foods/services/findFood";
 import snoozeFood from "@/api/foods/services/snoozeFood";
 import getMostLikelyNextFoods from "@/api/frequencies/services/getMostLikelyNextFood";
@@ -90,9 +91,10 @@ const applyShopAction = async (
     if (!startFoods.some((f) => f.id === food!.id)) startFoods = [...startFoods, food];
     await updateFrequencies({ previousFoodId, currentFoodId: foodId }, m);
     await resetFoodHistories(foodId, m, at);
-    if (!food.lastBoughtAt || at > food.lastBoughtAt) {
-      await m.update(FoodEntity, foodId, { lastBoughtAt: at });
-    }
+    await m.update(FoodEntity, foodId, {
+      boughtDates: addBoughtDates(food.boughtDates, [at]),
+      ...((!food.lastBoughtAt || at > food.lastBoughtAt) && { lastBoughtAt: at }),
+    });
   }
 
   const mostLikelyNextFoodIds = await getMostLikelyNextFoods(foodId, 1, shopListId, m);
