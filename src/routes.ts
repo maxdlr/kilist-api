@@ -20,6 +20,7 @@ import getMe from "./api/auth/controllers/getMe";
 import editMyLanguage from "./api/auth/controllers/editMyLanguage";
 import editMySkin from "./api/auth/controllers/editMySkin";
 import logIn from "./api/auth/controllers/logIn";
+import logInWithGoogle from "./api/auth/controllers/logInWithGoogle";
 import authenticate from "./middlewares/authenticate";
 import getRefreshToken from "./api/auth/controllers/getRefreshToken";
 import logOut from "./api/auth/controllers/logOut";
@@ -41,6 +42,7 @@ router.use("/products", productRoutes);
 router.use("/stats", installStatsRoutes);
 
 router.post("/login", logIn);
+router.post("/login/google", codeLimit, logInWithGoogle);
 router.post("/signup", signUp);
 router.post("/logout", authenticate, logOut);
 router.post("/refresh", getRefreshToken);

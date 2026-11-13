@@ -45,6 +45,14 @@ const MESSAGES = {
     en: "You can't do that.",
     fr: "Tu ne peux pas faire ça.",
   },
+  "auth.googleUnavailable": {
+    en: "Google sign-in isn't available right now.",
+    fr: "La connexion avec Google n'est pas disponible pour le moment.",
+  },
+  "auth.googleInvalid": {
+    en: "Google couldn't confirm your account. Try again.",
+    fr: "Google n'a pas pu confirmer ton compte. Réessaie.",
+  },
   "auth.userExists": {
     en: "An account already uses this email or username.",
     fr: "Un compte utilise déjà cet e-mail ou ce nom.",

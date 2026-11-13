@@ -21,6 +21,9 @@ export default class UserEntity extends AbstractEntity {
   @IsEmail({}, { message: "validation.email.invalid" })
   email!: string;
 
+  @Column({ type: "varchar", unique: true, nullable: true, default: null, length: 64 })
+  googleId?: string | null;
+
   @Column({ default: "", length: 2000 })
   description?: string;
 
