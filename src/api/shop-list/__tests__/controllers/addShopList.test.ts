@@ -29,7 +29,7 @@ const start = async (): Promise<number | null> => {
 const addFood = async (): Promise<FoodEntity> =>
   FoodRepository.save({
     name: "Milk",
-    inStockScore: 0.5,
+    inStockScore: 0.25,
     household: user.household,
     lists: [await ListRepository.findOneByOrFail({ household: { id: user.household.id }, isMain: true })],
   });

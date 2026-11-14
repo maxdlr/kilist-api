@@ -1,3 +1,4 @@
+import { RULES } from "@/api/catalog/rules";
 import findAllFoods from "@/api/foods/services/findAllFoods";
 import ShopListEntity from "@/entities/ShopListEntity";
 import ShopListRepository from "@/repositories/ShopListRepository";
@@ -17,7 +18,7 @@ const createShopList = async (
       where: {
         household: { id: householdId },
         lists: { id: Not(IsNull()) },
-        inStockScore: LessThan(1),
+        inStockScore: LessThan(RULES.shop.buyBelow),
         snoozedUntil: Or(IsNull(), LessThan(new Date())),
       },
     },

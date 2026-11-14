@@ -109,6 +109,14 @@ const MESSAGES = {
     en: "Your name needs at least 3 characters.",
     fr: "Ton nom doit faire au moins 3 caractères.",
   },
+  "validation.username.long": {
+    en: "Your name can be 30 characters at most.",
+    fr: "Ton nom peut faire 30 caractères au plus.",
+  },
+  "auth.usernameTaken": {
+    en: "Someone already uses this name.",
+    fr: "Quelqu'un utilise déjà ce nom.",
+  },
   "validation.email.invalid": {
     en: "That doesn't look like an email.",
     fr: "Cet e-mail n'a pas l'air valide.",
@@ -120,6 +128,10 @@ const MESSAGES = {
   "validation.name.required": {
     en: "Give it a name.",
     fr: "Donne-lui un nom.",
+  },
+  "validation.name.long": {
+    en: "The name can be 40 characters at most.",
+    fr: "Le nom peut faire 40 caractères au plus.",
   },
   "validation.url.invalid": {
     en: "That link isn't valid.",

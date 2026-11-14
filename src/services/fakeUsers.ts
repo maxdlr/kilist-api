@@ -36,7 +36,7 @@ const HOUSEHOLDS: { name: string; members: string[] }[] = [
 
 const NO_ICON = ["Sopalin", "Pesto", "Tofu", "Liquide vaisselle", "Kombucha"];
 const ICON_NAMES = Object.values(FOOD_ICON_ALIASES).map((aliases) => aliases[0]!.charAt(0).toUpperCase() + aliases[0]!.slice(1));
-const SKINS = ["calm", "calm", "calm", "arcade", "arcade", "roast", "versus"];
+const SKINS = ["calm", "calm", "calm", "calm", "roast", "versus"];
 
 const pick = <T>(list: T[]) => list[faker.number.int({ min: 0, max: list.length - 1 })]!;
 const chance = (probability: number) => Math.random() < probability;
@@ -152,7 +152,7 @@ export const makeFakeUsers = async (m: EntityManager) => {
       if (earned) await m.save(TicketEntryEntity, { user, amount: earned, reason: TicketReason.SWIPE, createdAt: joined });
 
       const skin = pick(SKINS);
-      if (skin !== "arcade" && skin !== "calm") {
+      if (skin !== "calm") {
         const prizeId = `skin:${skin}`;
         if (earned >= 500 && chance(0.7)) {
           await m.save(UnlockEntity, { user, prizeId, source: "points" });

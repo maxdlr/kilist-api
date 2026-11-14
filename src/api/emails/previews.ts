@@ -14,7 +14,7 @@ export const PREVIEWS: { [K in keyof EmailVars]: EmailVars[K] } = {
     subject: "New in Kilist: every item on one screen",
     version: "1.2",
     items: [
-      "Arcade shopping now lists every item in swipeable rows",
+      "Calm shopping now lists every item in swipeable rows",
       "Versus shopping races wait for your START",
       "Removed foods stay out of your shopping list",
     ],

@@ -78,15 +78,12 @@ describe("addFood", () => {
     expect(food.inStockScore).toBe(1);
   });
 
-  it("makes onboarding foods reach the swipe and shop flows", async () => {
+  it("sends onboarding foods to the swipe game, not straight to the shop", async () => {
     const food = await post({ name: "Milk", fromOnboarding: true });
 
     const swipes = await findFoodSwipes(user.household.id, { take: 10 });
     expect(swipes.map(({ id }) => id)).toContain(food.id);
 
-    const shopList = await createShopList(user.household.id);
-    expect(shopList?.startFoods.map((f) => (f as { id: number }).id)).toContain(
-      food.id,
-    );
+    expect(await createShopList(user.household.id)).toBeNull();
   });
 });

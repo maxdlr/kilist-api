@@ -118,7 +118,7 @@ describe("admin jobs", () => {
   });
 
   it("keeps the endpoints admin-only", async () => {
-    const regular = await makeUser("regular", "arcade");
+    const regular = await makeUser("regular", "roast");
     const asRegular = await fetch(`${baseUrl}/admin/jobs`, {
       headers: { "x-test-user": String(regular.id) },
     });

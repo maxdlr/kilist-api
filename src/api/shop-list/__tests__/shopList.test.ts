@@ -21,7 +21,7 @@ beforeEach(async () => {
         name: `Food ${i + 1}`,
         inStockScore: faker.number.float({
           min: 0,
-          max: 0.99,
+          max: 0.3,
           fractionDigits: 2,
         }),
         household,

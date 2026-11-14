@@ -82,8 +82,8 @@ describe("a food removed from the list", () => {
   const setUp = async () => {
     const shopper = await user();
     const main = await findList({ household: { id: shopper.household.id }, isMain: true });
-    const tomatoes = await createFood(shopper.household.id, main.id, { name: "Tomatoes", inStockScore: 0.5 });
-    const milk = await createFood(shopper.household.id, main.id, { name: "Milk", inStockScore: 0.5 });
+    const tomatoes = await createFood(shopper.household.id, main.id, { name: "Tomatoes", inStockScore: 0.25 });
+    const milk = await createFood(shopper.household.id, main.id, { name: "Milk", inStockScore: 0.25 });
     return { shopper, main, tomatoes, milk };
   };
 

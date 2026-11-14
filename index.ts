@@ -10,6 +10,7 @@ import routes from "@/routes";
 import setCors from "@/services/cors";
 import { AppDataSource } from "@/services/database/datasource";
 import ensureAdminUser from "@/services/ensureAdminUser";
+import resetRetiredSkins from "@/api/users/services/resetRetiredSkins";
 import { loadFixtures } from "@/services/fixtures";
 import { requestLogger } from "@/services/requestLogger";
 import serviceErrorHandler from "@/services/serviceErrorHandlers";
@@ -111,6 +112,7 @@ const bootstrapDatabase = async (): Promise<void> => {
 
   await loadFixtures();
   await ensureAdminUser();
+  await resetRetiredSkins();
 };
 
 bootstrapDatabase().catch((error) => {

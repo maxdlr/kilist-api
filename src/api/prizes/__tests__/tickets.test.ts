@@ -189,7 +189,7 @@ describe("prizes", () => {
     const counter = await prizeCounter(user.id);
 
     expect(counter.balance).toBe(120);
-    expect(counter.prizes.find((prize) => prize.skin === "arcade")?.owned).toBe(
+    expect(counter.prizes.find((prize) => prize.skin === "calm")?.owned).toBe(
       true,
     );
     expect(counter.prizes.find((prize) => prize.skin === "roast")?.owned).toBe(
@@ -243,7 +243,7 @@ describe("prizes", () => {
   });
 
   it("tells known skins from unknown ones", async () => {
-    expect(await skinAccess(user.id, "arcade")).toBe("allowed");
+    expect(await skinAccess(user.id, "calm")).toBe("allowed");
     expect(await skinAccess(user.id, "nope")).toBe("unknown");
   });
 });

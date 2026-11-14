@@ -32,6 +32,7 @@ export const RULES = {
     snoozeHours: 24,
     sameTripMinutes: 30,
     suggestBelow: 0.625,
+    buyBelow: 0.375,
   },
   products: {
     maxBarcodes: 20,

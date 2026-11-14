@@ -9,7 +9,7 @@ const ID_B = "22222222-2222-4222-8222-222222222222";
 const day = (offset: number) => new Date(Date.now() - offset * 24 * 3600000).toISOString().slice(0, 10);
 
 const entry = (installId: string, offset: number, extra: Record<string, unknown> = {}) =>
-  parseInstallStat({ day: day(offset), appVersion: "0.1.0", platform: "android", guest: true, skin: "arcade", ...extra }, installId)!;
+  parseInstallStat({ day: day(offset), appVersion: "0.1.0", platform: "android", guest: true, skin: "calm", ...extra }, installId)!;
 
 describe("anonymous install stats", () => {
   it("rejects malformed ids and days, and clamps counts", () => {
@@ -50,7 +50,7 @@ describe("anonymous install stats", () => {
     expect(stats.runs).toBe(1);
     expect(stats.suggestionsTaken).toBe(2);
     expect(stats.foodsPerInventory).toBe(10);
-    expect(stats.skins.map((row) => row.name).sort()).toEqual(["arcade", "roast"]);
+    expect(stats.skins.map((row) => row.name).sort()).toEqual(["calm", "roast"]);
     expect(stats.guests).toEqual({ guest: 1, account: 1 });
     expect(stats.gates).toMatchObject({ household: 1, signupsAfterGate: 1, conversion: 100 });
     expect(stats.errors).toBe(2);

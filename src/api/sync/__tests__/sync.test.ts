@@ -60,7 +60,7 @@ beforeEach(async () => {
   });
   list = await ListRepository.findOneByOrFail({ household: { id: user.household.id }, isMain: true });
   [milk, eggs] = (await FoodRepository.save(
-    ["Milk", "Eggs"].map((name) => ({ name, inStockScore: 0.5, household: user.household, lists: [list] })),
+    ["Milk", "Eggs"].map((name) => ({ name, inStockScore: 0.25, household: user.household, lists: [list] })),
   )) as [FoodEntity, FoodEntity];
 });
 
