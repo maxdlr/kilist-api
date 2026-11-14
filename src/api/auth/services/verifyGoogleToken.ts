@@ -15,9 +15,13 @@ const verifyGoogleToken = async (idToken: unknown): Promise<GoogleIdentity> => {
   const payload = await client
     .verifyIdToken({ idToken, audience })
     .then((ticket) => ticket.getPayload())
-    .catch(() => undefined);
+    .catch((error) => {
+      console.error("Google token rejected:", error?.message ?? error);
+      return undefined;
+    });
 
   if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+    if (payload) console.error("Google token has no verified email", { hasEmail: !!payload.email });
     throw UserError(400, "auth.googleInvalid");
   }
 
