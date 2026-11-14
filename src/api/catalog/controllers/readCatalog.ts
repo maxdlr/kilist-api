@@ -1,4 +1,6 @@
+import { AISLES } from "@/api/food-bank/aisles";
 import { FOOD_BANKS } from "@/api/food-bank/foodBank";
+import { FOOD_NAMES } from "@/api/food-bank/foodNames";
 import { EATER_PROFILES } from "@/api/food-bank/profiles";
 import { ALWAYS_EMAIL, NOTIFICATION_EVENTS } from "@/api/notifications/catalog";
 import { RULES } from "@/api/catalog/rules";
@@ -8,6 +10,8 @@ import { Request, Response } from "express";
 const readCatalog = (_req: Request, res: Response) =>
   res.status(200).json({
     foodBanks: FOOD_BANKS,
+    foodNames: FOOD_NAMES,
+    aisles: AISLES,
     profiles: EATER_PROFILES,
     prizes: PRIZES,
     rules: RULES,

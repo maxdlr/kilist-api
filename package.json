@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit --incremental",
     "tsc": "tsc --noEmit",
     "lint": "eslint .",
+    "import:food-names": "node scripts/importFoodNames.mjs",
     "format": "eslint . --fix",
     "copy:assets": "copyfiles -u 2 \"src/assets/**/*.{pdf,ttf}\" dist/src/assets"
   },

@@ -1,4 +1,6 @@
+import { AISLES } from "@/api/food-bank/aisles";
 import { FOOD_BANKS, foodKeyOf } from "@/api/food-bank/foodBank";
+import { aisleOfTags, FOOD_NAMES } from "@/api/food-bank/foodNames";
 import { PRIZES } from "@/api/prizes/catalog";
 import { Request, Response } from "express";
 import { describe, expect, it } from "vitest";
@@ -14,6 +16,8 @@ describe("catalog", () => {
     expect(Object.keys(body.foodBanks).sort()).toEqual(["en", "fr"]);
     expect(body.foodBanks.fr.find((item: any) => item.name === "Lait").icon).toBe("milk");
     expect(body.prizes).toEqual(PRIZES);
+    expect(body.aisles).toEqual(AISLES);
+    expect(body.foodNames.fr.drinks.length).toBeGreaterThan(0);
     expect(body.rules.suggestions.everyDays).toBeGreaterThan(0);
   });
 
@@ -30,5 +34,19 @@ describe("catalog", () => {
       keys.set(name, item.key);
     }
     expect(en.find((item) => item.key === "lettuce")!.months).not.toContain(11);
+  });
+
+  it("files every bank food and suggested name under a known aisle", () => {
+    const ids = new Set<string>(AISLES.map((aisle) => aisle.id));
+    for (const item of [...FOOD_BANKS.en, ...FOOD_BANKS.fr]) expect(ids.has(item.aisle)).toBe(true);
+    for (const names of Object.values(FOOD_NAMES)) {
+      for (const aisle of Object.keys(names)) expect(ids.has(aisle)).toBe(true);
+    }
+
+    expect(FOOD_NAMES.fr.dairy).toContain("Yaourts à boire");
+    expect(FOOD_NAMES.en.produce).toContain("Avocados");
+    expect(FOOD_NAMES.fr.dairy).not.toContain("Yaourts");
+    expect(aisleOfTags(["en:dairies", "en:yogurts"])).toBe("dairy");
+    expect(aisleOfTags(["en:unknown-thing"])).toBeNull();
   });
 });

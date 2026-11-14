@@ -1,14 +1,16 @@
+import type { AisleId } from "@/api/food-bank/aisles";
+import { aisleOfTags } from "@/api/food-bank/foodNames";
 import type { ProfileId } from "@/api/food-bank/profiles";
 import { Lang } from "@/i18n";
 import { basicName, dietTags, ProductFacts, productIcon, productQuantity } from "../helpers";
 
-export type Product = { name: string; icon?: string; tags: ProfileId[]; quantity?: string };
+export type Product = { name: string; icon?: string; tags: ProfileId[]; quantity?: string; aisle?: AisleId };
 
-const SOURCES = [
-  "https://world.openfoodfacts.org",
-  "https://world.openpetfoodfacts.org",
-  "https://world.openbeautyfacts.org",
-  "https://world.openproductsfacts.org",
+const SOURCES: { url: string; aisle?: AisleId }[] = [
+  { url: "https://world.openfoodfacts.org" },
+  { url: "https://world.openpetfoodfacts.org", aisle: "pets" },
+  { url: "https://world.openbeautyfacts.org", aisle: "household" },
+  { url: "https://world.openproductsfacts.org", aisle: "household" },
 ];
 const FIELDS = (lang: Lang) =>
   [
@@ -41,8 +43,8 @@ const remember = (key: string, product: Product | null) => {
   return product;
 };
 
-const readFrom = async (source: string, barcode: string, lang: Lang): Promise<Product | null | "down"> => {
-  const response = await fetch(`${source}/api/v2/product/${barcode}.json?fields=${FIELDS(lang)}`, {
+const readFrom = async (source: (typeof SOURCES)[number], barcode: string, lang: Lang): Promise<Product | null | "down"> => {
+  const response = await fetch(`${source.url}/api/v2/product/${barcode}.json?fields=${FIELDS(lang)}`, {
     headers: { "User-Agent": userAgent() },
     signal: AbortSignal.timeout(TIMEOUT_MS),
   }).catch(() => null);
@@ -60,6 +62,7 @@ const readFrom = async (source: string, barcode: string, lang: Lang): Promise<Pr
     icon: productIcon(body.product, lang, name),
     tags: dietTags(body.product),
     quantity: productQuantity(body.product),
+    aisle: source.aisle ?? aisleOfTags(body.product.categories_tags) ?? undefined,
   };
 };
 

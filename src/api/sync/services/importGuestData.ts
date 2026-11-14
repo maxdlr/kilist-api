@@ -1,3 +1,4 @@
+import { cleanAisle } from "@/api/food-bank/aisles";
 import { PRIZES } from "@/api/prizes/catalog";
 import { findEvent } from "@/api/notifications/catalog";
 import updateFoodInStockScore from "@/api/foods/services/updateFoodInStockScore";
@@ -40,6 +41,7 @@ type GuestFood = {
   imageUrl?: string | null;
   barcodes?: string[];
   quantity?: string | null;
+  aisle?: string | null;
   inStockScore: number;
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;
@@ -157,7 +159,7 @@ const importGuestData = async (
         update.snoozedUntil = snoozed;
       }
       for (const barcode of scanned(guest)) Object.assign(twin, productChanges(twin, { barcode }));
-      Object.assign(update, productChanges(twin, { quantity: guest.quantity }), { barcodes: twin.barcodes ?? null });
+      Object.assign(update, productChanges(twin, { quantity: guest.quantity, aisle: guest.aisle }), { barcodes: twin.barcodes ?? null });
       if (Object.keys(update).length > 0) await m.update(FoodEntity, twin.id, update);
       for (const history of histories) {
         await createFoodHistory(
@@ -178,6 +180,7 @@ const importGuestData = async (
       icon: guest.icon ?? null,
       barcodes: scanned(guest).slice(-MAX_BARCODES),
       quantity: typeof guest.quantity === "string" ? guest.quantity.slice(0, QUANTITY_LENGTH) : null,
+      aisle: cleanAisle(guest.aisle),
       inStockScore: Number.isFinite(guest.inStockScore) ? guest.inStockScore : 1,
       household,
       lastBoughtAt: bought,

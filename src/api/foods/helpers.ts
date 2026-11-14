@@ -1,8 +1,9 @@
+import { cleanAisle } from "@/api/food-bank/aisles";
 import { RULES } from "@/api/catalog/rules";
 import FoodEntity from "@/entities/FoodEntity";
 import { FOOD_ICON_ALIASES } from "@/api/food-bank/foodIconAliases";
 
-export type ScannedProduct = { barcode?: unknown; icon?: unknown; quantity?: unknown };
+export type ScannedProduct = { barcode?: unknown; icon?: unknown; quantity?: unknown; aisle?: unknown };
 
 export const MAX_BARCODES = RULES.products.maxBarcodes;
 export const QUANTITY_LENGTH = RULES.products.quantityLength;
@@ -59,11 +60,11 @@ export const isBarcode = (value: unknown): value is string =>
   typeof value === "string" && /^\d{8,14}$/.test(value);
 
 export const productChanges = (
-  food: Pick<FoodEntity, "barcodes" | "quantity" | "icon">,
+  food: Pick<FoodEntity, "barcodes" | "quantity" | "icon" | "aisle">,
   product?: ScannedProduct | null,
-): Partial<Pick<FoodEntity, "barcodes" | "quantity" | "icon">> => {
+): Partial<Pick<FoodEntity, "barcodes" | "quantity" | "icon" | "aisle">> => {
   if (!product || typeof product !== "object") return {};
-  const changes: Partial<Pick<FoodEntity, "barcodes" | "quantity" | "icon">> = {};
+  const changes: Partial<Pick<FoodEntity, "barcodes" | "quantity" | "icon" | "aisle">> = {};
   const barcodes = food.barcodes ?? [];
 
   if (isBarcode(product.barcode) && !barcodes.includes(product.barcode)) {
@@ -75,6 +76,8 @@ export const productChanges = (
   if (!food.icon && typeof product.icon === "string" && product.icon in FOOD_ICON_ALIASES) {
     changes.icon = product.icon;
   }
+  const aisle = cleanAisle(product.aisle);
+  if (!food.aisle && aisle) changes.aisle = aisle;
 
   return changes;
 };

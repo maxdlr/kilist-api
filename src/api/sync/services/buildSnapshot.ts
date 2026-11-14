@@ -120,6 +120,7 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
       icon: food.icon,
       barcodes: food.barcodes ?? [],
       quantity: food.quantity ?? null,
+      aisle: food.aisle ?? null,
       inStockScore: food.inStockScore,
       snoozedUntil: food.snoozedUntil,
       lastBoughtAt: food.lastBoughtAt,

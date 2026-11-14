@@ -39,6 +39,13 @@ release: ## Build and push the Docker image to Docker Hub (latest + commit SHA)
 		echo "✘ Uncommitted changes: commit them first, the image is tagged with the commit SHA"; \
 		exit 1; \
 	fi
+	@echo "Refreshing food names from Open Food Facts..."; \
+	npm run --silent import:food-names \
+		|| echo "⚠ Could not refresh food names: releasing with the committed list"
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "✘ Food names changed: review and commit src/api/food-bank/foodTaxonomy.generated.ts, then run make release again"; \
+		exit 1; \
+	fi
 	@SHA=$$(git rev-parse --short HEAD); \
 	echo "Releasing $(DOCKER_IMAGE):$$SHA from $$(git branch --show-current)..."; \
 	docker buildx build --platform linux/amd64,linux/arm64 \
