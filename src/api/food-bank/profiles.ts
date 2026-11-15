@@ -12,10 +12,22 @@ export const EATER_PROFILES = [
   { id: "soda", kind: "exclude" },
   { id: "alcohol", kind: "exclude" },
   { id: "coffee", kind: "include" },
+  { id: "tea", kind: "include" },
+  { id: "beer", kind: "include" },
+  { id: "wine", kind: "include" },
+  { id: "spirits", kind: "include" },
   { id: "baby", kind: "include" },
   { id: "cat", kind: "include" },
   { id: "dog", kind: "include" },
+  { id: "bird", kind: "include" },
+  { id: "rabbit", kind: "include" },
+  { id: "rodent", kind: "include" },
+  { id: "aquarium", kind: "include" },
+  { id: "kids", kind: "include" },
   { id: "baking", kind: "include" },
+  { id: "bathroom", kind: "include" },
+  { id: "cleaning", kind: "include" },
+  { id: "dishwasher", kind: "include" },
 ] as const;
 
 export type ProfileId = (typeof EATER_PROFILES)[number]["id"];
