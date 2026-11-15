@@ -17,8 +17,8 @@ export const PAID_SWIPES_PER_DAY = RULES.tickets.paidSwipesPerDay;
 
 export const PRIZES: Prize[] = [
   { id: "skin:calm", kind: "skin", skin: "calm", price: 0 },
-  { id: "skin:roast", kind: "skin", skin: "roast", price: 1000 },
-  { id: "skin:versus", kind: "skin", skin: "versus", price: 1000, accountOnly: true },
+  { id: "skin:roast", kind: "skin", skin: "roast", price: 5000 },
+  { id: "skin:versus", kind: "skin", skin: "versus", price: 5000, accountOnly: true },
 ];
 
 export const findPrize = (id: string) => PRIZES.find((prize) => prize.id === id);

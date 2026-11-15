@@ -198,7 +198,7 @@ describe("prizes", () => {
   });
 
   it("redeems a prize and spends the tickets", async () => {
-    await grant(1100);
+    await grant(5100);
     const counter = await redeemPrize(user.id, "skin:roast");
 
     expect(counter.balance).toBe(100);
@@ -208,16 +208,16 @@ describe("prizes", () => {
   });
 
   it("refuses a prize you can't afford", async () => {
-    await grant(999);
+    await grant(4999);
 
     await expect(redeemPrize(user.id, "skin:roast")).rejects.toMatchObject({
       status: 402,
     });
-    expect(await ticketBalance(user.id)).toBe(999);
+    expect(await ticketBalance(user.id)).toBe(4999);
   });
 
   it("lets only one of two parallel redeems through", async () => {
-    await grant(1100);
+    await grant(5100);
     const results = await Promise.allSettled([
       redeemPrize(user.id, "skin:roast"),
       redeemPrize(user.id, "skin:roast"),
@@ -228,7 +228,7 @@ describe("prizes", () => {
   });
 
   it("refuses a prize you already own", async () => {
-    await grant(1200);
+    await grant(5200);
     await redeemPrize(user.id, "skin:roast");
 
     await expect(redeemPrize(user.id, "skin:roast")).rejects.toMatchObject({
@@ -261,22 +261,22 @@ describe("tickets brought from guest mode", () => {
   });
 
   it("can buy Roast with them, and only account tickets count for Versus", async () => {
-    await importTickets(1500);
+    await importTickets(7500);
     const afterRoast = await redeemPrize(user.id, "skin:roast");
-    expect(afterRoast).toMatchObject({ balance: 500, reserved: 500 });
+    expect(afterRoast).toMatchObject({ balance: 2500, reserved: 2500 });
 
-    await grant(800);
+    await grant(4000);
     await expect(redeemPrize(user.id, "skin:versus")).rejects.toMatchObject({ status: 402 });
 
-    await grant(200);
+    await grant(1000);
     const afterVersus = await redeemPrize(user.id, "skin:versus");
-    expect(afterVersus).toMatchObject({ balance: 500, reserved: 500 });
-    expect(await prizeCounter(user.id)).toMatchObject({ balance: 500, reserved: 500 });
+    expect(afterVersus).toMatchObject({ balance: 2500, reserved: 2500 });
+    expect(await prizeCounter(user.id)).toMatchObject({ balance: 2500, reserved: 2500 });
   });
 
   it("spends account tickets on Roast only once guest tickets run out", async () => {
     await importTickets(300);
-    await grant(1000);
+    await grant(5000);
 
     expect(await redeemPrize(user.id, "skin:roast")).toMatchObject({ balance: 300, reserved: 0 });
   });
