@@ -8,7 +8,7 @@ const browseSwipeFoods = async ({ user, query }: Request, res: Response) => {
   const firstGame = !again && !(await hasSwipedBefore(user!.id, null));
   const take = firstGame ? RULES.swipe.firstDeckSize : RULES.swipe.deckSize;
 
-  const foodSwipes = await findFoodSwipes(user!.household.id, { take, again });
+  const foodSwipes = await findFoodSwipes(user!.household.id, { take, again, playerId: user!.id });
 
   return res.status(200).json(foodSwipes);
 };

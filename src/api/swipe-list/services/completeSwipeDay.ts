@@ -1,24 +1,18 @@
 import { toLocalDay } from "@/helpers/localDay";
-import { SwipeListStatus } from "@/entities/SwipeListEntity";
-import { EntityManager, IsNull, Not } from "typeorm";
+import { EntityManager } from "typeorm";
 import findAllSwipeLists from "./findAllSwipeLists";
+import playedRounds from "./playedRounds";
 import recordSwipeSession from "./recordSwipeSession";
 
 const completeSwipeDay = async (
   householdId: number,
+  userId: number,
   tzOffset: number,
   at: Date,
   m: EntityManager,
 ): Promise<void> => {
   const sessions = await findAllSwipeLists(
-    {
-      loadRelationIds: false,
-      where: {
-        household: { id: householdId },
-        status: SwipeListStatus.COMPLETED,
-        endedAt: Not(IsNull()),
-      },
-    },
+    { loadRelationIds: false, where: playedRounds(userId, householdId) },
     m,
   );
   const day = toLocalDay(at, tzOffset);
@@ -26,7 +20,7 @@ const completeSwipeDay = async (
     return;
   }
 
-  await recordSwipeSession(householdId, m, at);
+  await recordSwipeSession(householdId, userId, m, at);
 };
 
 export default completeSwipeDay;

@@ -5,16 +5,16 @@ import findList from "@/api/lists/services/findList";
 import hasSwipedBefore from "@/api/prizes/services/hasSwipedBefore";
 import prizeCounter from "@/api/prizes/services/prizeCounter";
 import findShopList from "@/api/shop-list/services/findShopList";
+import playedRounds from "@/api/swipe-list/services/playedRounds";
 import findAllSwipeLists from "@/api/swipe-list/services/findAllSwipeLists";
 import findUser from "@/api/users/services/findUser";
 import FoodEntity from "@/entities/FoodEntity";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import FrequencyEntity from "@/entities/FrequencyEntity";
-import { SwipeListStatus } from "@/entities/SwipeListEntity";
 import TicketEntryEntity, { TicketReason } from "@/entities/TicketEntryEntity";
 import UserEntity from "@/entities/UserEntity";
 import { RULES } from "@/api/catalog/rules";
-import { EntityManager, IsNull, MoreThan, Not, Or } from "typeorm";
+import { EntityManager, IsNull, MoreThan, Or } from "typeorm";
 
 const RECENT_SWIPES_MS = 48 * 3600000;
 
@@ -66,15 +66,9 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
     .addOrderBy("frequency.nextBoughtFoodId", "ASC")
     .getRawMany<{ foodId: number; nextFoodId: number; count: string | number }>();
 
+  // this player's own daily rounds (each member has their own game)
   const sessions = await findAllSwipeLists(
-    {
-      loadRelationIds: false,
-      where: {
-        household: { id: householdId },
-        status: SwipeListStatus.COMPLETED,
-        endedAt: Not(IsNull()),
-      },
-    },
+    { loadRelationIds: false, where: playedRounds(authUser.id, householdId) },
     m,
   );
 

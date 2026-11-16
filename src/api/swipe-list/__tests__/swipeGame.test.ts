@@ -8,6 +8,8 @@ import completeSwipeList from "../controllers/completeSwipeList";
 import readSwipeGame from "../controllers/readSwipeGame";
 import { parseTzOffset } from "@/helpers/localDay";
 import getSwipeGame from "../services/getSwipeGame";
+import completeSwipeDay from "../services/completeSwipeDay";
+import doTransaction from "@/utils/doTransaction";
 
 const DAY = 24 * 3600000;
 let user: UserEntity;
@@ -17,6 +19,7 @@ const saveSession = (endedAt: Date, status = SwipeListStatus.COMPLETED) =>
     status,
     endedAt,
     household: user.household,
+    user,
   } as SwipeListEntity);
 
 const respond = () => {
@@ -45,7 +48,7 @@ beforeEach(async () => {
 
 describe("swipe game", () => {
   it("starts a new household at level 1", async () => {
-    expect(await getSwipeGame(user.household.id, 0)).toEqual({
+    expect(await getSwipeGame(user.id, user.household.id, 0)).toEqual({
       level: 1,
       playedToday: false,
     });
@@ -56,7 +59,7 @@ describe("swipe game", () => {
     await saveSession(new Date(Date.now() - 3 * DAY));
     await saveSession(new Date(Date.now() - DAY));
 
-    expect(await getSwipeGame(user.household.id, 0)).toEqual({
+    expect(await getSwipeGame(user.id, user.household.id, 0)).toEqual({
       level: 3,
       playedToday: false,
     });
@@ -65,14 +68,14 @@ describe("swipe game", () => {
   it("ignores sessions that were never completed", async () => {
     await saveSession(new Date(Date.now() - DAY), SwipeListStatus.STARTED);
 
-    expect((await getSwipeGame(user.household.id, 0)).level).toBe(1);
+    expect((await getSwipeGame(user.id, user.household.id, 0)).level).toBe(1);
   });
 
   it("keeps the level of the day once played", async () => {
     await saveSession(new Date(Date.now() - DAY));
     await saveSession(new Date());
 
-    expect(await getSwipeGame(user.household.id, 0)).toEqual({
+    expect(await getSwipeGame(user.id, user.household.id, 0)).toEqual({
       level: 2,
       playedToday: true,
     });
@@ -84,13 +87,13 @@ describe("swipe game", () => {
       vi.setSystemTime(new Date("2026-03-10T23:30:00Z"));
       await saveSession(new Date("2026-03-10T22:30:00Z"));
 
-      expect((await getSwipeGame(user.household.id, 0)).playedToday).toBe(true);
+      expect((await getSwipeGame(user.id, user.household.id, 0)).playedToday).toBe(true);
 
       vi.setSystemTime(new Date("2026-03-11T00:30:00Z"));
-      expect((await getSwipeGame(user.household.id, 0)).playedToday).toBe(
+      expect((await getSwipeGame(user.id, user.household.id, 0)).playedToday).toBe(
         false,
       );
-      expect((await getSwipeGame(user.household.id, 60)).playedToday).toBe(
+      expect((await getSwipeGame(user.id, user.household.id, 60)).playedToday).toBe(
         true,
       );
     } finally {
@@ -107,7 +110,7 @@ describe("swipe game", () => {
     });
     await saveSession(new Date());
 
-    expect((await getSwipeGame(other.household.id, 0)).playedToday).toBe(false);
+    expect((await getSwipeGame(other.id, other.household.id, 0)).playedToday).toBe(false);
   });
 
   it("records one session per day however often it completes", async () => {
@@ -134,7 +137,7 @@ describe("swipe game", () => {
     ).toBe(1);
   });
 
-  it("reads the game for the authenticated household", async () => {
+  it("reads the game for the authenticated player", async () => {
     await saveSession(new Date());
     const { out, res } = respond();
 
@@ -154,5 +157,59 @@ describe("swipe game", () => {
     expect(parseTzOffset("nope")).toBe(0);
     expect(parseTzOffset(99999)).toBe(0);
     expect(parseTzOffset(undefined)).toBe(0);
+  });
+});
+
+describe("one daily game per household member", () => {
+  let partner: UserEntity;
+
+  beforeEach(async () => {
+    partner = await createUser({
+      username: "partner",
+      email: "partner@example.com",
+      password: "Str0ng!Passw0rd",
+      householdChoice: "join",
+      joinCode: user.household.joinCode,
+    });
+  });
+
+  const complete = async (player: UserEntity) => {
+    const { out, res } = respond();
+    await completeSwipeList({ user: player, body: { tzOffset: 0 } } as unknown as Request, res);
+    return out.body;
+  };
+
+  it("does not close a member's game when another member plays", async () => {
+    expect(partner.household.id).toBe(user.household.id);
+
+    expect(await complete(user)).toEqual({ level: 1, playedToday: true });
+
+    expect(await getSwipeGame(partner.id, partner.household.id, 0)).toEqual({
+      level: 1,
+      playedToday: false,
+    });
+    expect(await complete(partner)).toEqual({ level: 1, playedToday: true });
+  });
+
+  it("closes the day per member through sync too", async () => {
+    await doTransaction((m) => completeSwipeDay(user.household.id, user.id, 0, new Date(), m));
+
+    expect((await getSwipeGame(user.id, user.household.id, 0)).playedToday).toBe(true);
+    expect((await getSwipeGame(partner.id, partner.household.id, 0)).playedToday).toBe(false);
+  });
+
+  it("keeps the household's rounds from before games were per member for every member", async () => {
+    await SwipeListRepository.save({
+      status: SwipeListStatus.COMPLETED,
+      endedAt: new Date(Date.now() - DAY),
+      household: user.household,
+    } as SwipeListEntity);
+
+    for (const player of [user, partner]) {
+      expect(await getSwipeGame(player.id, player.household.id, 0)).toEqual({
+        level: 2,
+        playedToday: false,
+      });
+    }
   });
 });

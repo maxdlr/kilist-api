@@ -67,7 +67,7 @@ const applyOp = async (
       return null;
 
     case "swipe.complete":
-      await completeSwipeDay(householdId, parseTzOffset(payload.tzOffset), at, m);
+      await completeSwipeDay(householdId, user.id, parseTzOffset(payload.tzOffset), at, m);
       return null;
 
     case "race.answer": {

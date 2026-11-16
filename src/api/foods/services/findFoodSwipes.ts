@@ -7,9 +7,15 @@ import findAllFoods from "./findAllFoods";
 
 const SWIPE_BELOW = RULES.swipe.eligibleBelow;
 
+/**
+ * The foods to ask about. With `playerId` (the daily game), "recently answered" and "not checked lately"
+ * only look at that player's own answers, so every household member gets a full deck of their own and
+ * each of their answers adds to the shared stock score. Without it (races, legacy lists) the whole
+ * household's answers count.
+ */
 const findFoodSwipes = async (
   householdId: number,
-  { take, again = false }: { take: number; again?: boolean },
+  { take, again = false, playerId }: { take: number; again?: boolean; playerId?: number },
   manager?: EntityManager,
 ) => {
   const m = findManager(FoodRepository, manager);
@@ -24,7 +30,7 @@ const findFoodSwipes = async (
     {
       loadRelationIds: false,
 
-      relations: { foodHistories: true },
+      relations: { foodHistories: playerId === undefined ? true : { user: true } },
 
       where: {
         household: { id: householdId },
@@ -36,8 +42,13 @@ const findFoodSwipes = async (
     m,
   );
 
+  const historiesOf = (food: (typeof foods)[number]) =>
+    playerId === undefined
+      ? food.foodHistories
+      : food.foodHistories?.filter((history) => history.user?.id === playerId);
+
   const eligibleFoods = foods.filter((food) => {
-    const foodHistories = food.foodHistories;
+    const foodHistories = historiesOf(food);
 
     if (!foodHistories || foodHistories.length === 0) {
       return true;
@@ -61,7 +72,7 @@ const findFoodSwipes = async (
   const lastActivity = (food: (typeof foods)[number]) =>
     Math.max(
       food.lastBoughtAt?.getTime() ?? 0,
-      ...(food.foodHistories ?? []).map((history) => history.createdAt?.getTime() ?? 0),
+      ...(historiesOf(food) ?? []).map((history) => history.createdAt?.getTime() ?? 0),
     );
   const now = Date.now();
   const isStale = (food: (typeof foods)[number]) =>

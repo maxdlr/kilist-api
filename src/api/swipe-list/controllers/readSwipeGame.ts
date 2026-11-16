@@ -4,6 +4,7 @@ import getSwipeGame from "../services/getSwipeGame";
 
 const readSwipeGame = async ({ query, user }: Request, res: Response) => {
   const game = await getSwipeGame(
+    user!.id,
     user!.household.id,
     parseTzOffset(query.tzOffset),
   );

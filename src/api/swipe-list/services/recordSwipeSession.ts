@@ -5,6 +5,7 @@ import { EntityManager } from "typeorm";
 
 const recordSwipeSession = async (
   householdId: number,
+  userId: number,
   manager?: EntityManager,
   at: Date = new Date(),
 ): Promise<SwipeListEntity> => {
@@ -14,6 +15,7 @@ const recordSwipeSession = async (
   session.status = SwipeListStatus.COMPLETED;
   session.endedAt = at;
   session.household = { id: householdId } as SwipeListEntity["household"];
+  session.user = { id: userId } as SwipeListEntity["user"];
 
   return await m.save(SwipeListEntity, session);
 };

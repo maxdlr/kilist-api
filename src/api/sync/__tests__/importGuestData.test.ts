@@ -135,7 +135,7 @@ describe("importing a guest's phone", () => {
   it("keeps days played and the level", async () => {
     await run(guestData());
 
-    const game = await getSwipeGame(user.household.id, 0);
+    const game = await getSwipeGame(user.id, user.household.id, 0);
     expect(game.level).toBe(4);
     expect(game.playedToday).toBe(false);
   });
@@ -223,7 +223,7 @@ describe("merging into an existing household", () => {
   it("counts one round per day across the household", async () => {
     await run(guestData({ playedAt: [ago(1), ago(1)] }));
 
-    expect((await getSwipeGame(user.household.id, 0)).level).toBe(2);
+    expect((await getSwipeGame(user.id, user.household.id, 0)).level).toBe(2);
   });
 
   it("never touches another household", async () => {

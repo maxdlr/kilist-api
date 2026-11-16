@@ -1,4 +1,5 @@
 import { cleanAisle } from "@/api/food-bank/aisles";
+import playedRounds from "@/api/swipe-list/services/playedRounds";
 import { PRIZES } from "@/api/prizes/catalog";
 import { findEvent } from "@/api/notifications/catalog";
 import updateFoodInStockScore from "@/api/foods/services/updateFoodInStockScore";
@@ -23,7 +24,7 @@ import UnlockEntity from "@/entities/UnlockEntity";
 import UserEntity, { SKIN_PATTERN } from "@/entities/UserEntity";
 import { parseTzOffset, toLocalDay } from "@/helpers/localDay";
 import { isLang } from "@/i18n";
-import { EntityManager, IsNull, Not } from "typeorm";
+import { EntityManager } from "typeorm";
 import { clockSkew, resolveOpTime } from "../helpers";
 
 const MAX_ITEMS = 50000;
@@ -230,7 +231,7 @@ const importGuestData = async (
 
   const tzOffset = parseTzOffset(data.tzOffset);
   const sessions = await m.find(SwipeListEntity, {
-    where: { household, status: SwipeListStatus.COMPLETED, endedAt: Not(IsNull()) },
+    where: playedRounds(user.id, householdId),
     select: { id: true, endedAt: true },
   });
   const playedDays = new Set(sessions.map((session) => toLocalDay(session.endedAt as Date, tzOffset)));
@@ -240,7 +241,7 @@ const importGuestData = async (
     const day = toLocalDay(at, tzOffset);
     if (playedDays.has(day)) continue;
     playedDays.add(day);
-    newSessions.push({ status: SwipeListStatus.COMPLETED, endedAt: at, household } as Partial<SwipeListEntity>);
+    newSessions.push({ status: SwipeListStatus.COMPLETED, endedAt: at, household, user: userRef } as Partial<SwipeListEntity>);
   }
   if (newSessions.length > 0) await m.save(SwipeListEntity, newSessions, { chunk: CHUNK });
 

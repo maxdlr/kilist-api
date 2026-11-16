@@ -1,27 +1,22 @@
 import { toLocalDay } from "@/helpers/localDay";
-import { SwipeListStatus } from "@/entities/SwipeListEntity";
-import { EntityManager, IsNull, Not } from "typeorm";
+import { EntityManager } from "typeorm";
 import findAllSwipeLists from "./findAllSwipeLists";
+import playedRounds from "./playedRounds";
 
 export interface SwipeGame {
   level: number;
   playedToday: boolean;
 }
 
+/** The player's daily game: each household member has their own. */
 const getSwipeGame = async (
+  userId: number,
   householdId: number,
   tzOffset: number,
   manager?: EntityManager,
 ): Promise<SwipeGame> => {
   const sessions = await findAllSwipeLists(
-    {
-      loadRelationIds: false,
-      where: {
-        household: { id: householdId },
-        status: SwipeListStatus.COMPLETED,
-        endedAt: Not(IsNull()),
-      },
-    },
+    { loadRelationIds: false, where: playedRounds(userId, householdId) },
     manager,
   );
 

@@ -203,7 +203,7 @@ describe("action times", () => {
 
     await sync([op("swipe.complete", { tzOffset: 0 }, yesterday)]);
 
-    const game = await getSwipeGame(user.household.id, 0);
+    const game = await getSwipeGame(user.id, user.household.id, 0);
     expect(game.playedToday).toBe(false);
     expect(game.level).toBe(2);
   });
@@ -212,7 +212,7 @@ describe("action times", () => {
     await sync([op("swipe.complete", { tzOffset: 0 })]);
     await sync([op("swipe.complete", { tzOffset: 0 })]);
 
-    expect((await getSwipeGame(user.household.id, 0)).level).toBe(1);
+    expect((await getSwipeGame(user.id, user.household.id, 0)).level).toBe(1);
   });
 });
 

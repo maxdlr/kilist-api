@@ -88,9 +88,9 @@ describe("getDashboard", () => {
       password: "Str0ng!Passw0rd",
       householdChoice: "create",
     });
-    await recordSwipeSession(user.household.id);
-    await recordSwipeSession(user.household.id);
-    await recordSwipeSession(other.household.id);
+    await recordSwipeSession(user.household.id, user.id);
+    await recordSwipeSession(user.household.id, user.id);
+    await recordSwipeSession(other.household.id, other.id);
 
     const { swipes } = await read();
 
