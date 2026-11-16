@@ -9,7 +9,7 @@ const SWIPE_BELOW = RULES.swipe.eligibleBelow;
 
 const findFoodSwipes = async (
   householdId: number,
-  { take }: { take: number },
+  { take, again = false }: { take: number; again?: boolean },
   manager?: EntityManager,
 ) => {
   const m = findManager(FoodRepository, manager);
@@ -71,7 +71,13 @@ const findFoodSwipes = async (
     .filter((food) => food.inStockScore >= SWIPE_BELOW && isStale(food))
     .sort((a, b) => lastActivity(a) - lastActivity(b));
 
-  return [...low, ...stale].slice(0, take);
+  const rest = again
+    ? eligibleFoods
+        .filter((food) => food.inStockScore >= SWIPE_BELOW && !isStale(food))
+        .sort((a, b) => lastActivity(a) - lastActivity(b))
+    : [];
+
+  return [...low, ...stale, ...rest].slice(0, take);
 };
 
 export default findFoodSwipes;

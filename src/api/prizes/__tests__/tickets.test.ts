@@ -23,6 +23,14 @@ const grant = (amount: number) =>
     reason: TicketReason.SWIPE,
   } as TicketEntryEntity);
 
+const grantSwipeAt = (createdAt: Date) =>
+  TicketEntryRepository.save({
+    user,
+    amount: 10,
+    reason: TicketReason.SWIPE,
+    createdAt,
+  } as TicketEntryEntity);
+
 beforeEach(async () => {
   user = await createUser({
     username: "gamer",
@@ -79,13 +87,37 @@ describe("tickets", () => {
     expect(again.balance).toBe(10);
   });
 
-  it("stops paying after 10 swipes in a day", async () => {
-    for (const food of foods.slice(0, 10)) {
-      await awardSwipe(user.id, food.id);
+  it("pays the whole first game of 20 swipes in full", async () => {
+    const many = await FoodRepository.save(
+      Array.from({ length: 25 }, (_, i) =>
+        FoodRepository.create({ name: `Extra ${i}`, inStockScore: 0.2, household: user.household }),
+      ),
+    );
+    const paid = [];
+    for (const food of many.slice(0, 21)) {
+      paid.push((await awardSwipe(user.id, food.id, undefined, new Date(Date.now() - 60000 + paid.length * 3000))).earned);
     }
-    const eleventh = await awardSwipe(user.id, foods[10]!.id);
 
-    expect(eleventh.earned).toBe(0);
+    expect(paid.slice(0, 20).every((earned) => earned === 10)).toBe(true);
+    expect(paid[20]).toBe(5);
+  });
+
+  it("halves the pay with each later game of the day", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-03-09T08:00:00Z"));
+    await grantSwipeAt(new Date("2026-03-08T08:00:00Z"));
+    const many = await FoodRepository.save(
+      Array.from({ length: 50 }, (_, i) =>
+        FoodRepository.create({ name: `Extra ${i}`, inStockScore: 0.2, household: user.household }),
+      ),
+    );
+    const paid = [];
+    for (const food of many) {
+      vi.setSystemTime(new Date(Date.parse("2026-03-09T10:00:00Z") + paid.length * 5000));
+      paid.push((await awardSwipe(user.id, food.id)).earned);
+    }
+
+    expect([paid[0], paid[9], paid[10], paid[19], paid[20], paid[30], paid[40]]).toEqual([10, 10, 5, 5, 2, 1, 0]);
   });
 
   it("pays a food again once 24 hours have passed", async () => {
@@ -104,16 +136,6 @@ describe("tickets", () => {
 
     expect(results.filter((result) => result.earned > 0)).toHaveLength(1);
     expect(await ticketBalance(user.id)).toBe(10);
-  });
-
-  it("caps paid swipes even when they arrive in parallel", async () => {
-    await Promise.all(foods.map((food) => awardSwipe(user.id, food.id)));
-
-    expect(
-      await TicketEntryRepository.count({
-        where: { user: { id: user.id }, reason: TicketReason.SWIPE },
-      }),
-    ).toBe(10);
   });
 
   it("pays tickets through the swipe endpoint", async () => {

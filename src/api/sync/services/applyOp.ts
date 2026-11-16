@@ -2,6 +2,7 @@ import addOrMergeFood from "@/api/foods/services/addOrMergeFood";
 import applySwipe from "@/api/foods/services/applySwipe";
 import editFood from "@/api/foods/services/editFood";
 import findFood from "@/api/foods/services/findFood";
+import setFoodLevel from "@/api/foods/services/setFoodLevel";
 import removeFoodsFromList from "@/api/lists/services/removeFoodsFromList";
 import declineSuggestion from "@/api/households/services/declineSuggestion";
 import setEaterProfiles from "@/api/households/services/setEaterProfiles";
@@ -189,6 +190,13 @@ const applyOp = async (
       await m.update(FoodEntity, foodId, { editedAt: at });
       return null;
     }
+
+    case "food.setLevel":
+      await setFoodLevel(
+        { userId: user.id, householdId, foodId: resolve(payload.foodId), level: payload.level, at },
+        m,
+      );
+      return null;
 
     case "food.remove": {
       await removeFoodsFromList(

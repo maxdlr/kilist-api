@@ -6,6 +6,7 @@ export const RULES = {
   },
   swipe: {
     deckSize: 10,
+    firstDeckSize: 20,
     eligibleBelow: 0.75,
     restHours: 24,
     staleDays: 7,

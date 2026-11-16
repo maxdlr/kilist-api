@@ -2,6 +2,7 @@ import buildDashboard from "@/api/dashboard/services/buildDashboard";
 import { hideJoinCode, visibleJoinCode } from "@/api/households/helpers";
 import findHouseholdMembers from "@/api/households/services/findHouseholdMembers";
 import findList from "@/api/lists/services/findList";
+import hasSwipedBefore from "@/api/prizes/services/hasSwipedBefore";
 import prizeCounter from "@/api/prizes/services/prizeCounter";
 import findShopList from "@/api/shop-list/services/findShopList";
 import findAllSwipeLists from "@/api/swipe-list/services/findAllSwipeLists";
@@ -12,6 +13,7 @@ import FrequencyEntity from "@/entities/FrequencyEntity";
 import { SwipeListStatus } from "@/entities/SwipeListEntity";
 import TicketEntryEntity, { TicketReason } from "@/entities/TicketEntryEntity";
 import UserEntity from "@/entities/UserEntity";
+import { RULES } from "@/api/catalog/rules";
 import { EntityManager, IsNull, MoreThan, Not, Or } from "typeorm";
 
 const RECENT_SWIPES_MS = 48 * 3600000;
@@ -36,6 +38,11 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
     loadRelationIds: { relations: ["food"] },
     order: { createdAt: "ASC", id: "ASC" },
   });
+  const swipedBefore = await hasSwipedBefore(
+    authUser.id,
+    new Date(Date.now() - RULES.tickets.payWindowHours * 3600000),
+    m,
+  );
   const historiesByFood = new Map<number, { isInStock: boolean | null; at: Date }[]>();
   for (const history of histories) {
     const foodId = history.food as unknown as number;
@@ -150,6 +157,7 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
       foodId: entry.foodId,
       at: entry.createdAt as Date,
     })),
+    swipedBefore,
   };
 };
 

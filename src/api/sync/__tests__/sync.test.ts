@@ -64,6 +64,33 @@ beforeEach(async () => {
   )) as [FoodEntity, FoodEntity];
 });
 
+describe("setting a food's level", () => {
+  it("rewrites the history so the food lands on the chosen level", async () => {
+    await sync([op("swipe", { foodId: milk.id, isInStock: true }, minutesAgo(10))]);
+    await sync([op("food.setLevel", { foodId: milk.id, level: 0.25 }, minutesAgo(1))]);
+
+    expect(await scoreOf(milk)).toBe(0.25);
+    expect(await historiesOf(milk)).toHaveLength(4);
+  });
+
+  it("keeps answers given after the level was set", async () => {
+    await sync([
+      op("swipe", { foodId: eggs.id, isInStock: false }, minutesAgo(1)),
+      op("food.setLevel", { foodId: eggs.id, level: 1 }, minutesAgo(5)),
+    ]);
+
+    expect(await historiesOf(eggs)).toHaveLength(5);
+    expect(await scoreOf(eggs)).toBe(0.8);
+  });
+
+  it("rejects a level that isn't one of the five", async () => {
+    const result = await sync([op("food.setLevel", { foodId: milk.id, level: 0.3 })]);
+
+    expect(result.acks[0]?.status).toBe("rejected");
+    expect(await scoreOf(milk)).toBe(0.25);
+  });
+});
+
 describe("replaying operations", () => {
   it("applies a re-sent operation only once", async () => {
     const swipe = op("swipe", { foodId: milk.id, isInStock: false });
