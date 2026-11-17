@@ -7,12 +7,6 @@ import findAllFoods from "./findAllFoods";
 
 const SWIPE_BELOW = RULES.swipe.eligibleBelow;
 
-/**
- * The foods to ask about. With `playerId` (the daily game), "recently answered" and "not checked lately"
- * only look at that player's own answers, so every household member gets a full deck of their own and
- * each of their answers adds to the shared stock score. Without it (races, legacy lists) the whole
- * household's answers count.
- */
 const findFoodSwipes = async (
   householdId: number,
   { take, again = false, playerId }: { take: number; again?: boolean; playerId?: number },

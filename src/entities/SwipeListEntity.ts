@@ -40,10 +40,6 @@ export default class SwipeListEntity extends AbstractEntity {
   })
   household!: HouseholdEntity;
 
-  /**
-   * Who played this round: every member gets their own daily game. Null on rounds played before
-   * games were per member; those count for everyone in the household (see playedRounds).
-   */
   @ManyToOne(() => UserEntity, { nullable: true, onDelete: "CASCADE" })
   user?: UserEntity | null;
 }

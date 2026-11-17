@@ -34,7 +34,6 @@ beforeEach(async () => {
       lists: [list],
     })),
   );
-  // I just answered every card
   for (const food of foods) await createFoodHistory({ foodId: food.id, isInStock: true, userId: me.id });
 });
 

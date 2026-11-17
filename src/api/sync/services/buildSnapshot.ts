@@ -66,7 +66,6 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
     .addOrderBy("frequency.nextBoughtFoodId", "ASC")
     .getRawMany<{ foodId: number; nextFoodId: number; count: string | number }>();
 
-  // this player's own daily rounds (each member has their own game)
   const sessions = await findAllSwipeLists(
     { loadRelationIds: false, where: playedRounds(authUser.id, householdId) },
     m,
