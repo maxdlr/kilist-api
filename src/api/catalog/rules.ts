@@ -39,6 +39,10 @@ export const RULES = {
     maxBarcodes: 20,
     quantityLength: 40,
   },
+  accounts: {
+    usernameMin: 3,
+    usernameMax: 30,
+  },
 };
 
 export type Rules = typeof RULES;

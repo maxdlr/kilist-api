@@ -1,3 +1,4 @@
+import { RULES } from "@/api/catalog/rules";
 import { hideJoinCode } from "@/api/households/helpers";
 import findUser from "@/api/users/services/findUser";
 import isUsernameTaken from "@/api/users/services/isUsernameTaken";
@@ -5,8 +6,8 @@ import updateUserColumns from "@/api/users/services/updateUserColumns";
 import doTransaction from "@/utils/doTransaction";
 import type { Request, Response } from "express";
 
-export const USERNAME_MIN = 3;
-export const USERNAME_MAX = 30;
+export const USERNAME_MIN = RULES.accounts.usernameMin;
+export const USERNAME_MAX = RULES.accounts.usernameMax;
 
 const editMyUsername = async ({ body, user }: Request, res: Response) => {
   if (!user) {

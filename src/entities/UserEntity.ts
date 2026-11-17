@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
-import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
+import { RULES } from "@/api/catalog/rules";
+import { IsEmail, IsNotEmpty, MaxLength, MinLength } from "class-validator";
 import { Column, Entity, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import HouseholdEntity from "./HouseholdEntity";
@@ -13,7 +14,8 @@ export default class UserEntity extends AbstractEntity {
   private _password!: string;
 
   @Column({ unique: true })
-  @MinLength(3, { message: "validation.username.short" })
+  @MinLength(RULES.accounts.usernameMin, { message: "validation.username.short" })
+  @MaxLength(RULES.accounts.usernameMax, { message: "validation.username.long" })
   @IsNotEmpty({ message: "validation.username.required" })
   username!: string;
 
