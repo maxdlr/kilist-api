@@ -21,11 +21,11 @@ const en = {
   },
   memberJoined: {
     subject: (member: string) => `${member} joined your household on Kilist`,
-    preheader: "You now share the same foods and shopping list.",
+    preheader: "You now share the same items and shopping list.",
     title: (member: string) => `${member} joined your household`,
     note: (household: string, players: number) =>
       `${household} · ${players} ${players === 1 ? "member" : "members"}`,
-    body: "You now share the same foods and shopping list.",
+    body: "You now share the same items and shopping list.",
     button: "Open Kilist",
     notYou: (member: string, support: string) => `Don't know ${member}? Write to ${support}.`,
     footer: (email: string, household: string) =>
@@ -38,7 +38,7 @@ const en = {
     hero: "Goodbye",
     note: (name: string) => `Thanks for using Kilist, ${name}`,
     body: "Your account, points and unlocked looks are gone. This can't be undone.",
-    lastInHousehold: "You were the last one in your household, so its foods were deleted too.",
+    lastInHousehold: "You were the last one in your household, so its items were deleted too.",
     notYou: (support: string) => `Didn't do this? Write to ${support} right away.`,
     footer: (email: string) =>
       `Sent to ${email} because this Kilist account was deleted. This is the last email you will get from us.`,
@@ -52,11 +52,11 @@ const en = {
   },
   memberLeft: {
     subject: (member: string) => `${member} left your household on Kilist`,
-    preheader: "Your foods and shopping list stay as they are.",
+    preheader: "Your items and shopping list stay as they are.",
     title: (member: string) => `${member} left your household`,
     note: (household: string, players: number) =>
       `${household} · ${players} ${players === 1 ? "member" : "members"}`,
-    body: "Your foods and shopping list stay as they are. You can invite someone else from the app anytime.",
+    body: "Your items and shopping list stay as they are. You can invite someone else from the app anytime.",
     button: "Open Kilist",
     footer: (email: string, household: string) =>
       `Sent to ${email} because you are a member of ${household} on Kilist.`,
@@ -82,13 +82,13 @@ const en = {
   skinUnlock: {
     versus: {
       subject: "You unlocked Versus. Time to race.",
-      preheader: "Same foods. Fastest wins.",
+      preheader: "Same items. Fastest wins.",
       stub: "PRIZE WON",
       title: "You unlocked",
       hero: "VERSUS",
       note: (tickets: number, balance: number) => `${tickets} tickets redeemed · ${balance} left`,
-      tagline: "Same foods. Fastest wins.",
-      body: "Race your household through the daily foods, then chase the record at the store.",
+      tagline: "Same items. Fastest wins.",
+      body: "Race your household through the daily items, then chase the record at the store.",
       button: "Wear Versus",
     },
     roast: {

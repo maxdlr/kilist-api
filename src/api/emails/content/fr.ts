@@ -23,11 +23,11 @@ const fr: EmailContent = {
   },
   memberJoined: {
     subject: (member: string) => `${member} a rejoint ton foyer sur Kilist`,
-    preheader: "Vous partagez maintenant les mêmes aliments et la même liste de courses.",
+    preheader: "Vous partagez maintenant les mêmes produits et la même liste de courses.",
     title: (member: string) => `${member} a rejoint ton foyer`,
     note: (household: string, players: number) =>
       `${household} · ${players} ${players <= 1 ? "membre" : "membres"}`,
-    body: "Vous partagez maintenant les mêmes aliments et la même liste de courses.",
+    body: "Vous partagez maintenant les mêmes produits et la même liste de courses.",
     button: "Ouvrir Kilist",
     notYou: (member: string, support: string) => `Tu ne connais pas ${member} ? Écris à ${support}.`,
     footer: (email: string, household: string) =>
@@ -40,7 +40,7 @@ const fr: EmailContent = {
     hero: "Au revoir",
     note: (name: string) => `Merci d'avoir utilisé Kilist, ${name}`,
     body: "Ton compte, tes points et tes styles débloqués ont disparu. Impossible de revenir en arrière.",
-    lastInHousehold: "Tu étais la dernière personne de ton foyer, donc ses aliments ont aussi été supprimés.",
+    lastInHousehold: "Tu étais la dernière personne de ton foyer, donc ses produits ont aussi été supprimés.",
     notYou: (support: string) => `Ce n'est pas toi ? Écris vite à ${support}.`,
     footer: (email: string) =>
       `Envoyé à ${email} parce que ce compte Kilist a été supprimé. C'est le dernier e-mail que tu recevras de notre part.`,
@@ -54,11 +54,11 @@ const fr: EmailContent = {
   },
   memberLeft: {
     subject: (member: string) => `${member} a quitté ton foyer sur Kilist`,
-    preheader: "Tes aliments et ta liste de courses ne changent pas.",
+    preheader: "Tes produits et ta liste de courses ne changent pas.",
     title: (member: string) => `${member} a quitté ton foyer`,
     note: (household: string, players: number) =>
       `${household} · ${players} ${players <= 1 ? "membre" : "membres"}`,
-    body: "Tes aliments et ta liste de courses ne changent pas. Tu peux inviter quelqu'un d'autre depuis l'appli quand tu veux.",
+    body: "Tes produits et ta liste de courses ne changent pas. Tu peux inviter quelqu'un d'autre depuis l'appli quand tu veux.",
     button: "Ouvrir Kilist",
     footer: (email: string, household: string) =>
       `Envoyé à ${email} parce que tu fais partie du foyer ${household} sur Kilist.`,
@@ -84,13 +84,13 @@ const fr: EmailContent = {
   skinUnlock: {
     versus: {
       subject: "Tu as débloqué Versus. Place à la course.",
-      preheader: "Mêmes aliments. Le plus rapide gagne.",
+      preheader: "Mêmes produits. Le plus rapide gagne.",
       stub: "LOT GAGNÉ",
       title: "Tu as débloqué",
       hero: "VERSUS",
       note: (tickets: number, balance: number) => `${tickets} tickets échangés · il en reste ${balance}`,
-      tagline: "Mêmes aliments. Le plus rapide gagne.",
-      body: "Affronte ton foyer sur les aliments du jour, puis chasse le record au magasin.",
+      tagline: "Mêmes produits. Le plus rapide gagne.",
+      body: "Affronte ton foyer sur les produits du jour, puis chasse le record au magasin.",
       button: "Porter Versus",
     },
     roast: {

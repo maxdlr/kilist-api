@@ -94,8 +94,8 @@ const MESSAGES = {
     fr: "Tu as déjà fini la course du jour.",
   },
   "race.notInRace": {
-    en: "This food isn't in today's race.",
-    fr: "Cet aliment ne fait pas partie de la course du jour.",
+    en: "This item isn't in today's race.",
+    fr: "Ce produit ne fait pas partie de la course du jour.",
   },
   "shop.completed": {
     en: "This shopping trip is already over.",
