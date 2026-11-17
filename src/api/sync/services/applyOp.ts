@@ -184,7 +184,7 @@ const applyOp = async (
       await editFood(
         householdId,
         foodId,
-        { name: payload.name, description: payload.description },
+        { name: payload.name, description: payload.description, aisle: payload.aisle },
         m,
       );
       await m.update(FoodEntity, foodId, { editedAt: at });

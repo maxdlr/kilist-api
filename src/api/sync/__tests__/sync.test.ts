@@ -327,6 +327,12 @@ describe("editing foods", () => {
 
     expect((await FoodRepository.findOneByOrFail({ id: milk.id })).name).toBe("New name");
   });
+
+  it("sets an aisle from a food edit", async () => {
+    await sync([op("food.edit", { foodId: milk.id, aisle: "dairy" })]);
+
+    expect((await FoodRepository.findOneByOrFail({ id: milk.id })).aisle).toBe("dairy");
+  });
 });
 
 describe("offline races", () => {

@@ -38,6 +38,14 @@ describe("editFood", () => {
     expect(updated.description).toBe("Granny Smith");
   });
 
+  it("sets a known aisle and ignores an unknown one", async () => {
+    const set = await editFood(household.id, food.id, { aisle: "produce" });
+    expect(set.aisle).toBe("produce");
+
+    const kept = await editFood(household.id, food.id, { aisle: "moon" });
+    expect(kept.aisle).toBe("produce");
+  });
+
   it("rejects editing a food from another household", async () => {
     const otherHousehold = await HouseholdRepository.save({
       joinCode: generateJoinCode(),
