@@ -4,8 +4,9 @@ import NewsRepository from "@/repositories/NewsRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager } from "typeorm";
 import { pageOf } from "../../helpers";
+import newsEngagement, { NewsEngagement } from "@/api/news/services/newsEngagement";
 
-export const adminNewsView = (news: NewsEntity) => ({
+export const adminNewsView = (news: NewsEntity, engagement: NewsEngagement) => ({
   id: news.id,
   titleEn: news.titleEn,
   bodyEn: news.bodyEn,
@@ -18,6 +19,7 @@ export const adminNewsView = (news: NewsEntity) => ({
   sentAt: news.sentAt ?? null,
   delivered: news.delivered,
   failed: news.failed,
+  engagement,
   author: news.author ? { id: news.author.id, username: news.author.username } : null,
 });
 
@@ -29,7 +31,8 @@ const browseAdminNews = async (query: Record<string, unknown>, manager?: EntityM
     skip: offset,
     take: limit,
   });
-  return { total, items: items.map(adminNewsView) };
+  const engagement = await newsEngagement(items.map((news) => news.id), manager);
+  return { total, items: items.map((news) => adminNewsView(news, engagement.get(news.id)!)) };
 };
 
 export default browseAdminNews;

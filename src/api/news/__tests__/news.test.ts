@@ -1,6 +1,8 @@
 import addAdminNews from "@/api/admin/services/news/addAdminNews";
 import cancelAdminNews from "@/api/admin/services/news/cancelAdminNews";
 import editAdminNews from "@/api/admin/services/news/editAdminNews";
+import readAdminNews from "@/api/admin/services/news/readAdminNews";
+import postNewsEvent from "../controllers/postNewsEvent";
 import testAdminNews from "@/api/admin/services/news/testAdminNews";
 import postDevicePushToken from "@/api/push/controllers/postDevicePushToken";
 import postPushToken from "@/api/push/controllers/postPushToken";
@@ -220,5 +222,41 @@ describe("drafts and edits", () => {
     const news = await addAdminNews(admin, draft());
     await dispatchDueNews();
     await expect(editAdminNews(admin, news.id, draft({ titleEn: "Too late" }))).rejects.toMatchObject({ status: 400 });
+  });
+});
+
+describe("engagement", () => {
+  const event = (id: number, kind: string, installId = INSTALL) =>
+    postNewsEvent({ params: { id: String(id) }, body: { installId, kind } } as unknown as Request, res());
+
+  it("tags the push with the news id so the phone can report the open", async () => {
+    const fetchMock = mockExpo();
+    await device(GUEST_EN);
+    const news = await addAdminNews(admin, draft());
+    await dispatchDueNews();
+    expect(sentTo(fetchMock)[0]!.data).toMatchObject({ newsId: news.id, url: "/account?panel=theme" });
+  });
+
+  it("counts each phone once per kind, and openers across push and card", async () => {
+    mockExpo();
+    const news = await addAdminNews(admin, draft());
+    await dispatchDueNews();
+    const other = "1f8e2a4c-1b3d-4e5f-9a7b-6c5d4e3f2a1b";
+    const third = "2f8e2a4c-1b3d-4e5f-9a7b-6c5d4e3f2a1b";
+
+    await event(news.id, "push_open");
+    await event(news.id, "push_open");
+    await event(news.id, "card_open");
+    await event(news.id, "card_open", other);
+    await event(news.id, "card_close", third);
+
+    expect((await readAdminNews(news.id)).engagement).toEqual({ opened: 2, pushOpens: 1, cardOpens: 2, closed: 1 });
+  });
+
+  it("ignores reports for drafts and refuses junk", async () => {
+    const news = await addAdminNews(admin, { titleEn: "Draft", draft: true });
+    await expect(event(news.id, "card_open")).rejects.toMatchObject({ status: 404 });
+    await expect(event(news.id, "liked")).rejects.toMatchObject({ status: 400 });
+    await expect(event(news.id, "card_open", "nope")).rejects.toMatchObject({ status: 400 });
   });
 });

@@ -1,3 +1,4 @@
+import { NO_ENGAGEMENT } from "@/api/news/services/newsEngagement";
 import { parseNewsFor, newsName } from "@/api/news/helpers";
 import NewsEntity from "@/entities/NewsEntity";
 import UserEntity from "@/entities/UserEntity";
@@ -18,7 +19,7 @@ const addAdminNews = (admin: UserEntity, body: Record<string, unknown> | undefin
       ? `Drafted news "${newsName(news)}"`
       : `Scheduled news "${newsName(news)}" for ${news.sendAt.toISOString()}`;
     await logAction(admin, "news", news.id, summary, m);
-    return adminNewsView({ ...news, author: admin });
+    return adminNewsView({ ...news, author: admin }, NO_ENGAGEMENT);
   });
 };
 

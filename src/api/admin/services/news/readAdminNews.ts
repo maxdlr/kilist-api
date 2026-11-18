@@ -3,6 +3,7 @@ import NewsRepository from "@/repositories/NewsRepository";
 import findManager from "@/utils/findManager";
 import { EntityManager } from "typeorm";
 import { adminNewsView } from "./browseAdminNews";
+import newsEngagement from "@/api/news/services/newsEngagement";
 
 const readAdminNews = async (id: number, manager?: EntityManager) => {
   const news = await findManager(NewsRepository, manager).findOne(NewsEntity, {
@@ -10,7 +11,8 @@ const readAdminNews = async (id: number, manager?: EntityManager) => {
     relations: { author: true },
   });
   if (!news) throw Missing(`News ${id} not found`);
-  return adminNewsView(news);
+  const engagement = await newsEngagement([news.id], manager);
+  return adminNewsView(news, engagement.get(news.id)!);
 };
 
 export default readAdminNews;

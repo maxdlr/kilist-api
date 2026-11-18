@@ -3,7 +3,14 @@ import removePushTokens from "./removePushTokens";
 
 type Ticket = { status: "ok" | "error"; details?: { error?: string } };
 
-export type PushMessage = { to: string; title: string; body: string; url: string; event: string };
+export type PushMessage = {
+  to: string;
+  title: string;
+  body: string;
+  url: string;
+  event: string;
+  extra?: Record<string, string | number>;
+};
 
 const deliverPush = async (messages: PushMessage[]) => {
   const dead: string[] = [];
@@ -14,13 +21,13 @@ const deliverPush = async (messages: PushMessage[]) => {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify(
-        batch.map(({ to, title, body, url, event }) => ({
+        batch.map(({ to, title, body, url, event, extra }) => ({
           to,
           title,
           body,
           sound: "default",
           channelId: "default",
-          data: { url, event },
+          data: { url, event, ...extra },
         })),
       ),
     });

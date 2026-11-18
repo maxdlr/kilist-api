@@ -20,7 +20,7 @@ const dispatchDueNews = async (now = new Date(), manager?: EntityManager) => {
       const recipients = await newsRecipients(m);
       const messages = recipients.flatMap(({ to, lang }) => {
         const text = newsText(news, lang);
-        return text ? [{ to, ...text, url: news.url ?? "/", event: NEWS_EVENT }] : [];
+        return text ? [{ to, ...text, url: news.url ?? "/", event: NEWS_EVENT, extra: { newsId: news.id } }] : [];
       });
       const { delivered, failed } = await deliverPush(messages);
       await m.update(NewsEntity, news.id, { status: "sent", sentAt: new Date(), delivered, failed });
