@@ -441,6 +441,7 @@ describe("pulling the household", () => {
     expect(first.snapshot?.foods.map((food: FoodEntity) => food.name)).toEqual(["Milk", "Eggs"]);
     expect(unchanged).not.toHaveProperty("snapshot");
     expect(changed.snapshot?.foods[0]?.histories).toHaveLength(1);
+    expect(changed.snapshot?.foods[0]?.histories[0]).toMatchObject({ by: user.id });
   });
 
   it("includes a housemate's changes made outside of sync", async () => {

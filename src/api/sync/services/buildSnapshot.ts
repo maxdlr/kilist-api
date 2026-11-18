@@ -35,7 +35,7 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
 
   const histories = await m.find(FoodHistoryEntity, {
     where: { food: { household: { id: householdId } } },
-    loadRelationIds: { relations: ["food"] },
+    loadRelationIds: { relations: ["food", "user"] },
     order: { createdAt: "ASC", id: "ASC" },
   });
   const swipedBefore = await hasSwipedBefore(
@@ -43,12 +43,16 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
     new Date(Date.now() - RULES.tickets.payWindowHours * 3600000),
     m,
   );
-  const historiesByFood = new Map<number, { isInStock: boolean | null; at: Date }[]>();
+  const historiesByFood = new Map<number, { isInStock: boolean | null; at: Date; by: number | null }[]>();
   for (const history of histories) {
     const foodId = history.food as unknown as number;
     historiesByFood.set(foodId, [
       ...(historiesByFood.get(foodId) ?? []),
-      { isInStock: history.isInStock, at: history.createdAt as Date },
+      {
+        isInStock: history.isInStock,
+        at: history.createdAt as Date,
+        by: (history.user as unknown as number | null) ?? null,
+      },
     ]);
   }
 
