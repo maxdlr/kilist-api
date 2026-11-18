@@ -7,7 +7,7 @@ const savePushToken = async (userId: number, token: string, platform: string, ma
   const m = findManager(UserRepository, manager);
   const existing = await m.findOne(PushTokenEntity, { where: { token } });
   if (existing) {
-    await m.update(PushTokenEntity, existing.id, { user: { id: userId }, platform, lastSeenAt: new Date() });
+    await m.update(PushTokenEntity, existing.id, { user: { id: userId }, installId: null, news: true, platform, lastSeenAt: new Date() });
     return;
   }
   await m.save(PushTokenEntity, { user: { id: userId }, token, platform, lastSeenAt: new Date() } as PushTokenEntity);

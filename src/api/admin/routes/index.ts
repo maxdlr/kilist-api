@@ -6,6 +6,12 @@ import addHousehold from "../controllers/households/addHousehold";
 import addList from "../controllers/lists/addList";
 import addListFoods from "../controllers/lists/addListFoods";
 import addMember from "../controllers/households/addMember";
+import addNews from "../controllers/news/addNews";
+import browseNews from "../controllers/news/browseNews";
+import cancelNews from "../controllers/news/cancelNews";
+import editNews from "../controllers/news/editNews";
+import readNews from "../controllers/news/readNews";
+import testNews from "../controllers/news/testNews";
 import addUser from "../controllers/users/addUser";
 import adjustPoints from "../controllers/users/adjustPoints";
 import browseActions from "../controllers/stats/browseActions";
@@ -80,6 +86,13 @@ router.delete("/households/:id", ...admin, [deleteHousehold]);
 router.get("/emails/templates", ...admin, [browseEmailTemplates]);
 router.get("/emails/templates/:id", ...admin, [readEmailTemplate]);
 router.get("/emails/history", ...admin, [browseEmailHistory]);
+
+router.get("/news", ...admin, [browseNews]);
+router.post("/news", ...admin, [addNews]);
+router.post("/news/test", ...admin, [testNews]);
+router.get("/news/:id", ...admin, [readNews]);
+router.put("/news/:id", ...admin, [editNews]);
+router.delete("/news/:id", ...admin, [cancelNews]);
 
 router.get("/foods", ...admin, [browseFoods]);
 router.post("/foods", ...admin, [addFood]);

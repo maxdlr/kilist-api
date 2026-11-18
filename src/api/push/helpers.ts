@@ -4,8 +4,13 @@ export const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 export const PUSH_BATCH = 100;
 const TOKEN_PATTERN = /^(ExponentPushToken|ExpoPushToken)\[[A-Za-z0-9_-]{10,200}\]$/;
 
+const INSTALL_PATTERN = /^[0-9a-f-]{16,64}$/i;
+
 export const isPushToken = (value: unknown): value is string =>
   typeof value === "string" && TOKEN_PATTERN.test(value);
+
+export const isInstallId = (value: unknown): value is string =>
+  typeof value === "string" && INSTALL_PATTERN.test(value);
 
 type PushVars = Record<string, unknown>;
 type PushText = (vars: PushVars) => { title: string; body: string; url: string };

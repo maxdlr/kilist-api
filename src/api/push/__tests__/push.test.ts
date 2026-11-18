@@ -45,7 +45,7 @@ describe("push tokens", () => {
 
     const saved = await tokens();
     expect(saved).toHaveLength(1);
-    expect(saved[0]!.user.id).toBe(other.id);
+    expect(saved[0]!.user!.id).toBe(other.id);
   });
 
   it("refuses something that isn't an Expo token", async () => {

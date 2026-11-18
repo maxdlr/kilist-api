@@ -16,6 +16,8 @@ import syncRoutes from "./api/sync/routes/index";
 import catalogRoutes from "./api/catalog/routes/index";
 import productRoutes from "./api/products/routes/index";
 import installStatsRoutes from "./api/installStats/routes/index";
+import newsRoutes from "./api/news/routes/index";
+import deviceRoutes from "./api/push/routes/devices";
 import getMe from "./api/auth/controllers/getMe";
 import editMyLanguage from "./api/auth/controllers/editMyLanguage";
 import editMySkin from "./api/auth/controllers/editMySkin";
@@ -41,6 +43,8 @@ router.get("/health", getHealth);
 router.use("/catalog", catalogRoutes);
 router.use("/products", productRoutes);
 router.use("/stats", installStatsRoutes);
+router.use("/news", newsRoutes);
+router.use("/devices", deviceRoutes);
 
 router.post("/login", logIn);
 router.post("/login/google", codeLimit, logInWithGoogle);

@@ -20,6 +20,7 @@ import SyncOpEntity from "@/entities/SyncOpEntity";
 import InstallStatEntity from "@/entities/InstallStatEntity";
 import VerificationCodeEntity from "@/entities/VerificationCodeEntity";
 import PushTokenEntity from "@/entities/PushTokenEntity";
+import NewsEntity from "@/entities/NewsEntity";
 
 export const AppDataSource = new DataSource({
   type: "mariadb",
@@ -55,6 +56,7 @@ export const AppDataSource = new DataSource({
     InstallStatEntity,
     VerificationCodeEntity,
     PushTokenEntity,
+    NewsEntity,
   ],
   migrations: [__dirname + "/../../migrations/**/*.{ts,js}"],
   subscribers: [],

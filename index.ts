@@ -11,6 +11,7 @@ import setCors from "@/services/cors";
 import { AppDataSource } from "@/services/database/datasource";
 import ensureAdminUser from "@/services/ensureAdminUser";
 import resetRetiredSkins from "@/api/users/services/resetRetiredSkins";
+import startNewsLoop from "@/api/news/services/startNewsLoop";
 import { loadFixtures } from "@/services/fixtures";
 import { requestLogger } from "@/services/requestLogger";
 import serviceErrorHandler from "@/services/serviceErrorHandlers";
@@ -113,6 +114,7 @@ const bootstrapDatabase = async (): Promise<void> => {
   await loadFixtures();
   await ensureAdminUser();
   await resetRetiredSkins();
+  if (process.env.NODE_ENV !== "test") startNewsLoop();
 };
 
 bootstrapDatabase().catch((error) => {

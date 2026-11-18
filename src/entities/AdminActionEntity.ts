@@ -2,7 +2,7 @@ import { Column, Entity, Index, ManyToOne } from "typeorm";
 import { AbstractEntity } from "./AbstractEntity";
 import UserEntity from "./UserEntity";
 
-export type AdminTarget = "user" | "household" | "food" | "list";
+export type AdminTarget = "user" | "household" | "food" | "list" | "news";
 
 @Entity({ name: "admin_actions" })
 @Index(["targetType", "targetId"])
