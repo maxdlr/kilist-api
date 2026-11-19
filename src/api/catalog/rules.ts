@@ -48,6 +48,15 @@ export const RULES = {
     quantityLength: 40,
     noteLength: 300,
   },
+  aisleGroups: {
+    maxItems: 3,
+    families: [
+      { key: "market", aisles: ["produce", "bakery", "meat", "fish"] },
+      { key: "cold", aisles: ["dairy", "meals", "frozen"] },
+      { key: "groceries", aisles: ["pantry", "sweet", "drinks"] },
+      { key: "nonFood", aisles: ["household", "baby", "pets"] },
+    ],
+  },
   summary: {
     minPurchases: 3,
     maxSpread: 0.5,
