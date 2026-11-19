@@ -39,7 +39,7 @@ const browseFoods = async ({ query, user }: Request, res: Response) => {
         where: searchTerm
           ? [
               { ...baseWhere, name: ILike(searchTerm) },
-              { ...baseWhere, description: ILike(searchTerm) },
+              { ...baseWhere, note: ILike(searchTerm) },
             ]
           : baseWhere,
       },

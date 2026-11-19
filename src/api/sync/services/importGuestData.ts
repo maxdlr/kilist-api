@@ -10,7 +10,7 @@ import skinAccess from "@/api/prizes/services/skinAccess";
 import updateUserColumns from "@/api/users/services/updateUserColumns";
 import { foodKeyOf } from "@/api/food-bank/foodBank";
 import { cleanProfiles } from "@/api/food-bank/profiles";
-import { addBoughtDates, isBarcode, MAX_BARCODES, productChanges, QUANTITY_LENGTH } from "@/api/foods/helpers";
+import { addBoughtDates, cleanNote, isBarcode, MAX_BARCODES, productChanges, QUANTITY_LENGTH } from "@/api/foods/helpers";
 import { MAX_DECLINED, suggestionKey } from "@/api/households/helpers";
 import FoodEntity from "@/entities/FoodEntity";
 import HouseholdEntity from "@/entities/HouseholdEntity";
@@ -31,14 +31,13 @@ import { clockSkew, resolveOpTime } from "../helpers";
 const MAX_ITEMS = 50000;
 const MAX_FREQUENCY_PER_FOOD = 100;
 const NAME_LENGTH = 255;
-const DESCRIPTION_LENGTH = 2000;
 const CHUNK = 200;
 const IMPORT_TYPE = "guest.import";
 
 type GuestFood = {
   id: number;
   name: string;
-  description?: string;
+  note?: string | null;
   icon?: string | null;
   imageUrl?: string | null;
   barcodes?: string[];
@@ -160,6 +159,8 @@ const importGuestData = async (
       if (purchases.length > 0) update.boughtDates = addBoughtDates(twin.boughtDates, purchases);
       const frequencyDays = cleanFrequencyDays(guest.frequencyDays);
       if (frequencyDays && !twin.frequencyDays) update.frequencyDays = frequencyDays;
+      const note = cleanNote(guest.note);
+      if (note && !twin.note) update.note = note;
       if (snoozed && (!twin.snoozedUntil || snoozed > new Date(twin.snoozedUntil))) {
         update.snoozedUntil = snoozed;
       }
@@ -181,7 +182,7 @@ const importGuestData = async (
 
     const created = await m.save(FoodEntity, {
       name,
-      description: String(guest.description ?? "").slice(0, DESCRIPTION_LENGTH),
+      note: cleanNote(guest.note) ?? null,
       icon: guest.icon ?? null,
       barcodes: scanned(guest).slice(-MAX_BARCODES),
       quantity: typeof guest.quantity === "string" ? guest.quantity.slice(0, QUANTITY_LENGTH) : null,

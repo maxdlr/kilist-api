@@ -3,7 +3,7 @@ import editFood from "../services/editFood";
 
 const updateFood = async ({ body, params, user }: Request, res: Response) => {
   const { id } = params;
-  const { name, description, aisle, frequencyDays } = body;
+  const { name, note, quantity, aisle, frequencyDays } = body;
 
   if (!id) {
     throw ApiError("Food id is required");
@@ -11,7 +11,8 @@ const updateFood = async ({ body, params, user }: Request, res: Response) => {
 
   const food = await editFood(user!.household.id, Number(id), {
     name,
-    description,
+    note,
+    quantity,
     aisle,
     frequencyDays,
   });

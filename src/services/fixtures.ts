@@ -87,7 +87,7 @@ const makeFoods = async (
       food.name = name;
       food.icon = findFoodIcon(name) ?? null;
       food.inStockScore = 1;
-      food.description = faker.food.description();
+      food.note = faker.food.description().slice(0, 300);
       food.household = household;
       return food;
     }),

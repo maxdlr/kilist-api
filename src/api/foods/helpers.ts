@@ -23,6 +23,17 @@ export const packSize = (quantity?: string | null): number | null => {
   return count * Number(match[2]!.replace(",", ".")) * UNITS[match[3]!.toLowerCase()]!;
 };
 
+const cleanText = (value: unknown, max: number): string | null | undefined => {
+  if (value === null) return null;
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim().slice(0, max);
+  return trimmed || null;
+};
+
+export const cleanNote = (value: unknown) => cleanText(value, RULES.products.noteLength);
+
+export const cleanQuantity = (value: unknown) => cleanText(value, QUANTITY_LENGTH);
+
 export const staleDaysFor = (quantity?: string | null) =>
   (packSize(quantity) ?? 0) >= BIG_PACK ? BIG_PACK_STALE_DAYS : STALE_DAYS;
 

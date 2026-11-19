@@ -350,6 +350,23 @@ describe("editing foods", () => {
 
     expect((await FoodRepository.findOneByOrFail({ name: "Yogurt" })).frequencyDays).toBe(14);
   });
+
+  it("edits a note and a quantity one field at a time", async () => {
+    await sync([op("food.edit", { foodId: milk.id, quantity: "1 L" }, minutesAgo(2))]);
+    await sync([op("food.edit", { foodId: milk.id, note: "Blue cap" }, minutesAgo(1))]);
+
+    const edited = await FoodRepository.findOneByOrFail({ id: milk.id });
+    expect(edited).toMatchObject({ quantity: "1 L", note: "Blue cap", name: "Milk" });
+
+    await sync([op("food.edit", { foodId: milk.id, note: null, quantity: null })]);
+    expect(await FoodRepository.findOneByOrFail({ id: milk.id })).toMatchObject({ quantity: null, note: null });
+  });
+
+  it("creates a food with a note and a quantity", async () => {
+    await sync([op("food.create", { tempId: -51, name: "Butter", listId: list.id, note: "Salted", quantity: "250 g" })]);
+
+    expect(await FoodRepository.findOneByOrFail({ name: "Butter" })).toMatchObject({ note: "Salted", quantity: "250 g" });
+  });
 });
 
 describe("offline races", () => {

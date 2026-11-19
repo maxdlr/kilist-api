@@ -18,12 +18,10 @@ describe("createFood", () => {
   it("creates a food attached to the household and the given list", async () => {
     const food = await createFood(household.id, list.id, {
       name: "Apples",
-      description: "Granny Smith",
     });
 
     expect(food.id).toBeDefined();
     expect(food.name).toBe("Apples");
-    expect(food.description).toBe("Granny Smith");
 
     const updatedList = await ListRepository.findOne({
       where: { id: list.id },

@@ -13,20 +13,35 @@ beforeEach(async () => {
   household = await HouseholdRepository.save({ joinCode: generateJoinCode() });
   food = await FoodRepository.save({
     name: "Apples",
-    description: "Granny Smith",
+    note: "Granny Smith",
     household,
   });
 });
 
 describe("editFood", () => {
-  it("updates name and description", async () => {
+  it("updates name and note", async () => {
     const updated = await editFood(household.id, food.id, {
       name: "Pears",
-      description: "Bartlett",
+      note: "  Bartlett  ",
     });
 
     expect(updated.name).toBe("Pears");
-    expect(updated.description).toBe("Bartlett");
+    expect(updated.note).toBe("Bartlett");
+  });
+
+  it("clears a note with null or blank text", async () => {
+    expect((await editFood(household.id, food.id, { note: "   " })).note).toBeNull();
+    await editFood(household.id, food.id, { note: "Ripe" });
+    expect((await editFood(household.id, food.id, { note: null })).note).toBeNull();
+  });
+
+  it("sets and clears the quantity, and rescores the food", async () => {
+    const set = await editFood(household.id, food.id, { quantity: " 2 kg " });
+    expect(set.quantity).toBe("2 kg");
+    expect(typeof set.inStockScore).toBe("number");
+
+    const cleared = await editFood(household.id, food.id, { quantity: null });
+    expect(cleared.quantity).toBeNull();
   });
 
   it("updates only the provided fields", async () => {
@@ -35,7 +50,7 @@ describe("editFood", () => {
     });
 
     expect(updated.name).toBe("Pears");
-    expect(updated.description).toBe("Granny Smith");
+    expect(updated.note).toBe("Granny Smith");
   });
 
   it("sets a known aisle and ignores an unknown one", async () => {

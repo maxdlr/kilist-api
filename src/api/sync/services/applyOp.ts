@@ -161,7 +161,8 @@ const applyOp = async (
         resolve(payload.listId),
         {
           name: payload.name,
-          description: payload.description,
+          note: payload.note,
+          quantity: payload.quantity,
           fromOnboarding: payload.fromOnboarding,
           product: payload.product,
           frequencyDays: payload.frequencyDays,
@@ -187,7 +188,8 @@ const applyOp = async (
         foodId,
         {
           name: payload.name,
-          description: payload.description,
+          note: payload.note,
+          quantity: payload.quantity,
           aisle: payload.aisle,
           frequencyDays: payload.frequencyDays,
         },

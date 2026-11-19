@@ -1,3 +1,4 @@
+import { RULES } from "@/api/catalog/rules";
 import findFoodIcon from "@/api/food-bank/findFoodIcon";
 import FoodEntity from "@/entities/FoodEntity";
 import UserEntity from "@/entities/UserEntity";
@@ -18,11 +19,11 @@ const editAdminFood = (admin: UserEntity, id: number, body: Record<string, any> 
       notes.push(`renamed to ${name}`);
       if (!(body && "icon" in body)) changes.icon = findFoodIcon(name) ?? null;
     }
-    if (body && "description" in body) {
-      const description = text(body.description, "description", { optional: true, max: 2000 }) ?? "";
-      if (description !== (food.description ?? "")) {
-        changes.description = description;
-        notes.push("description changed");
+    if (body && "note" in body) {
+      const note = text(body.note, "note", { optional: true, max: RULES.products.noteLength }) || null;
+      if (note !== (food.note ?? null)) {
+        changes.note = note;
+        notes.push("note changed");
       }
     }
     if (body && "icon" in body) {

@@ -5,15 +5,25 @@ import findList from "@/api/lists/services/findList";
 import FoodEntity from "@/entities/FoodEntity";
 import ListEntity from "@/entities/ListEntity";
 import { EntityManager } from "typeorm";
-import { productChanges, ScannedProduct } from "../helpers";
+import { cleanNote, cleanQuantity, productChanges, ScannedProduct } from "../helpers";
 import createFood from "./createFood";
 import { cleanFrequencyDays } from "../scoring";
 
 const ONBOARDING_IN_STOCK_SCORE = RULES.swipe.onboardingScore;
 
-const withFrequency = (changes: Partial<FoodEntity>, value: unknown): Partial<FoodEntity> => {
-  const frequencyDays = cleanFrequencyDays(value);
-  return frequencyDays ? { ...changes, frequencyDays } : changes;
+const withDetails = (
+  changes: Partial<FoodEntity>,
+  data: { frequencyDays?: unknown; note?: unknown; quantity?: unknown },
+): Partial<FoodEntity> => {
+  const frequencyDays = cleanFrequencyDays(data.frequencyDays);
+  const note = cleanNote(data.note);
+  const quantity = cleanQuantity(data.quantity);
+  return {
+    ...changes,
+    ...(frequencyDays && { frequencyDays }),
+    ...(note && { note }),
+    ...(quantity && { quantity }),
+  };
 };
 
 const addOrMergeFood = async (
@@ -21,7 +31,8 @@ const addOrMergeFood = async (
   listId: number,
   data: {
     name: string;
-    description?: string;
+    note?: unknown;
+    quantity?: unknown;
     fromOnboarding?: boolean;
     product?: ScannedProduct | null;
     frequencyDays?: unknown;
@@ -44,7 +55,7 @@ const addOrMergeFood = async (
       list.foods = [...list.foods, twin];
       await m.save(ListEntity, list);
     }
-    const changes = withFrequency(productChanges(twin, data.product), data.frequencyDays);
+    const changes = withDetails(productChanges(twin, data.product), data);
     if (Object.keys(changes).length > 0) {
       await m.update(FoodEntity, twin.id, changes);
       Object.assign(twin, changes);
@@ -57,7 +68,6 @@ const addOrMergeFood = async (
     listId,
     {
       name: data.name,
-      description: data.description,
       ...(data.fromOnboarding === true && {
         inStockScore: ONBOARDING_IN_STOCK_SCORE,
         icon: findFoodIcon(data.name),
@@ -65,7 +75,7 @@ const addOrMergeFood = async (
     },
     m,
   );
-  const changes = withFrequency(productChanges(created, data.product), data.frequencyDays);
+  const changes = withDetails(productChanges(created, data.product), data);
   if (Object.keys(changes).length > 0) {
     await m.update(FoodEntity, created.id, changes);
     Object.assign(created, changes);

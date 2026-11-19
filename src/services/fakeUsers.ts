@@ -49,7 +49,7 @@ const makeFoods = async (m: EntityManager, household: HouseholdEntity, list: Lis
   ];
   const foods = await m.save(
     FoodEntity,
-    names.map((name) => m.create(FoodEntity, { name, icon: findFoodIcon(name) ?? null, inStockScore: 1, household, description: "" })),
+    names.map((name) => m.create(FoodEntity, { name, icon: findFoodIcon(name) ?? null, inStockScore: 1, household })),
   );
   list.foods = foods;
   await m.save(ListEntity, list);

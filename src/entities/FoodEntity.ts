@@ -37,8 +37,8 @@ export default class FoodEntity extends AbstractEntity {
   @OneToMany(() => FoodHistoryEntity, (foodHistory) => foodHistory.food)
   foodHistories!: FoodHistoryEntity[];
 
-  @Column({ default: "", length: 2000 })
-  description?: string;
+  @Column({ type: "varchar", length: 300, nullable: true })
+  note?: string | null;
 
   @Column({ nullable: true })
   snoozedUntil!: Date;

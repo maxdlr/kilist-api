@@ -119,7 +119,7 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
     foods: foods.map((food) => ({
       id: food.id,
       name: food.name,
-      description: food.description,
+      note: food.note ?? null,
       imageUrl: food.imageUrl,
       icon: food.icon,
       barcodes: food.barcodes ?? [],

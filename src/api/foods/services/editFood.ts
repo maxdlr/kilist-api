@@ -6,23 +6,22 @@ import validateCrudPayload from "@/services/validateCrudPayload";
 import { EntityManager } from "typeorm";
 import findFood from "./findFood";
 import { cleanFrequencyDays } from "../scoring";
+import { cleanNote, cleanQuantity } from "../helpers";
 import updateFoodInStockScore from "./updateFoodInStockScore";
 
-const EDITABLE_FIELDS = ["name", "description"] as const;
-
 /**
- * Edits a food's general details (name, description, aisle) within a household.
+ * Edits a food's general details (name, note, quantity, aisle, frequency) within a household.
  *
  * @param householdId - The household the food must belong to
  * @param foodId - The food to edit
- * @param data - Partial name/description/aisle/frequencyDays updates; an unknown aisle or out-of-range frequency is ignored, a null frequency clears it
+ * @param data - Partial name/note/quantity/aisle/frequencyDays updates; invalid values are ignored, null clears note, quantity and frequency
  * @param manager - Optional entity manager for transaction support
  * @returns The updated food
  */
 const editFood = async (
   householdId: number,
   foodId: number,
-  data: Partial<Pick<FoodEntity, "name" | "description">> & { aisle?: unknown; frequencyDays?: unknown },
+  data: { name?: string; note?: unknown; quantity?: unknown; aisle?: unknown; frequencyDays?: unknown },
   manager?: EntityManager,
 ): Promise<FoodEntity> => {
   const m = findManager(FoodRepository, manager);
@@ -36,11 +35,13 @@ const editFood = async (
     throw Missing(`Food with id ${foodId} not found`);
   }
 
-  for (const field of EDITABLE_FIELDS) {
-    if (data[field] !== undefined) {
-      food[field] = data[field] as string;
-    }
-  }
+  if (data.name !== undefined) food.name = data.name;
+
+  const note = cleanNote(data.note);
+  if (note !== undefined) food.note = note;
+
+  const quantity = cleanQuantity(data.quantity);
+  if (quantity !== undefined) food.quantity = quantity;
 
   const aisle = cleanAisle(data.aisle);
   if (aisle) food.aisle = aisle;
@@ -52,7 +53,7 @@ const editFood = async (
 
   const saved = await m.save(FoodEntity, food);
 
-  if (frequencyDays !== undefined) {
+  if (frequencyDays !== undefined || quantity !== undefined) {
     await updateFoodInStockScore(foodId, m);
     saved.inStockScore = (await m.findOneByOrFail(FoodEntity, { id: foodId })).inStockScore;
   }

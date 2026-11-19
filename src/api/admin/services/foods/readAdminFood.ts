@@ -24,7 +24,7 @@ const readAdminFood = async (id: number, manager?: EntityManager) => {
   return {
     id,
     name: food.name,
-    description: food.description ?? "",
+    note: food.note ?? "",
     icon: food.icon ?? null,
     inStockScore: food.inStockScore,
     snoozedUntil: food.snoozedUntil ?? null,

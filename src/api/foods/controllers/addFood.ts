@@ -6,7 +6,7 @@ import createFood from "../services/createFood";
 const ONBOARDING_IN_STOCK_SCORE = RULES.swipe.onboardingScore;
 
 const addFood = async ({ body, user }: Request, res: Response) => {
-  const { name, description, listId, fromOnboarding } = body;
+  const { name, listId, fromOnboarding } = body;
 
   if (!name) {
     throw ApiError("name is required");
@@ -18,7 +18,6 @@ const addFood = async ({ body, user }: Request, res: Response) => {
 
   const food = await createFood(user!.household.id, Number(listId), {
     name,
-    description,
     ...(fromOnboarding === true && {
       inStockScore: ONBOARDING_IN_STOCK_SCORE,
       icon: findFoodIcon(name),
