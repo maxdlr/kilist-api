@@ -8,7 +8,7 @@ const browseAdminLists = async (query: Record<string, unknown>, manager?: Entity
   const { offset, limit } = pageOf(query);
   const qb = findManager(ListRepository, manager)
     .createQueryBuilder(ListEntity, "list")
-    .leftJoinAndSelect("list.household", "household")
+    .innerJoinAndSelect("list.household", "household")
     .loadRelationCountAndMap("list.foodCount", "list.foods")
     .orderBy("household.id", "DESC")
     .addOrderBy("list.isMain", "DESC");

@@ -2,6 +2,7 @@ import { cleanAisle } from "@/api/food-bank/aisles";
 import { RULES } from "@/api/catalog/rules";
 import FoodEntity from "@/entities/FoodEntity";
 import { FOOD_ICON_ALIASES } from "@/api/food-bank/foodIconAliases";
+import { cycleOf } from "./scoring";
 
 export type ScannedProduct = { barcode?: unknown; icon?: unknown; quantity?: unknown; aisle?: unknown };
 
@@ -51,9 +52,9 @@ export const buyGapDays = (dates?: string[] | null) => {
   return median / (24 * HOUR_MS);
 };
 
-export const waitDaysFor = (food: Pick<FoodEntity, "quantity" | "boughtDates">) => {
-  const gap = buyGapDays(food.boughtDates);
-  return gap === null ? staleDaysFor(food.quantity) : Math.max(RHYTHM.minDays, gap * RHYTHM.share);
+export const waitDaysFor = (food: Pick<FoodEntity, "quantity" | "boughtDates" | "frequencyDays">) => {
+  const cycle = cycleOf(food);
+  return cycle.known ? Math.max(RHYTHM.minDays, cycle.days * RHYTHM.share) : staleDaysFor(food.quantity);
 };
 
 export const isBarcode = (value: unknown): value is string =>

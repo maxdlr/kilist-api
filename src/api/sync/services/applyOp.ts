@@ -164,6 +164,7 @@ const applyOp = async (
           description: payload.description,
           fromOnboarding: payload.fromOnboarding,
           product: payload.product,
+          frequencyDays: payload.frequencyDays,
         },
         m,
       );
@@ -184,7 +185,12 @@ const applyOp = async (
       await editFood(
         householdId,
         foodId,
-        { name: payload.name, description: payload.description, aisle: payload.aisle },
+        {
+          name: payload.name,
+          description: payload.description,
+          aisle: payload.aisle,
+          frequencyDays: payload.frequencyDays,
+        },
         m,
       );
       await m.update(FoodEntity, foodId, { editedAt: at });

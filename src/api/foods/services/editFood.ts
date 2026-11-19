@@ -5,6 +5,8 @@ import findManager from "@/utils/findManager";
 import validateCrudPayload from "@/services/validateCrudPayload";
 import { EntityManager } from "typeorm";
 import findFood from "./findFood";
+import { cleanFrequencyDays } from "../scoring";
+import updateFoodInStockScore from "./updateFoodInStockScore";
 
 const EDITABLE_FIELDS = ["name", "description"] as const;
 
@@ -13,14 +15,14 @@ const EDITABLE_FIELDS = ["name", "description"] as const;
  *
  * @param householdId - The household the food must belong to
  * @param foodId - The food to edit
- * @param data - Partial name/description/aisle updates; an unknown aisle is ignored
+ * @param data - Partial name/description/aisle/frequencyDays updates; an unknown aisle or out-of-range frequency is ignored, a null frequency clears it
  * @param manager - Optional entity manager for transaction support
  * @returns The updated food
  */
 const editFood = async (
   householdId: number,
   foodId: number,
-  data: Partial<Pick<FoodEntity, "name" | "description">> & { aisle?: unknown },
+  data: Partial<Pick<FoodEntity, "name" | "description">> & { aisle?: unknown; frequencyDays?: unknown },
   manager?: EntityManager,
 ): Promise<FoodEntity> => {
   const m = findManager(FoodRepository, manager);
@@ -43,9 +45,19 @@ const editFood = async (
   const aisle = cleanAisle(data.aisle);
   if (aisle) food.aisle = aisle;
 
+  const frequencyDays = cleanFrequencyDays(data.frequencyDays);
+  if (frequencyDays !== undefined) food.frequencyDays = frequencyDays;
+
   await validateCrudPayload(food);
 
-  return await m.save(FoodEntity, food);
+  const saved = await m.save(FoodEntity, food);
+
+  if (frequencyDays !== undefined) {
+    await updateFoodInStockScore(foodId, m);
+    saved.inStockScore = (await m.findOneByOrFail(FoodEntity, { id: foodId })).inStockScore;
+  }
+
+  return saved;
 };
 
 export default editFood;

@@ -333,6 +333,23 @@ describe("editing foods", () => {
 
     expect((await FoodRepository.findOneByOrFail({ id: milk.id })).aisle).toBe("dairy");
   });
+
+  it("sets and clears a declared frequency", async () => {
+    await sync([op("food.edit", { foodId: milk.id, frequencyDays: 7 }, minutesAgo(2))]);
+    expect((await FoodRepository.findOneByOrFail({ id: milk.id })).frequencyDays).toBe(7);
+
+    await sync([op("food.edit", { foodId: milk.id, frequencyDays: 9999 }, minutesAgo(1))]);
+    expect((await FoodRepository.findOneByOrFail({ id: milk.id })).frequencyDays).toBe(7);
+
+    await sync([op("food.edit", { foodId: milk.id, frequencyDays: null })]);
+    expect((await FoodRepository.findOneByOrFail({ id: milk.id })).frequencyDays).toBeNull();
+  });
+
+  it("creates a food with a declared frequency", async () => {
+    await sync([op("food.create", { tempId: -50, name: "Yogurt", listId: list.id, frequencyDays: 14 })]);
+
+    expect((await FoodRepository.findOneByOrFail({ name: "Yogurt" })).frequencyDays).toBe(14);
+  });
 });
 
 describe("offline races", () => {

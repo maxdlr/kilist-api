@@ -1,5 +1,6 @@
 import FoodEntity from "@/entities/FoodEntity";
 import HouseholdEntity from "@/entities/HouseholdEntity";
+import ListEntity from "@/entities/ListEntity";
 import UserEntity from "@/entities/UserEntity";
 import HouseholdRepository from "@/repositories/HouseholdRepository";
 import findManager from "@/utils/findManager";
@@ -12,6 +13,7 @@ const removeHouseholdIfEmpty = async (householdId: number, manager?: EntityManag
   if (members > 0) return false;
 
   await m.softDelete(FoodEntity, { household: { id: householdId } });
+  await m.softDelete(ListEntity, { household: { id: householdId } });
   await m.softDelete(HouseholdEntity, householdId);
 
   return true;

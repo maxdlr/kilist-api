@@ -1,4 +1,5 @@
 import { cleanAisle } from "@/api/food-bank/aisles";
+import { cleanFrequencyDays } from "@/api/foods/scoring";
 import playedRounds from "@/api/swipe-list/services/playedRounds";
 import { PRIZES } from "@/api/prizes/catalog";
 import { findEvent } from "@/api/notifications/catalog";
@@ -47,6 +48,7 @@ type GuestFood = {
   snoozedUntil?: string | null;
   lastBoughtAt?: string | null;
   boughtDates?: string[];
+  frequencyDays?: number | null;
   onList: boolean;
   histories?: { isInStock: boolean | null; at: string }[];
 };
@@ -156,6 +158,8 @@ const importGuestData = async (
       const update: Partial<FoodEntity> = {};
       if (bought && (!twin.lastBoughtAt || bought > twin.lastBoughtAt)) update.lastBoughtAt = bought;
       if (purchases.length > 0) update.boughtDates = addBoughtDates(twin.boughtDates, purchases);
+      const frequencyDays = cleanFrequencyDays(guest.frequencyDays);
+      if (frequencyDays && !twin.frequencyDays) update.frequencyDays = frequencyDays;
       if (snoozed && (!twin.snoozedUntil || snoozed > new Date(twin.snoozedUntil))) {
         update.snoozedUntil = snoozed;
       }
@@ -186,6 +190,7 @@ const importGuestData = async (
       household,
       lastBoughtAt: bought,
       boughtDates: addBoughtDates([], purchases),
+      frequencyDays: cleanFrequencyDays(guest.frequencyDays) ?? null,
       ...(snoozed && { snoozedUntil: snoozed }),
     } as Partial<FoodEntity>);
     idMap.set(guest.id, created.id);

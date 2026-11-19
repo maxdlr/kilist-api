@@ -12,12 +12,7 @@ const updateFoodInStockScore = async (
 ) => {
   const m = findManager(FoodRepository, manager);
 
-  const foodInStockScores = await findAllFoodHistories(
-    { where: { food: { id: foodId } } },
-    m,
-  );
-
-  const newInStockScore = calculateInStockScore(foodInStockScores);
+  await limitFoodHistories(foodId, m);
 
   // foodId is already validated against the caller's household at the
   // controller entry point (e.g. editFoods, editSwipeList) — no need to
@@ -28,11 +23,14 @@ const updateFoodInStockScore = async (
     throw ServiceError(`Food with id ${foodId} not found`);
   }
 
-  food.inStockScore = newInStockScore;
+  const histories = await findAllFoodHistories(
+    { where: { food: { id: foodId } } },
+    m,
+  );
+
+  food.inStockScore = calculateInStockScore(histories, food);
 
   await m.save(FoodEntity, food);
-
-  await limitFoodHistories(foodId, m);
 };
 
 export default updateFoodInStockScore;

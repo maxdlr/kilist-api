@@ -129,6 +129,7 @@ const buildSnapshot = async (authUser: UserEntity, m: EntityManager) => {
       snoozedUntil: food.snoozedUntil,
       lastBoughtAt: food.lastBoughtAt,
       boughtDates: food.boughtDates ?? [],
+      frequencyDays: food.frequencyDays ?? null,
       lists: food.lists,
       histories: historiesByFood.get(food.id) ?? [],
     })),

@@ -97,10 +97,25 @@ describe("admin jobs", () => {
     expect(await HouseholdRepository.countBy({ id: empty.id })).toBe(0);
     expect(await FoodRepository.countBy({ name: "Ghost bread" })).toBe(0);
     expect(await FoodRepository.count({ where: { name: "Ghost bread" }, withDeleted: true })).toBe(1);
+    expect(await ListRepository.countBy({ id: emptyList.id })).toBe(0);
     expect(await HouseholdRepository.count({ where: { id: empty.id }, withDeleted: true })).toBe(1);
     expect(await runAdminJob("delete-orphans", true, admin.id)).toMatchObject({ affected: 0 });
     expect(await HouseholdRepository.countBy({ id: user.household.id })).toBe(1);
     expect(await HouseholdRepository.countBy({ id: admin.household.id })).toBe(1);
+  });
+
+  it("deletes lists left behind by an already deleted household", async () => {
+    const gone = await createHousehold("Long gone");
+    const strayList = await ListRepository.findOneByOrFail({ household: { id: gone.id } });
+    await HouseholdRepository.softDelete(gone.id);
+
+    const dry = await runAdminJob("delete-orphans", true, admin.id);
+    expect(dry).toMatchObject({ affected: 1 });
+
+    await runAdminJob("delete-orphans", false, admin.id);
+
+    expect(await ListRepository.countBy({ id: strayList.id })).toBe(0);
+    expect(await ListRepository.count({ where: { id: strayList.id }, withDeleted: true })).toBe(1);
   });
 
   it("logs every run", async () => {

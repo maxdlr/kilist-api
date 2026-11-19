@@ -7,13 +7,25 @@ import ListEntity from "@/entities/ListEntity";
 import { EntityManager } from "typeorm";
 import { productChanges, ScannedProduct } from "../helpers";
 import createFood from "./createFood";
+import { cleanFrequencyDays } from "../scoring";
 
 const ONBOARDING_IN_STOCK_SCORE = RULES.swipe.onboardingScore;
+
+const withFrequency = (changes: Partial<FoodEntity>, value: unknown): Partial<FoodEntity> => {
+  const frequencyDays = cleanFrequencyDays(value);
+  return frequencyDays ? { ...changes, frequencyDays } : changes;
+};
 
 const addOrMergeFood = async (
   householdId: number,
   listId: number,
-  data: { name: string; description?: string; fromOnboarding?: boolean; product?: ScannedProduct | null },
+  data: {
+    name: string;
+    description?: string;
+    fromOnboarding?: boolean;
+    product?: ScannedProduct | null;
+    frequencyDays?: unknown;
+  },
   m: EntityManager,
 ): Promise<FoodEntity> => {
   if (!data.name) {
@@ -32,7 +44,7 @@ const addOrMergeFood = async (
       list.foods = [...list.foods, twin];
       await m.save(ListEntity, list);
     }
-    const changes = productChanges(twin, data.product);
+    const changes = withFrequency(productChanges(twin, data.product), data.frequencyDays);
     if (Object.keys(changes).length > 0) {
       await m.update(FoodEntity, twin.id, changes);
       Object.assign(twin, changes);
@@ -53,7 +65,7 @@ const addOrMergeFood = async (
     },
     m,
   );
-  const changes = productChanges(created, data.product);
+  const changes = withFrequency(productChanges(created, data.product), data.frequencyDays);
   if (Object.keys(changes).length > 0) {
     await m.update(FoodEntity, created.id, changes);
     Object.assign(created, changes);

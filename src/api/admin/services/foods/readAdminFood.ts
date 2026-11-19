@@ -5,12 +5,14 @@ import findManager from "@/utils/findManager";
 import { EntityManager } from "typeorm";
 import recentActions from "../actions/recentActions";
 import loadFood from "./loadFood";
+import { explainScore } from "@/api/foods/scoring";
 
 const readAdminFood = async (id: number, manager?: EntityManager) => {
   const m = findManager(FoodRepository, manager);
   const food = await loadFood(id, m);
-  const [histories, lists, next] = await Promise.all([
+  const [histories, answers, lists, next] = await Promise.all([
     m.find(FoodHistoryEntity, { where: { food: { id } }, relations: { user: true }, order: { createdAt: "DESC" }, take: 10 }),
+    m.find(FoodHistoryEntity, { where: { food: { id } }, select: { isInStock: true, createdAt: true } }),
     m.createQueryBuilder(ListEntity, "list").innerJoin("list.foods", "food", "food.id = :id", { id }).getMany(),
     m.query(
       `SELECT f.id, f.name, COUNT(*) AS times FROM frequencies q JOIN foods f ON f.id = q.nextBoughtFoodId
@@ -26,6 +28,11 @@ const readAdminFood = async (id: number, manager?: EntityManager) => {
     icon: food.icon ?? null,
     inStockScore: food.inStockScore,
     snoozedUntil: food.snoozedUntil ?? null,
+    frequencyDays: food.frequencyDays ?? null,
+    scoring: explainScore(
+      food,
+      answers.map((answer) => ({ isInStock: answer.isInStock, at: answer.createdAt ?? new Date() })),
+    ),
     createdAt: food.createdAt,
     household: { id: food.household.id, name: food.household.name ?? null },
     history: histories.map((entry) => ({

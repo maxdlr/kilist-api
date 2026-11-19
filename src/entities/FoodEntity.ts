@@ -49,6 +49,9 @@ export default class FoodEntity extends AbstractEntity {
   @Column({ type: "simple-json", nullable: true })
   boughtDates?: string[] | null;
 
+  @Column({ type: "smallint", nullable: true })
+  frequencyDays?: number | null;
+
   @Column({ type: "datetime", precision: 6, nullable: true })
   editedAt?: Date | null;
 

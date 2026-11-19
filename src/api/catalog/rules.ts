@@ -12,8 +12,16 @@ export const RULES = {
     staleDays: 7,
     bigPackStaleDays: 10,
     bigPackSize: 1000,
-    historyLimit: 8,
+    historyLimit: 30,
     onboardingScore: 0.5,
+  },
+  score: {
+    defaultCycleDays: 10,
+    bigPackCycleDays: 20,
+    halfLifeShare: 0.5,
+    minHalfLifeDays: 1,
+    trust: { declared: 4, perPurchaseGap: 1, pack: 1, fallback: 1 },
+    frequencyDays: { min: 1, max: 365 },
   },
   rhythm: {
     minPurchases: 3,
