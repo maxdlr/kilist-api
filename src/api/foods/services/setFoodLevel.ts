@@ -1,4 +1,5 @@
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
+import joinOpenShopList from "@/api/shop-list/services/joinOpenShopList";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import { EntityManager, LessThanOrEqual } from "typeorm";
 import findFood from "./findFood";
@@ -28,6 +29,7 @@ const setFoodLevel = async (
   for (let step = 0; step < LEVEL_STEPS; step++) {
     await createFoodHistory({ foodId, isInStock: step < inStock, userId, at }, m);
   }
+  await joinOpenShopList(householdId, foodId, m);
 };
 
 export default setFoodLevel;

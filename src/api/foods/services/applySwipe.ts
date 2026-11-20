@@ -1,5 +1,6 @@
 import createFoodHistory from "@/api/foodHistories/services/createFoodHistory";
 import awardSwipe from "@/api/prizes/services/awardSwipe";
+import joinOpenShopList from "@/api/shop-list/services/joinOpenShopList";
 import { RULES } from "@/api/catalog/rules";
 import FoodHistoryEntity from "@/entities/FoodHistoryEntity";
 import { Between, EntityManager } from "typeorm";
@@ -44,6 +45,7 @@ const applySwipe = async (
   }
 
   await createFoodHistory({ foodId, isInStock, userId, at }, m);
+  if (isInStock === false) await joinOpenShopList(householdId, foodId, m);
   if (withReward && !replay) {
     await awardSwipe(userId, foodId, m, at);
   }

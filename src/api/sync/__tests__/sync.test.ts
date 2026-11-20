@@ -283,6 +283,46 @@ describe("buying and late swipes", () => {
   });
 });
 
+describe("an open run", () => {
+  const startRun = async () => (await sync([op("shop.start", { tempId: -1, foodIds: [] })])).ids["-1"] as number;
+  const butter = () =>
+    FoodRepository.save({ name: "Butter", inStockScore: 1, household: user.household, lists: [list] });
+  const startIds = async (id: number) =>
+    ((await findShopList({ id }))!.startFoods as FoodEntity[]).map((food) => food.id);
+
+  it("takes in a food swiped out while it is open", async () => {
+    const id = await startRun();
+    const food = await butter();
+
+    await sync([op("swipe", { foodId: food.id, isInStock: false })]);
+
+    expect(await startIds(id)).toContain(food.id);
+  });
+
+  it("takes in a food set to needed while it is open", async () => {
+    const id = await startRun();
+    const food = await butter();
+
+    await sync([op("food.setLevel", { foodId: food.id, level: 0 })]);
+
+    expect(await startIds(id)).toContain(food.id);
+  });
+
+  it("leaves out a food that a single stray answer keeps in stock", async () => {
+    const id = await startRun();
+    const food = await butter();
+
+    await sync([
+      op("swipe", { foodId: food.id, isInStock: true }, minutesAgo(3 * 24 * 60)),
+      op("swipe", { foodId: food.id, isInStock: true }, minutesAgo(2 * 24 * 60)),
+      op("swipe", { foodId: food.id, isInStock: true }, minutesAgo(24 * 60)),
+      op("swipe", { foodId: food.id, isInStock: false }),
+    ]);
+
+    expect(await startIds(id)).not.toContain(food.id);
+  });
+});
+
 describe("foods created offline", () => {
   it("maps a temporary id and accepts operations that use it", async () => {
     const create = op("food.create", { tempId: -5, name: "Oat milk", listId: list.id });
